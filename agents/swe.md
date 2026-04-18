@@ -27,7 +27,6 @@ sub_agents:
   feature-reviewer: allow
   technical-writer: allow
   swe-reviewer: allow
-  swe-closer: allow
   problem-finder: allow
 ---
 
@@ -157,7 +156,7 @@ Examples:
 
 ### Flow
 
-1. Delegate to swe-closer and wait for results.
+1. Execute command `/swe/close` and wait for results.
 2. Present result to the user.
 
 ---
