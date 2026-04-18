@@ -1,10 +1,15 @@
 - This configuration runs on Windows. Use PowerShell commands (not Linux/Bash) for all terminal operations.
 
-## AGENT & SKILL PROTOCOL (START HERE)
+## (MANDATORY) AGENT & SKILL LOADING
 
-> **MANDATORY:** You MUST read the appropriate agent file and its skills BEFORE performing any implementation. This is the highest priority rule.
+- You MUST read the appropriate agent file and its skills BEFORE performing any implementation. This is the highest priority rule.
+
+Search order: 1) Global AGENTS.md (this file), 2) Project AGENTS.md (if exists).
+
+- After receiving the request of the user, ALWAYS try to search for an skill that matches the context and load it. Multiple skills can apply simultaneously.
 
 ### Enforcement Protocol
+
 1. **When agent is activated:**
    - ✅ READ all rules inside the agent file.
    - ✅ CHECK frontmatter `skills:` list.
@@ -14,16 +19,9 @@
 2. **Forbidden:** Never skip reading agent rules or skill instructions. "Read → Understand → Apply" is mandatory.
 
 ## Git Workflow
-When making code changes ALWAYS follow this process:
 
-1. Ensure current branch is committed if not do not continue until the user has committed and pushed the changes.
-
-2. Create a new branch before editing:
-   git checkout -b agent/<short-task-name>
-
-3. NEVER commit directly to main or master.
-
-4. NEVER modify protected branches.
+1. NEVER commit directly to main or master without user permission.
+2. NEVER modify protected branches.
 
 ## Behavior
 
@@ -51,93 +49,6 @@ When user's prompt is NOT in English:
 1. **Internally translate** for better comprehension
 2. **Respond in user's language** - match their communication
 3. **Code comments/variables** remain in English
-
-## 📁 File Dependency Awareness
-
-**Before modifying ANY file:**
-1. Check `CODEBASE.md` → File Dependencies
-2. Identify dependent files
-3. Update ALL affected files together
-
-## 🧠 Read → Understand → Apply
-
-```
-❌ WRONG: Read agent file → Start coding
-✅ CORRECT: Read → Understand WHY → Apply PRINCIPLES → Code
-```
-
-**Before coding, answer:**
-1. What is the GOAL of this agent/skill?
-2. What PRINCIPLES must I apply?
-3. How does this DIFFER from generic output?
-
----
-
-## 🛑 GLOBAL SOCRATIC GATE (TIER 0)
-
-**MANDATORY: Every user request must pass through the Socratic Gate before ANY tool use or implementation.**
-
-| Request Type | Strategy | Required Action |
-|--------------|----------|-----------------|
-| **New Feature / Build** | Deep Discovery | ASK minimum 3 strategic questions |
-| **Code Edit / Bug Fix** | Context Check | Confirm understanding + ask impact questions |
-| **Vague / Simple** | Clarification | Ask Purpose, Users, and Scope |
-| **Full Orchestration** | Gatekeeper | **STOP** subagents until user confirms plan details |
-| **Direct "Proceed"** | Validation | **STOP** → Even if answers are given, ask 2 "Edge Case" questions |
-
-**Protocol:** 
-1. **Never Assume:** If even 1% is unclear, ASK.
-2. **Handle Spec-heavy Requests:** When user gives a list (Answers 1, 2, 3...), do NOT skip the gate. Instead, ask about **Trade-offs** or **Edge Cases** (e.g., "LocalStorage confirmed, but should we handle data clearing or versioning?") before starting.
-3. **Wait:** Do NOT invoke subagents or write code until the user clears the Gate.
-4. **Reference:** Full protocol in `skills/brainstorming`.
-
-## Skills (Auto-load based on context)
-
-When you detect any of these contexts, IMMEDIATELY load the corresponding skill BEFORE writing any code.
-
-Search order: 1) Global AGENTS.md (this file), 2) Project AGENTS.md (if exists).
-
-If a project has its own AGENTS.md, also check there for project-specific skills and rules.
-
-| Context | Skill to load |
-| ------- | ------------- |
-| Creating new AI skills | skill-creator |
-| Writing TypeScript code | typescript |
-| Browser automation, debugging, Chrome DevTools | chrome-devtools |
-| Software architecture, structuring code | design-architecture |
-| GitHub CLI operations | github-cli |
-| Git commits, conventional commits | git-commit |
-| Git branch creation, Git Flow | git-flow-branch-creator |
-| Creating PRs, pull requests | git-pr |
-| Creating issues, bug reports | git-issue |
-| Jira tasks or epics | jira-task, jira-epic |
-| Logging implementation | logging |
-| React/Angular frontend, state management | (no skill - follow own expertise) |
-| Supabase/Postgres queries or optimization | postgres |
-| GDPR compliance questions | gdpr-compliant |
-| Java JUnit tests | tools-junit |
-| Java use case tests with DSL pattern | java-usecase-testing |
-| Spring Boot development | spring-boot |
-| Maven commands, wrapper, troubleshooting | tools-maven |
-| Windows/PowerShell tasks | tools-powershell |
-| Creating diagrams, flowcharts, visualizations | tools-diagram-generator |
-| Documentation guidelines | docs-guidelines |
-| Code review (adversarial) | code-review |
-| Code refactoring | refactor |
-| Finding skills or capabilities | find-skills |
-| Clean code, pragmatic standards | design-clean-code |
-| Testing principles, mocking guidelines | testing-principles |
-| My GitHub issues | git-my-issues |
-| My pull requests | git-my-pull-requests |
-| OpenAPI to code generation | openapi-to-application-code |
-| Systematic debugging, bug investigation | debug |
-| EditorConfig generation | tools-editorconfig |
-| Frontend performance profiling | frontend-performance-profiling |
-| Spring Boot performance profiling | springboot-performance-profiling |
-| Docker containerization | docker |
-| Build automation (Maven/Gradle/npm) | project-builder |
-
-Load skills BEFORE writing code. Apply ALL patterns. Multiple skills can apply simultaneously.
 
 ## Session Handling
 
