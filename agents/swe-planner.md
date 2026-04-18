@@ -1,9 +1,10 @@
 ---
+id: swe-planner
+name: SWE Planner
 description: Coordinates the SWE planning process until completion.
 mode: all
 model: opencode/minimax-m2.5-free
 temperature: 0.2
-hidden: true
 artifact_store_mode: engram
 tools:
   read: true

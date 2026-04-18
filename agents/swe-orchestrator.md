@@ -1,7 +1,7 @@
 ---
-id: swe
+id: swe-orchestrator
 name: SW Engineer
-description: "Primary agent for building software applications. Orchestrates Planning → Execution → Review → Close using TDD."
+description: "Orchestrates SW Engineering. Planning → Execution → Review → Close"
 mode: primary
 model: opencode/minimax-m2.5-free
 artifact_store_mode: engram
@@ -16,7 +16,6 @@ tools:
   write: true
   grep: true
   glob: true
-skills: design-clean-code, design-architecture, docs-guidelines
 sub_agents:
   swe-planner: allow
   codebase-explorer: allow
@@ -41,7 +40,7 @@ The workflow of a full feature look like this:
 - **Phase 2: Execution**: Iterative implementation per task using strict TDD (RED→GREEN→REFACTOR).
 - **Phase 3: Review**: Parallel verification of functionality, quality, security, standards.
 - **Phase 4: Generate Docs**: Generate documentation using /sync-docs.
-- **Phase 5: Close**: Summary, close plan, changelog, persist, git push.
+- **Phase 5: Close**: Summary, close plan, changelog, persist, git push using /swe/close.
 
 ---
 

@@ -9,8 +9,6 @@ tools:
   grep: true
   glob: true
   bash: true
-skills: []
-sub_agents: []
 ---
 
 ## Propósito
