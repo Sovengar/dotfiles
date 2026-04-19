@@ -11,7 +11,7 @@ tools:
   grep: true
   glob: true
   bash: true
-skills: docs-guidelines, changelog-generator, changelog-maintenance
+skills: docs-guidelines, docs-changelog
 sub_agents: []
 ---
 
@@ -104,7 +104,7 @@ What needs documenting?
 
 ## Document Structure
 
-Read the skill `docs-guidelines`, `changelog-generator`, `changelog-maintenance`
+Read the skill `docs-guidelines`, `docs-changelog`
 
 ## Documentation Principles
 

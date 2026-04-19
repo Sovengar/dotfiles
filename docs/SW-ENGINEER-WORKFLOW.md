@@ -10,20 +10,26 @@ Instalar opencode.nvim en lazyvim
 
 
 Creo que no puedo hacer approval points dentro de un subAgent
-Cuando termina swe-planner, me dice Inicia nueva sesión y dime que ejecute el plan withdrawal-daily-limit
-*esto me lo deberia decir el orquestrador cuando apruebe lo que ha generado el swe-planner.
 
 Cuando le doy correciones despues de haber generado un plan, no vuelve a ejecutar sw-planner
-No me pide approval del plan, me dice que apruebe un PRD que ni existe
 Crear todo en docs/specs, no en .specs/
 Si corrijo una tarea, no corrige el plan.
 
-Primero va el PRD, luego el implementation plan
+
+
+
+
+
+Mover mas codigo del planner y swe-planner a una skill llamada docs-impl-plans
+
 
 
 Refactor agent
 
 Hacer un test planner, esto es importante: Planea tareas pequeñas, cuanto mas pequeñas mas facil sera revisarlas.
+
+
+
 
 
 

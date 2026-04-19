@@ -2,7 +2,7 @@
 description: "Close SWE workflow - genera summary, renombra spec, actualiza changelog, persiste engram, push"
 agent: general
 subtask: true
-skills: docs-guidelines, changelog-generator, changelog-maintenance
+skills: docs-guidelines, docs-changelog
 ---
 
 ## Input Esperado
@@ -76,7 +76,7 @@ No borrar tasks ni prd.
 
 ### Paso 4: Actualizar Changelog
 
-Utiliza las skills `changelog-generator` y `changelog-maintenance` para crear o actualizar el `CHANGELOG.md`
+Utiliza la skill `docs-changelog` para crear o actualizar el `CHANGELOG.md`
 
 ### Paso 5: Persistir en Engram
 
