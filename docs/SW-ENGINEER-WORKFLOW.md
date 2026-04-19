@@ -9,29 +9,19 @@ Instalar opencode.nvim en lazyvim
 
 
 
-Mover plannification-phase a swe-planner, quizas crear planner tmb, revisa el que tienes en PENDING...
-
-
-
 Creo que no puedo hacer approval points dentro de un subAgent
 Cuando termina swe-planner, me dice Inicia nueva sesión y dime que ejecute el plan withdrawal-daily-limit
 *esto me lo deberia decir el orquestrador cuando apruebe lo que ha generado el swe-planner.
-
-Creo que voy a quitar la decision matrix, que delege siempre a los subagentes y ahi implementas la logica, low work skip phase
-
 
 Cuando le doy correciones despues de haber generado un plan, no vuelve a ejecutar sw-planner
 No me pide approval del plan, me dice que apruebe un PRD que ni existe
 Crear todo en docs/specs, no en .specs/
 Si corrijo una tarea, no corrige el plan.
 
-
+Primero va el PRD, luego el implementation plan
 
 
 Refactor agent
-
-Comando Usecase analyzer from endpoint
-Comando /Onboarding 
 
 Hacer un test planner, esto es importante: Planea tareas pequeñas, cuanto mas pequeñas mas facil sera revisarlas.
 
@@ -39,6 +29,13 @@ Hacer un test planner, esto es importante: Planea tareas pequeñas, cuanto mas p
 
 Preguntarle por inspiracion intentional chasm kit
 Preguntarle por inspiracion backlog.md
+
+
+Tienes que poner un punto de control y empezar a hacer un mapa de herramientas a tu disposicion, pq tienes muchas y muchas deben ser llamadas solo desde otras.
+
+
+
+
 
 
 
