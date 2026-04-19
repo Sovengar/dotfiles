@@ -67,7 +67,7 @@ At the start of planning:
 9. 💡 Ask user: "¿Estas tareas son las correctas?"
 10. End → `.specs/` files generated
 11. Commit without push
-12. Output: "Inicia nueva sesión (/new) y dime que ejecute el plan <slug>"
+12. Output: "Si estas de acuerdo, te recomiendo iniciar una nueva sesión (/new -clean) para ejecutar el plan <slug>"
 ```
 
 ### Detailed Steps
