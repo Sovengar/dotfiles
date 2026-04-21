@@ -18,10 +18,10 @@ NO edita código - solo reporta findings.
 
 ## Input
 
-- **spec**: `.specs/{slug}.md`
-- **prd**: `.specs/{slug}-prd.md`
-- **tasks**: `.specs/{slug}-tasks.md`
-- **branch**: feat/<feature-name>
+- **spec**: `docs/planning/{NNNN}-{slug}/spec.md`
+- **prd**: `docs/planning/{NNNN}-{slug}/prd.md`
+- **tasks**: `docs/planning/{NNNN}-{slug}/tasks.md`
+- **branch**: feat/|fix/|refactor/<feature-name>
 - **diff**: git diff de la branch vs main
 
 ## Output: Result Contract

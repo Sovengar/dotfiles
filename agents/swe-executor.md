@@ -19,7 +19,7 @@ sub_agents: []
 
 Before starting work, ensure you're on the correct branch:
 
-1. Run: `git checkout feat/<feature-name>`
+1. Run: `git checkout feat/|fix/|refactor/<feature-name>`
 
 ## Propósito
 
@@ -41,9 +41,9 @@ Ejecutar UNA tarea del task list usando TDD estricto:
 ## Input
 
 - **task**: Una tarea del task list
-- **spec**: `.specs/{slug}.md`
-- **design**: `.specs/{slug}.md` (sección design)
-- **branch**: feat/<feature-name>
+- **spec**: `docs/planning/{NNNN}-{slug}/spec.md`
+- **design**: `docs/planning/{NNNN}-{slug}/plan.md` (sección design)
+- **branch**: feat/|fix/|refactor/<feature-name>
 - **context**: previous tasks completadas (si aplica)
 
 ## Output: Result Contract

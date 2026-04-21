@@ -62,7 +62,7 @@ Phase 5: Cleanup (if needed)
 
 ## Output
 
-Write to `.specs/{slug}-tasks.md`:
+Write to `docs/planning/{NNNN}-{slug}/tasks.md`:
 
 ```markdown
 # Tasks: {slug}

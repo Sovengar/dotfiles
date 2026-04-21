@@ -18,18 +18,18 @@ sub_agents:
 
 Before starting work, ensure you're on the correct branch:
 
-1. Run: `git checkout feat/<feature-name>`
+1. Run: `git checkout feat/|fix/|refactor/<feature-name>`
 
-## Propósito
+2. ## Propósito
 
 Orquestar el review paralelo de dos sub-agentes especializados, sintetizar sus hallazgos y determinar la siguiente acción basada en la severidad de issues.
 
 ## Input Esperado
 
-- **spec**: `.specs/{slug}.md`
-- **prd**: `.specs/{slug}-prd.md`
-- **tasks**: `.specs/{slug}-tasks.md`
-- **branch**: feat/<feature-name>
+- **spec**: `docs/planning/{NNNN}-{slug}/spec.md`
+- **prd**: `docs/planning/{NNNN}-{slug}/prd.md`
+- **tasks**: `docs/planning/{NNNN}-{slug}/tasks.md`
+- **branch**: feat/|fix/|refactor/<feature-name>
 - **commit_hash**: hash del último commit para análisis de diff
 
 ## Output: Result Contract

@@ -61,10 +61,10 @@ You are a writer with expertise in creating clear, comprehensive documentation f
 
 ## Input
 
-- **spec**: `.specs/{slug}.md`
-- **summary_partial**: `.specs/{slug}-summary.md` (parcial, si existe)
-- **prd**: `.specs/{slug}-prd.md`
-- **tasks**: `.specs/{slug}-tasks.md`
+- **spec**: `docs/planning/{NNNN}-{slug}/spec.md`
+- **summary_partial**: `docs/planning/{NNNN}-{slug}/summary.md` (parcial, si existe)
+- **prd**: `docs/planning/{NNNN}-{slug}/prd.md`
+- **tasks**: `docs/planning/{NNNN}-{slug}/tasks.md`
 - **commits**: git log --oneline
 
 ## Output: Result Contract

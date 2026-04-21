@@ -38,7 +38,7 @@ Example:
 
 ## Output Format
 
-Write to `.specs/{slug}.md` with this structure:
+Write to `docs/planning/{NNNN}-{slug}/architect-design.md` with this structure:
 
 ```markdown
 # {slug}

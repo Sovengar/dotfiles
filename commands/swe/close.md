@@ -8,9 +8,18 @@ skills: docs-guidelines, docs-changelog
 ## Input Esperado
 
 - **slug**: Nombre del feature
+- **NNNN**: Número secuencial del plan (e.g., 0001)
+- **type**: Tipo de cambio (feature, fix, refactor, chore, docs)
 - **branch**: Nombre de la branch (ej: feat/<feature-name>)
 - **commits**: git log --oneline de la branch
 - **approved_points**: Si el usuario aprobó continuar
+
+## Directory Structure
+
+| State | Path | Example |
+|-------|------|--------|
+| Active | `docs/planning/{NNNN}-{type}-{slug}/` | `docs/planning/0001-feature-dark-mode/` |
+| Completed | `docs/planning/{YYYY-MM-DD}-{type}-{slug}/` | `docs/planning/2025-04-21-feature-dark-mode/` |
 
 ## Flujo de Ejecución
 
@@ -24,7 +33,7 @@ Validar que estamos en `feat/<feature-name>`.
 
 ### Paso 2: Generar Summary Estructurado
 
-Crear `.specs/{slug}-summary.md` con el formato:
+Crear `docs/planning/{NNNN}-{type}-{slug}/summary.md` con el formato:
 
 ```markdown
 # Summary: {slug}
@@ -32,7 +41,7 @@ Crear `.specs/{slug}-summary.md` con el formato:
 ## Metadata
 - **Completed:** YYYY-MM-DD HH:MM
 - **Duration:** X minutes
-- **Version:** v1
+- **Plan Number:** {NNNN}
 
 ## Tasks
 | # | Status |
@@ -66,10 +75,10 @@ Crear `.specs/{slug}-summary.md` con el formato:
 [Descripción]
 ```
 
-### Paso 3: Renombrar Spec a IMPLEMENTED
+### Paso 3: Renombrar Directorio con Fecha
 
 ```bash
-Move-Item ".specs/{slug}.md" ".specs/{slug}-IMPLEMENTED.md"
+Move-Item "docs/planning/{NNNN}-{type}-{slug}" "docs/planning/{YYYY-MM-DD}-{type}-{slug}"
 ```
 
 No borrar tasks ni prd.
@@ -84,7 +93,7 @@ Utiliza la skill `docs-changelog` para crear o actualizar el `CHANGELOG.md`
 {
   "title": "Close: {slug}",
   "type": "close",
-  "content": "**What**: Workflow cerrado - summary generado, spec renombrado a IMPLEMENTED, changelog actualizado\n**Where**: .specs/{slug}-summary.md, .specs/{slug}-IMPLEMENTED.md, CHANGELOG.md\n**Learned**: N/A"
+  "content": "**What**: Workflow cerrado - summary generado, directorio renombrado con fecha, changelog actualizado\n**Where**: docs/planning/{YYYY-MM-DD}-{type}-{slug}/summary.md, CHANGELOG.md\n**Learned**: N/A"
 }
 ```
 
@@ -118,6 +127,7 @@ git push
 |--------|-------------|
 | SUMMARY_GENERATION_FAILED | No se pudo generar el summary |
 | CHANGELOG_UPDATE_FAILED | No se pudo actualizar el changelog |
+| DIRECTORY_RENAME_FAILED | No se pudo renombrar el directorio |
 | GIT_PUSH_FAILED | No se pudo hacer git push |
 
 ---
@@ -125,8 +135,8 @@ git push
 ## Ejemplo de Output
 
 ```
-✅ Summary generado: .specs/{slug}-summary.md
-✅ Spec renombrado: {slug}-IMPLEMENTED.md
+✅ Summary generado: docs/planning/0001-feature-dark-mode/summary.md
+✅ Directorio renombrado: 0001 → 2025-04-21
 ✅ Changelog actualizado
 ✅ Persistido en Engram
 ✅ Git push completado

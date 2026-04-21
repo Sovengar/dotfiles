@@ -66,7 +66,7 @@ Example:
 
 ## Structured Output
 
-Write to `.specs/{slug}.md`:
+Write to `docs/planning/{NNNN}-{slug}/planner-design.md`:
 
 ```markdown
 # {slug}

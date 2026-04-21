@@ -36,7 +36,7 @@ You are a COORDINATOR, not an executor, you guide, the user supervises you, fixi
 
 The workflow of a full feature look like this: 
 - **Phase 0: Init**: Configure the agent and context.
-- **Phase 1: Planning**: Discovery, proposal, design and task breakdown (`.specs/` files).
+- **Phase 1: Planning**: Discovery, proposal, design and task breakdown (`docs/planning/` directories).
 - **Phase 2: Execution**: Iterative implementation per task using strict TDD (RED→GREEN→REFACTOR).
 - **Phase 3: Review**: Parallel verification of functionality, quality, security, standards.
 - **Phase 4: Generate Docs**: Generate documentation using /sync-docs.
@@ -99,7 +99,7 @@ Examples:
 
 ### Flow
 
-1. Extract the feature name from user's request to create the slug (e.g., "feature-x" → `.specs/feature-x.md`)
+1. Extract the feature name from user's request to create the slug (e.g., "feature-x" → `docs/planning/0001-feature-x/`)
 2. Delegate task to subagent `swe-planner` (Task, not delegate) and wait for results.
 3. **💡 Approval**: -> Ask user: "¿Apruebas o iteramos?"
   - If approved: Move to phase 2 execution
@@ -111,13 +111,13 @@ Examples:
 
 **Objective**: Implement the feature using strict TDD.
 **Pre-requisites**: 
-- `.specs/` files exist. 
-- `.specs/` files are not IMPLEMENTED yet. 
-- Branch `feat/<feature-name>` created in Phase 1.
+- `docs/planning/{NNNN}-{slug}/` directory exists
+- Plan is not completed yet (not renamed with YYYY-MM-DD)
+- Branch created in Phase 1.
 
 ### Flow
 
-1. READ .specs/{slug}.md + .specs/{slug}-tasks.md + .specs/{slug}-prd.md
+1. READ docs/planning/{NNNN}-{slug}/spec.md + docs/planning/{NNNN}-{slug}/plan.md + docs/planning/{NNNN}-{slug}/tasks.md + docs/planning/{NNNN}-{slug}/prd.md
 
 2. Loop per task:
 2.1. Call `swe-executor` and wait for results.
@@ -187,7 +187,7 @@ Workflow can be paused at any point thanks to the persistence in Engram.
   "phase": "planning|execution|review|close",
   "mode": "interactive|auto",
   "slug": "feature-name",
-  "branch": "feat/feature-name",
+  "branch": "feat/|fix/|refactor/<feature-name>",
   "current_task": "task-n",
   "approved_points": ["approval-1-prd"],
   "pending_approvals": ["task-1-red"],
@@ -208,7 +208,7 @@ Workflow can be paused at any point thanks to the persistence in Engram.
 
 ## Git Rules
 
-- **Branch**: `feat/<feature-name>`, `fix/<feature-name>`, `refactor/<feature-name>`, `chore/<feature-name>`, `docs/<feature-name>` - new branch for each feature
+- **Branch**: `feat/`, `fix/`, `refactor/`, `chore/`, `docs/` + `<feature-name>` - new branch for each feature
 - **Commits**: Individual, no squash, Conventional Commits
 - **Push**: Only at end, after all approvals
 
