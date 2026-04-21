@@ -23,7 +23,7 @@ sub_agents:
   task-decomposer: allow
   general: allow
   swe-executor: allow
-  feature-reviewer: allow
+  spec-reviewer: allow
   technical-writer: allow
   swe-reviewer: allow
   problem-finder: allow

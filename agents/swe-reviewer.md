@@ -1,5 +1,5 @@
 ---
-description: "Orquesta feature-reviewer + code-reviewer en paralelo, sintetiza resultados y maneja severidad de issues"
+description: "Orquesta spec-reviewer + code-reviewer en paralelo, sintetiza resultados y maneja severidad de issues"
 mode: subagent
 hidden: true
 model: opencode/minimax-m2.5-free
@@ -10,7 +10,7 @@ tools:
   delegation_read: true
   read: true
 sub_agents:
-  feature-reviewer: allow
+  spec-reviewer: allow
   code-reviewer: allow
 ---
 
@@ -51,14 +51,14 @@ Orquestar el review paralelo de dos sub-agentes especializados, sintetizar sus h
 ### 1. Invocar Reviewers en Paralelo
 
 Delegates simultaneously to:
-- **`feature-reviewer`**: Verifies functionality vs spec, tests passing, conventional commits.
+- **`spec-reviewer`**: Verifies functionality vs spec, tests passing, conventional commits.
 - **`code-reviewer`**: Static analysis, security, performance, style.
 
 Both return the *Result Contract*.
 
 ```python
 # Pseudocode - ejecución paralela
-feature_result = delegate("feature-reviewer", async=true)
+feature_result = delegate("spec-reviewer", async=true)
 code_result = delegate("code-reviewer", async=true)
 ```
 
@@ -132,7 +132,7 @@ Combinar findings de ambos reviewers:
 {
   "code": "REVIEWER_TIMEOUT",
   "message": "Un reviewer no respondió",
-  "context": { "reviewer": "feature-reviewer | code-reviewer" }
+  "context": { "reviewer": "spec-reviewer | code-reviewer" }
 }
 ```
 
@@ -150,7 +150,7 @@ Combinar findings de ambos reviewers:
 
 ```
 🔄 Ejecutando reviewers en paralelo...
-✅ feature-reviewer: 3 findings (1 HIGH, 2 MEDIUM)
+✅ spec-reviewer: 3 findings (1 HIGH, 2 MEDIUM)
 ✅ code-reviewer: 2 findings (1 CRITICAL, 1 LOW)
 
 📊 Synthesis:
