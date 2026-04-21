@@ -17,7 +17,10 @@ Si corrijo una tarea, no corrige el plan.
 
 
 
-
+Que es la especificacion?
+Añadir mecanismo para mantener sincronizado la spec con el codigo y el codigo con la spec
+Carpeta archived con los specs implementados, en vez de usar IMPLEMENTED- que tengan la fecha de implementacion
+que es una especificacion?
 
 
 Mover mas codigo del planner y swe-planner a una skill llamada docs-impl-plans
