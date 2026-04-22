@@ -20,9 +20,7 @@ sub_agents:
   planner: allow
   task-decomposer: allow
   sdd-propose: allow
-  sdd-design: allow
   sdd-spec: allow
-  sdd-tasks: allow
   refinement-agent: allow
 ---
 
@@ -59,17 +57,15 @@ At the start of planning:
    - Medium (4-10 files)  → MAYBE, ask user
    - Large (10+ files)    → YES PRD
    - En duda           → Ask user
-4. sdd-propose → generates docs/planning/{NNNN}-{slug}/proposal.md
+4. sdd-propose → proposal.md
 5. 💡 User approves proposal
-6. sdd-spec → generates docs/planning/{NNNN}-{slug}/spec.md
+6. sdd-spec → spec.md
 7. 💡 User approves spec
-8. PARALLEL: planner + task-decomposer vs sdd-design + sdd-tasks
-   - Each approach generates design + tasks
-9. MERGE → unified impl plan
-10. 💡 Ask user: "¿Este impl plan cubre lo que necesitas?"
-11. End → docs/planning/{NNNN}-{slug}/ files generated
-12. Commit without push
-13. Output: "Si estas de acuerdo, te recomiendo iniciar una nueva sesión (/new -clean) para ejecutar el plan <slug>"
+8. planner → task-decompose → impl-plan + tasks
+9. 💡 User approves impl plan + tasks
+10. End → docs/planning/{NNNN}-{slug}/ files generated
+11. Commit without push
+12. Output: "Si estas de acuerdo, te recomiendo iniciar una nueva sesión (/new -clean) para ejecutar el plan <slug>"
 ```
 
 ### Detailed Steps
@@ -91,28 +87,20 @@ At the start of planning:
    - Wait for completion
 7. **approval (spec)**: Ask "¿La especificación está correcta?"
    - If rejects → loop back to step 6 with feedback
-8. **parallel design** (sync, after spec approved):
+8. **planner + task-decomposer** (sync, after spec approved):
    - Delegate to `planner` → generates impl-plan at docs/planning/{NNNN}-{slug}/impl-plan.md
-   - Delegate to `sdd-design` → generates design at docs/planning/{NNNN}-{slug}/design-sdd.md
-   - Wait for all to complete
-9. **parallel tasks** (sync, after spec approved):
    - Delegate to `task-decomposer` → generates tasks at docs/planning/{NNNN}-{slug}/tasks.md
-   - Delegate to `sdd-tasks` → generates tasks at docs/planning/{NNNN}-{slug}/tasks-sdd.md
    - Wait for all to complete
-10. **merge**: Analyze both approaches, create unified plan
-    - Merge design documents into single coherent design at docs/planning/{NNNN}-{slug}/plan.md
-    - Merge both task lists into unified task list at docs/planning/{NNNN}-{slug}/tasks.md
-    - Mark differences between approaches for user awareness
-10. **approval (impl plan)**: Ask "¿Este impl plan cubre lo que necesitas?"
-    - If rejects → loop back to planning with feedback
-11. **End**: Files generated in docs/planning/{NNNN}-{slug}/
-12. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
-13. **Output**: "NOTA: Te recomiendo que inicies una nueva sesión o limpies el contexto antes de ejecutar el plan <slug>"
+9. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
+   - If rejects → loop back to step 8 with feedback
+10. **End**: Files generated in docs/planning/{NNNN}-{slug}/
+11. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
+12. **Output**: "NOTA: Te recomiendo que inicies una nueva sesión o limpies el contexto antes de ejecutar el plan <slug>"
 
 ### Approval Points in Flow
-- After proposal: Ask "¿La propuesta cubre lo que necesitas?"
+- After proposal: Ask "¿La propuesta covers what you need?"
 - After spec: Ask "¿La especificación está correcta?"
-- After merge: Ask "¿Este impl plan cubre lo que necesitas?"
+- After impl plan + tasks: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
 
 ### Safeguards
 - **Timeout**: 1 hour max → escalate: "¿Simplificamos scope o dividimos en múltiples features?"
@@ -126,8 +114,8 @@ At the start of planning:
 | Completed | `docs/planning/{YYYY-MM-DD}-{type}-{slug}/` | `docs/planning/2025-04-21-feature-dark-mode/` |
 
 ### Files Generated (on approval)
-- `docs/planning/{NNNN}-{slug}/proposal.md` → Proposal from sdd-propose
-- `docs/planning/{NNNN}-{slug}/spec.md` → Specification from sdd-spec
-- `docs/planning/{NNNN}-{slug}/plan.md` → Unified Proposal + Design + Specification (merged)
-- `docs/planning/{NNNN}-{slug}/tasks.md` → Unified task list (merged)
-- `docs/planning/{NNNN}-{slug}/prd.md` → Product Requirements Document (only if size warrants it)
+- `proposal.md` → Proposal from sdd-propose
+- `spec.md` → Specification from sdd-spec
+- `impl-plan.md` → Implementation Plan from planner
+- `tasks.md` → Task list from task-decomposer
+- `prd.md` → Product Requirements Document (only if size warrants it)
