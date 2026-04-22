@@ -17,6 +17,7 @@ skills: design-clean-code, design-architecture, docs-guidelines
 sub_agents:
   sdd-init: allow
   codebase-explorer: allow
+  codebase-researcher: allow
   planner: allow
   task-decomposer: allow
   sdd-propose: allow
@@ -49,6 +50,21 @@ At the start of planning:
 
 ```
 1. SDD-INIT (if needed)
+2. DETECT SIZE
+3. refinement-agent → issue
+4. User approves issue
+5. Exploration phase. Call codebase-researcher
+   - Enough context? SI → skip, go to step 6
+   - Enough context? NO → codebase-explorer
+6. sdd-propose → proposal.md
+7. User approves proposal
+8. sdd-spec → spec.md
+9. User approves spec
+10. planner → task-decomposer → impl-plan + tasks
+11. User approves impl plan + tasks
+12. End + Commit
+```
+1. SDD-INIT (if needed)
 2. codebase-explorer (1 time)
 3. DETECT SIZE → ¿PRD needed?
    - Small (1-3 files)     → NO PRD
@@ -71,21 +87,25 @@ At the start of planning:
 ### Detailed Steps
 
 1. **init**: Call `sdd-init` if needed (delegated to sdd-init sub-agent).
-2. **explore**: Invoke `codebase-explorer` (1 time, sync).
-3. **detect size**: Estimate change complexity:
+2. **detect size**: Estimate change complexity:
    - Small (1-3 files, simple feature, bug fix) → No PRD needed
    - Medium (4-10 files, new functionality) → Ask user: "¿Necesitamos PRD para este cambio?"
    - Large (10+ files, new system/API) → PRD required
    - If unsure → Ask user directly
-4. **refinement-agent** (sync):
+3. **refinement-agent** (sync):
    - Delegate to `refinement-agent` → clarifies and drafts the issue
    - Wait for completion
-5. **approval (issue)**: Ask "¿La issue está clara?"
-   - If rejects → loop back to step 4 with feedback
-6. **sdd-propose** (sync, after issue approved):
+4. **approval (issue)**: Ask "¿La issue está clara?"
+   - If rejects → loop back to step 3 with feedback
+5. **Exploration phase** (sync):
+   - Delegate to `codebase-researcher` → minimal research
+   - Check: Enough context?
+     - YES: Go to step 6
+     - NO: Delegate to `codebase-explorer` for deeper research
+6. **sdd-propose** (sync):
    - Delegate to `sdd-propose` → generates docs/planning/{NNNN}-{slug}/proposal.md
    - Wait for completion
-7. **approval (proposal)**: Ask "¿La propuesta cubre lo que necesitas?"
+7. **approval (proposal)**: Ask "¿La propuesta covers what you need?"
    - If rejects → loop back to step 6 with feedback
 8. **sdd-spec** (sync, after proposal approved):
    - Delegate to `sdd-spec` → generates docs/planning/{NNNN}-{slug}/spec.md
@@ -96,7 +116,7 @@ At the start of planning:
     - Delegate to `planner` → generates impl-plan at docs/planning/{NNNN}-{slug}/impl-plan.md
     - Delegate to `task-decomposer` → generates tasks at docs/planning/{NNNN}-{slug}/tasks.md
     - Wait for all to complete
-11. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
+11. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cover lo que necesitas?"
     - If rejects → loop back to step 10 with feedback
 12. **End**: Files generated in docs/planning/{NNNN}-{slug}/
 13. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
@@ -106,7 +126,7 @@ At the start of planning:
 - After issue: Ask "¿La issue está clara?"
 - After proposal: Ask "¿La propuesta covers what you need?"
 - After spec: Ask "¿La especificación está correcta?"
-- After impl plan + tasks: Ask "¿El impl plan y las tareas cover lo que necesitas?"
+- After impl plan + tasks: Ask "¿El impl plan + las tareas cover lo que necesitas?"
 
 ### Safeguards
 - **Timeout**: 1 hour max → escalate: "¿Simplificamos scope o dividimos en múltiples features?"
