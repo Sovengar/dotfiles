@@ -55,15 +55,17 @@ At the start of planning:
    - Medium (4-10 files)  → MAYBE, ask user
    - Large (10+ files)    → YES PRD
    - En duda           → Ask user
-4. sdd-propose → proposal.md
-5. 💡 User approves proposal
-6. sdd-spec → spec.md
-7. 💡 User approves spec
-8. planner → task-decompose → impl-plan + tasks
-9. 💡 User approves impl plan + tasks
-10. End → docs/planning/{NNNN}-{slug}/ files generated
-11. Commit without push
-12. Output: "Si estas de acuerdo, te recomiendo iniciar una nueva sesión (/new -clean) para ejecutar el plan <slug>"
+4. refinement-agent → clarifies and drafts the issue
+5. 💡 User approves issue
+6. sdd-propose → proposal.md (based on approved issue)
+7. 💡 User approves proposal
+8. sdd-spec → spec.md
+9. 💡 User approves spec
+10. planner → task-decomposer → impl-plan + tasks
+11. 💡 User approves impl plan + tasks
+12. End → docs/planning/{NNNN}-{slug}/ files generated
+13. Commit without push
+14. Output: "Si estas de acuerdo, te recomiendo iniciar una nueva sesión (/new -clean) para ejecutar el plan <slug>"
 ```
 
 ### Detailed Steps
@@ -75,30 +77,36 @@ At the start of planning:
    - Medium (4-10 files, new functionality) → Ask user: "¿Necesitamos PRD para este cambio?"
    - Large (10+ files, new system/API) → PRD required
    - If unsure → Ask user directly
-4. **sdd-propose** (sync):
+4. **refinement-agent** (sync):
+   - Delegate to `refinement-agent` → clarifies and drafts the issue
+   - Wait for completion
+5. **approval (issue)**: Ask "¿La issue está clara?"
+   - If rejects → loop back to step 4 with feedback
+6. **sdd-propose** (sync, after issue approved):
    - Delegate to `sdd-propose` → generates docs/planning/{NNNN}-{slug}/proposal.md
    - Wait for completion
-5. **approval (proposal)**: Ask "¿La propuesta cubre lo que necesitas?"
-   - If rejects → loop back to step 4 with feedback
-6. **sdd-spec** (sync, after proposal approved):
+7. **approval (proposal)**: Ask "¿La propuesta cubre lo que necesitas?"
+   - If rejects → loop back to step 6 with feedback
+8. **sdd-spec** (sync, after proposal approved):
    - Delegate to `sdd-spec` → generates docs/planning/{NNNN}-{slug}/spec.md
    - Wait for completion
-7. **approval (spec)**: Ask "¿La especificación está correcta?"
-   - If rejects → loop back to step 6 with feedback
-8. **planner + task-decomposer** (sync, after spec approved):
-   - Delegate to `planner` → generates impl-plan at docs/planning/{NNNN}-{slug}/impl-plan.md
-   - Delegate to `task-decomposer` → generates tasks at docs/planning/{NNNN}-{slug}/tasks.md
-   - Wait for all to complete
-9. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
+9. **approval (spec)**: Ask "¿La especificación está correcta?"
    - If rejects → loop back to step 8 with feedback
-10. **End**: Files generated in docs/planning/{NNNN}-{slug}/
-11. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
-12. **Output**: "NOTA: Te recomiendo que inicies una nueva sesión o limpies el contexto antes de ejecutar el plan <slug>"
+10. **planner + task-decomposer** (sync, after spec approved):
+    - Delegate to `planner` → generates impl-plan at docs/planning/{NNNN}-{slug}/impl-plan.md
+    - Delegate to `task-decomposer` → generates tasks at docs/planning/{NNNN}-{slug}/tasks.md
+    - Wait for all to complete
+11. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
+    - If rejects → loop back to step 10 with feedback
+12. **End**: Files generated in docs/planning/{NNNN}-{slug}/
+13. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
+14. **Output**: "NOTA: Te recomiendo que inicies una nueva sesión o limpies el contexto antes de ejecutar el plan <slug>"
 
 ### Approval Points in Flow
+- After issue: Ask "¿La issue está clara?"
 - After proposal: Ask "¿La propuesta covers what you need?"
 - After spec: Ask "¿La especificación está correcta?"
-- After impl plan + tasks: Ask "¿El impl plan y las tareas cubren lo que necesitas?"
+- After impl plan + tasks: Ask "¿El impl plan y las tareas cover lo que necesitas?"
 
 ### Safeguards
 - **Timeout**: 1 hour max → escalate: "¿Simplificamos scope o dividimos en múltiples features?"
