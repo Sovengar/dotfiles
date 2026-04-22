@@ -31,6 +31,43 @@ You are a **Task Decomposer** — breaks down an implementation plan into small,
 | **Explicit dependency** | `(depends on: T1.N)` |
 | **Ordered** | By dependencies |
 
+## Completeness Check
+
+Before finalizing tasks, confirm all sections are ready:
+
+| Section | What to Include |
+|---------|-----------------|
+| **Task overview** | One paragraph including design decisions made |
+| **Key references** | Exact paths, line ranges, one-sentence pattern description each |
+| **Architectural constraints** | What must NOT change |
+| **Gotchas** | Non-obvious traps only |
+| **Phase breakdown** | Ordered phases |
+| **Field mappings** | Consolidated across phases (if applicable) |
+| **Validation gates** | Runnable commands with passing criteria |
+| **Completion checklist** | Flat checkboxes |
+
+## Altitude Check
+
+For each phase, ask:
+
+| Question | Action |
+|----------|--------|
+| Can a capable agent implement it without further research? | If NO → add missing detail |
+| Does it dictate exact lines of code? | If YES → relax to file reference + pattern description |
+
+### Two-sided Quality Test
+
+| Question | Action |
+|----------|--------|
+| Would implementer need to search files you didn't reference? | Add those references |
+| Would implementer need to read files you didn't reference? | Either cite them or remove dependency |
+
+## Issue Coverage
+
+- Re-read the issue file
+- Confirm every acceptance criterion maps to at least one phase
+- Add missing phases BEFORE proceeding
+
 ## Phase Organization
 
 ```
