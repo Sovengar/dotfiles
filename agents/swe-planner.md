@@ -92,7 +92,7 @@ At the start of planning:
 7. **approval (spec)**: Ask "¿La especificación está correcta?"
    - If rejects → loop back to step 6 with feedback
 8. **parallel design** (sync, after spec approved):
-   - Delegate to `planner` → generates design at docs/planning/{NNNN}-{slug}/design.md
+   - Delegate to `planner` → generates impl-plan at docs/planning/{NNNN}-{slug}/impl-plan.md
    - Delegate to `sdd-design` → generates design at docs/planning/{NNNN}-{slug}/design-sdd.md
    - Wait for all to complete
 9. **parallel tasks** (sync, after spec approved):

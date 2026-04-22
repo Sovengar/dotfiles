@@ -66,63 +66,85 @@ Example:
 
 ## Structured Output
 
-Write to `docs/planning/{NNNN}-{slug}/planner-design.md`:
+Write to `docs/planning/{NNNN}-{slug}/impl-plan.md`:
 
 ```markdown
-# {slug}
+# Implementation Plan — {slug}
 
-## Proposal
-### Intent
-{What problem are we solving? Why does this change need to happen?}
+## 1. Objetivo
+{2-3 líneas: qué problema resuelvo y por qué existe esta necesidad}
 
-### In Scope
-- {Concrete deliverable 1}
-- {Concrete deliverable 2}
+## 2. Alcance
+- **Incluye**:
+  - {Deliverable 1}
+  - {Deliverable 2}
+- **No incluye**:
+  - {Lo que explicitamente NO se hace}
 
-### Out of Scope
-- {What we're explicitly NOT doing}
+## 3. Estado actual
+{3-5 líneas: qué existe ahora en el sistema relacionado con este cambio}
 
-### Approach
-{High-level technical approach}
+## 4. Diseño técnico
+### 4.1 Backend
+- Nuevos endpoints o modificados
+- Contratos de API (request/response)
+- Lógica de negocio
 
-### Risks
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| {Risk} | Low/Med/High | {How we mitigate} |
+### 4.2 Persistencia
+- Nuevas tablas o modificaciones
+- Índices
+- Migraciones necesarias
 
-### Rollback Plan
-{How to revert if something goes wrong}
+### 4.3 Modelo de datos
+- Entidades nuevas o modificadas
+- Relaciones
 
-## Design
-### Technical Approach
-{Concise description of the overall technical strategy}
+### 4.4 Frontend
+- Nuevas pantallas
+- Estados (loading, error, success)
 
-### Architecture Decisions
-**Choice**: {What we chose}
-**Alternatives**: {What we rejected}
-**Rationale**: {Why this choice}
+### 4.5 Seguridad
+- Validaciones
+- Rate limiting
 
-### Data Flow
-{Describe how data moves through the system}
+### 4.6 Integraciones
+- Servicios externos
 
-### File Changes
-| File | Action | Description |
-|------|--------|-------------|
-| `path/to/file` | Create/Modify/Delete | {Description} |
+### 4.7 Configuración
+- Variables de entorno
+- Feature flags
 
-## Specification
-### Requirement: {Name}
-The system {MUST/SHALL/SHOULD} {behavior}.
+### 4.8 Data Flow
+{Descripción de cómo fluye la información}
 
-#### Scenario: {Happy path}
-- GIVEN {precondition}
-- WHEN {action}
-- THEN {expected outcome}
+## 5. Riesgos y decisiones
+| Riesgo | Mitigación |
+|-------|-----------|
+| {Riesgo 1} | {Cómo se mitiga} |
 
-#### Scenario: {Edge case}
-- GIVEN {precondition}
-- WHEN {action}
-- THEN {expected outcome}
+| Decisión | Por qué |
+|---------|--------|
+| {Decisión} | {Rationale} |
+
+## 6. Observabilidad
+- **Métricas**:
+  - {métrica 1}
+- **Logs**:
+  - {log 1}
+
+## 7. Pruebas
+- **Unit**: {qué}
+- **Integration**: {qué}
+- **E2E**: {qué}
+
+## 8. Rollout
+- **Fase 1**: { descripción }
+- **Fase 2**: { descripción }
+- **Fase 3**: { descripción }
+
+## 9. Criterios de aceptación
+- [ ] {Criterio técnico 1}
+- [ ] {Criterio técnico 2}
 ```
 
 - Uses Engram for persistence
