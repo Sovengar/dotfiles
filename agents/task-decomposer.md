@@ -96,29 +96,6 @@ Phase 6: Final Verification
   └─ Documentation
 ```
 
-## Phase Limit
-
-Maximum: **7 phases per task**.
-
-If impl-plan requires more than 7 phases:
-1. **STOP** - do not continue writing
-2. Add a **Split Recommendation** section:
-
-```markdown
-## Split Recommendation
-
-The impl-plan exceeds 7 phases. Proposed division:
-
-### Part A: {description}
-- Phases {N-N}
-### Part B: {description}  
-- Phases {N-N}
-
-Recommendation: Split into two separate implementation plans.
-```
-
-Do not write further planning content beyond this point.
-
 ## Input
 
 - **impl-plan**: `docs/planning/{NNNN}-{slug}/impl-plan.md`
