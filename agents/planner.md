@@ -142,6 +142,30 @@ Write to `docs/planning/{NNNN}-{slug}/impl-plan.md`:
 - **Fase 2**: { descripción }
 - **Fase 3**: { descripción }
 
+### Phase Limit
+
+Maximum: **7 phases in rollout section**.
+
+If the implementation requires more than 7 phases:
+1. **STOP** - do not continue writing phases
+2. Add a **Split Recommendation** section:
+
+```markdown
+## Split Recommendation
+
+The implementation exceeds 7 phases. Proposed division:
+
+### Part A: {description}
+- Phases {N-N}
+
+### Part B: {description}
+- Phases {N-N}
+
+Recommendation: Split into two separate implementation plans.
+```
+
+Do not write further phases beyond this point.
+
 ## 9. Criterios de aceptación
 - [ ] {Criterio técnico 1}
 - [ ] {Criterio técnico 2}
