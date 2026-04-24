@@ -1,6 +1,18 @@
-﻿{
+{
   "$schema": "https://opencode.ai/config.json",
-  "theme": "lucent-orng",
+  "instructions": [
+    "C:\\Users\\buble\\.config\\opencode\\plugins\\shell-strategy\\shell_strategy.md"
+  ],
+  "plugin": [
+    "@tarquinen/opencode-smart-title",
+    "@gotgenes/opencode-agent-identity",
+    "@tarquinen/opencode-dcp@latest",
+    "@plannotator/opencode@latest",
+    "cc-safety-net",
+    "@simonwjackson/opencode-direnv",
+    "envsitter-guard@latest",
+    "opencode-snip@latest"
+  ],
   "mcp": {
     "context7": {
       "enabled": true,
