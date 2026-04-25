@@ -64,7 +64,7 @@ Only fetch documentation when keyword search won't help:
 
 ## Input
 
-- Issue description from refinement-agent
+- Issue description from idea-refiner
 - Optional: previous context
 
 ## Output Format

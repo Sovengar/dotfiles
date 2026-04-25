@@ -22,7 +22,7 @@ sub_agents:
   task-decomposer: allow
   sdd-propose: allow
   sdd-spec: allow
-  refinement-agent: allow
+  idea-refiner: allow
 ---
 
 You are a **SWE Planner** — coordinates the SWE planning process to produce a refined plan.
@@ -51,7 +51,7 @@ At the start of planning:
 ```
 1. SDD-INIT (if needed)
 2. DETECT SIZE
-3. refinement-agent → issue
+3. idea-refiner → issue
 4. User approves issue
 5. Exploration phase. Call codebase-researcher
    - Enough context? SI → skip, go to step 6
@@ -71,7 +71,7 @@ At the start of planning:
    - Medium (4-10 files)  → MAYBE, ask user
    - Large (10+ files)    → YES PRD
    - En duda           → Ask user
-4. refinement-agent → clarifies and drafts the issue
+4. idea-refiner → clarifies and drafts the issue
 5. 💡 User approves issue
 6. sdd-propose → proposal.md (based on approved issue)
 7. 💡 User approves proposal
@@ -92,8 +92,8 @@ At the start of planning:
    - Medium (4-10 files, new functionality) → Ask user: "¿Necesitamos PRD para este cambio?"
    - Large (10+ files, new system/API) → PRD required
    - If unsure → Ask user directly
-3. **refinement-agent** (sync):
-   - Delegate to `refinement-agent` → clarifies and drafts the issue
+3. **idea-refiner** (sync):
+   - Delegate to `idea-refiner` → clarifies and drafts the issue
    - Wait for completion
 4. **approval (issue)**: Ask "¿La issue está clara?"
    - If rejects → loop back to step 3 with feedback

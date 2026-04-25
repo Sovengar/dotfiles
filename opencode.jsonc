@@ -5,20 +5,37 @@
   ],
   "plugin": [
     "@tarquinen/opencode-smart-title",
-    "@gotgenes/opencode-agent-identity",
-    "@tarquinen/opencode-dcp@latest",
     //Es util que se abra un plan que pueda añadirle comentarios pero se hace pesado "@plannotator/opencode@latest", Opcion 2, no probada "open-plan-annotator@latest"
     "cc-safety-net",
     "@simonwjackson/opencode-direnv",
-    "envsitter-guard@latest",
-    "opencode-snip@latest",
-    "@zenobius/opencode-background",
     "opencode-pty",
-    "@nick-vi/opencode-type-inject",
     "opencode-firecrawl",
-    "opencode-vibeguard",
+
+    // CONTEXT OPTIMIZER
+    "opencode-snip@latest",
+    "@tarquinen/opencode-dcp@latest",
+
+    // AGENTS
+    "@gotgenes/opencode-agent-identity",
+    "@zenobius/opencode-background",
     //NO TMUX https://github.com/mailshieldai/opencode-canvas,
     //NO TMUX https://github.com/AnganSamadder/opentmux
+
+    // GUARDRAILS
+    "opencode-vibeguard",
+    "envsitter-guard@latest",
+    "@nick-vi/opencode-type-inject",
+
+    // TELEMETRY
+    "@slkiser/opencode-quota@latest",
+    "@ramtinj95/opencode-tokenscope@latest",
+    //OVERKILL "@devtheops/opencode-plugin-otel"
+
+    // NOTIFICATIONS
+    //Not working "@pantheon-ai/opencode-warcraft-notifications"
+    //Fallback https://github.com/kdcokenny/opencode-notify
+    //Fallback https://github.com/renjfk/opencode-voice
+    "opencode-smart-voice-notify@latest"
   ],
   "mcp": {
     "context7": {
@@ -36,9 +53,31 @@
     },
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
       "enabled": true
-    }
+    },
+    // "notion": {
+    //   "enabled": false,
+    //   "type": "remote",
+    //   "url": "https://mcp.notion.com/mcp"
+    // },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": false
+    },
+    // "excalidraw": {
+    //   "enabled": false,
+    //   "command": "node",
+    //   "args": ["/path/to/excalidraw-mcp-app/dist/index.js", "--stdio"]
+    // }
   },
   "permission": {
     "bash": {
@@ -58,6 +97,15 @@
       "**/secrets/**": "deny",
       "*.env": "deny",
       "*.env.*": "deny"
+    }
+  },
+  "experimental": {
+    "quotaToast": {
+      "enableToast": false,
+      "showSessionTokens": false, //Show input and output tokens (We have the Context from Opencode, enough)
+      "enabledProviders": ["openai"], // auto, "copilot", 
+      "formatStyle": "allWindows", // Show all quota windows instead of the default single-window layout
+      "percentDisplayMode": "used"
     }
   }
 }
