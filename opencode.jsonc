@@ -7,11 +7,15 @@
     "@tarquinen/opencode-smart-title",
     "@gotgenes/opencode-agent-identity",
     "@tarquinen/opencode-dcp@latest",
-    "@plannotator/opencode@latest",
+    //Es util que se abra un plan que pueda añadirle comentarios pero se hace pesado "@plannotator/opencode@latest",
     "cc-safety-net",
     "@simonwjackson/opencode-direnv",
     "envsitter-guard@latest",
-    "opencode-snip@latest"
+    "opencode-snip@latest",
+    "opencode-pty",
+    "@nick-vi/opencode-type-inject",
+    "opencode-firecrawl",
+    "opencode-vibeguard"
   ],
   "mcp": {
     "context7": {
@@ -26,6 +30,11 @@
         "--tools=agent"
       ],
       "type": "local"
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": true
     }
   },
   "permission": {
