@@ -1,0 +1,20 @@
+{
+  "repo": {
+    "owner": "Sovengar",
+    "name": "my-opencode-config",
+    "branch": "main"
+  },
+  "extraConfigPaths": [
+    "C:\\Users\\buble\\.config\\opencode"
+  ],
+  "extraSecretPaths": [
+    "C:\\Users\\buble\\.config\\opencode"
+  ],
+  "includeSecrets": true,
+  "includeMcpSecrets": true,
+  "includeSessions": true,
+  "includePromptStash": true,
+  "includeModelFavorites": true,
+  "includeOpencodeSkills": true,
+  "includeAgentsDir": true
+}

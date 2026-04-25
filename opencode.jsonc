@@ -7,15 +7,21 @@
     "@tarquinen/opencode-smart-title",
     "@gotgenes/opencode-agent-identity",
     "@tarquinen/opencode-dcp@latest",
-    //Es util que se abra un plan que pueda añadirle comentarios pero se hace pesado "@plannotator/opencode@latest",
+    //Es util que se abra un plan que pueda añadirle comentarios pero se hace pesado "@plannotator/opencode@latest", Opcion 2, no probada "open-plan-annotator@latest"
     "cc-safety-net",
     "@simonwjackson/opencode-direnv",
     "envsitter-guard@latest",
     "opencode-snip@latest",
+    "@zenobius/opencode-background",
     "opencode-pty",
     "@nick-vi/opencode-type-inject",
     "opencode-firecrawl",
-    "opencode-vibeguard"
+    "opencode-vibeguard",
+    //NO TMUX https://github.com/mailshieldai/opencode-canvas,
+    //NO TMUX https://github.com/AnganSamadder/opentmux
+    "opencode-subagent-statusline",
+    "opencode-subagent-statusline/runtime",
+    "opencode-synced"
   ],
   "mcp": {
     "context7": {
