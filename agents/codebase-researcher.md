@@ -5,6 +5,7 @@ mode: subagent
 hidden: true
 model: opencode/minimax-m2.5-free
 temperature: 0.1
+artifact_store_mode: engram
 tools:
   read: true
   grep: true
@@ -20,6 +21,13 @@ For each piece of information, ask:
 > "Can the implement agent infer this from reading files, or does it need explicit instruction?"
 
 Only research what **cannot be trivially discovered**.
+
+## Persistent Project Index
+
+- First look for a project index in Engram under `codebase-index/{project}`.
+- If a fresh index exists, use it to sharpen file selection, line references, and non-obvious integration notes.
+- If the index is missing, stale, or incomplete, continue with the current minimal-research rules and do not block on rebuilding it.
+- The fallback path must behave exactly like the current agent: only the non-obvious facts that the implementer cannot trivially discover.
 
 ## Research Principle
 
@@ -85,6 +93,7 @@ Only fetch documentation when keyword search won't help:
 
 ### Context Assessment
 - Enough: YES/NO
+- Index used: YES/NO
 - Notes: {any additional context needed}
 ```
 
