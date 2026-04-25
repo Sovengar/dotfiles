@@ -5,10 +5,12 @@
     "branch": "main"
   },
   "extraConfigPaths": [
-    "C:\\Users\\buble\\.config\\opencode"
+    "C:\\Users\\buble\\.config\\opencode",
+    "C:\\Users\\buble\\.agents"
   ],
   "extraSecretPaths": [
-    "C:\\Users\\buble\\.config\\opencode"
+    "C:\\Users\\buble\\.config\\opencode",
+    "C:\\Users\\buble\\.agents"
   ],
   "includeSecrets": true,
   "includeMcpSecrets": true,

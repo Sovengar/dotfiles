@@ -19,9 +19,6 @@
     "opencode-vibeguard",
     //NO TMUX https://github.com/mailshieldai/opencode-canvas,
     //NO TMUX https://github.com/AnganSamadder/opentmux
-    "opencode-subagent-statusline",
-    "opencode-subagent-statusline/runtime",
-    "opencode-synced"
   ],
   "mcp": {
     "context7": {
