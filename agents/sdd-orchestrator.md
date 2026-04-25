@@ -3,7 +3,7 @@ id: sdd-orchestrator
 name: SDD
 description: Coordinates SDD Sub-agents to do an SDD workflow
 mode: primary
-model: github-copilot/claude-opus-4.6
+model: openai/gpt-5.4
 color: '#00E5FF'
 tools:
   bash: true
