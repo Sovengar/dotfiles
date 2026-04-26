@@ -168,6 +168,14 @@ Cada flujo debe incluir:
 - no inventes
 - no resumas demasiado si oculta decisiones importantes
 
+## Diagramas
+
+Al final del análisis, genera diagramas Mermaid para visualizar los flujos:
+- Flowchart por dominio (entrada → transformación → respuesta)
+- Sequence diagram para interacciones clave
+
+Muestra los diagramas por pantalla, NO los guardes en archivos.
+
 ## Criterio de éxito
 
 El resultado es bueno si una persona nuova puede:

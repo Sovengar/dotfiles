@@ -71,8 +71,9 @@ At the start of planning:
 8. sdd-spec → spec.md
 9. User approves spec
 10. planner → task-decomposer → impl-plan + tasks
-11. User approves impl plan + tasks
-12. End + Commit
+11. 💡 User approves impl plan + tasks
+12. Generate Diagrams (Mermaid)
+13. End + Commit
 ```
 1. SDD-INIT (if needed)
 2. Index-aware exploration
@@ -132,8 +133,13 @@ At the start of planning:
     - Wait for all to complete
 11. **approval (impl plan + tasks)**: Ask "¿El impl plan y las tareas cover lo que necesitas?"
     - If rejects → loop back to step 10 with feedback
-12. **End**: Files generated in docs/planning/{NNNN}-{slug}/
-13. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
+12. **Generate Diagrams** (sync, after all approved):
+    - Generate Mermaid flowchart of the planning process flow
+    - Generate Mermaid class diagram of the planning directory structure
+    - Use skill `docs-guidelines` for Mermaid syntax
+    - Save in docs/planning/{NNNN}-{slug}/diagrams/
+13. **End**: Files generated in docs/planning/{NNNN}-{slug}/
+14. **Commit**: `git add docs/planning/{NNNN}-{slug}/ && git commit -m "chore: add {slug} plan"`
 14. **Output**: "NOTA: Te recomiendo que inicies una nueva sesión o limpies el contexto antes de ejecutar el plan <slug>"
 
 ### Approval Points in Flow
@@ -158,4 +164,6 @@ At the start of planning:
 - `spec.md` → Specification from sdd-spec
 - `impl-plan.md` → Implementation Plan from planner
 - `tasks.md` → Task list from task-decomposer
-- `prd.md` → Product Requirements Document (only if size warrants it)
+- `prd.md` → PRD (only if size warrants it)
+- `diagrams/planning-flow.md` → Planning process flowchart
+- `diagrams/directory-structure.md` → Directory structure class diagram
