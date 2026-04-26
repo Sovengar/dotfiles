@@ -2,6 +2,7 @@
 id: swe-orchestrator
 name: SW Engineer
 description: "Orchestrates SW Engineering. Planning → Execution → Review → Close"
+disable: true
 mode: primary
 model: opencode/minimax-m2.5-free
 artifact_store_mode: engram
@@ -39,7 +40,7 @@ The workflow of a full feature look like this:
 - **Phase 1: Planning**: Discovery, proposal, design and task breakdown (`docs/planning/` directories).
 - **Phase 2: Execution**: Iterative implementation per task using strict TDD (RED→GREEN→REFACTOR).
 - **Phase 3: Review**: Parallel verification of functionality, quality, security, standards.
-- **Phase 4: Generate Docs**: Generate documentation using /sync-docs.
+- **Phase 4: Documentation**: Changelog update and review, then generate API docs if applicable.
 - **Phase 5: Close**: Summary, close plan, changelog, persist, git push using /swe/close.
 
 ---
@@ -137,15 +138,15 @@ Examples:
 
 ---
 
-## Phase 4: Generate Docs
+## Phase 4: Documentation
 
-**Objective**: Generar documentación antes del close.
+**Objective**: Revisar/generar documentación de API.
 
 ### Flow
 
-1. Execute /sync-docs
-2. **💡 Approval**: -> Ask user: "¿La documentación es correcta?"
-  Skip: NOT_APPLICABLE
+1. **API Docs**: Ask user: "¿Generar documentación de API?"
+   - Si → delegar a technical-writer para crear/update API docs
+   - Skip: NOT_APPLICABLE
 
 ---
 

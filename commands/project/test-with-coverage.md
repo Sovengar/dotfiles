@@ -1,5 +1,5 @@
 ---
-description: Analyze test coverage
+description: Test with coverage
 model: opencode/minimax-m2.5-free
 subtask: true
 ---
@@ -11,7 +11,7 @@ Here are the current test results:
 !`npm test`
 
 ## For backend
-Averigua que tool usa, por ejemplo, maven: .\mvnw
+Averigua que tool usa, por ejemplo, maven: mvn o .\mvnw
 
 ## Smart report
 Based on these results, suggest improvements to increase coverage.

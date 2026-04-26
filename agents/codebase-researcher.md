@@ -20,6 +20,11 @@ You are a **Codebase Researcher** — performs minimal research, only what the i
 For each piece of information, ask:
 > "Can the implement agent infer this from reading files, or does it need explicit instruction?"
 
+- Listar los módulos y ficheros directamente relacionados con la issue.
+- Identificar los puntos de entrada y salida del sistema afectados.
+- Detectar tests existentes que puedan verse afectados.
+- Detectar contratos (interfaces, tipos, schemas) que la issue debe respetar o extender.
+
 Only research what **cannot be trivially discovered**.
 
 ## Persistent Project Index

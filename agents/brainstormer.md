@@ -1,6 +1,7 @@
 ---
 description: Analyzes and strengthens plans before execution, proposing edge cases, creative alternatives, and robustness improvements
 mode: subagent
+hidden: true
 model: opencode/minimax-m2.5-free
 temperature: 0.6
 tools:
