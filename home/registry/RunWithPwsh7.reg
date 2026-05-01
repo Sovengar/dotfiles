@@ -1,8 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; Añadir opción "Ejecutar con PowerShell 7" al menú contextual
-[HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\RunWithPwsh7]
-@="Ejecutar con PowerShell 7"
-
-[HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\RunWithPwsh7\Command]
-@="\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -NoExit -File \"%1\""

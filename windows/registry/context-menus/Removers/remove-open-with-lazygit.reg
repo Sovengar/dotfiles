@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+; Eliminar opción "Abrir con LazyGit" del clic derecho en carpetas
+[-HKEY_CLASSES_ROOT\Directory\shell\OpenWithLazygit]
+
+; Eliminar también para carpetas en el escritorio (Directory\Background)
+[-HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithLazygit]

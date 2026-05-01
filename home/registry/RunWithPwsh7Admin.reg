@@ -1,9 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; Añadir opción "Ejecutar con PowerShell 7 (Admin)" al menú contextual
-[HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\RunWithPwsh7Admin]
-@="Ejecutar con PowerShell 7 (Admin)"
-"HasLUAShield"=""
-
-[HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\RunWithPwsh7Admin\Command]
-@="powershell.exe -NoProfile -Command \"Start-Process 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' -ArgumentList '-NoExit','-File','\"\"%1\"\"' -Verb RunAs\""

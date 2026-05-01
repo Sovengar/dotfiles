@@ -8,6 +8,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\OpenWithLazygit\command]
 @="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%1\" -- pwsh -NoLogo -NoProfile -Command \"lazygit -p '%1'\""
 
+
 ; También funciona para carpetas en el escritorio (Directory\Background)
 [HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithLazygit]
 @="Abrir con LazyGit"

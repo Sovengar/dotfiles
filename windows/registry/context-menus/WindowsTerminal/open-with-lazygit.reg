@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; Añadir opción "Abrir con LazyGit" al clic derecho en carpetas
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithLazygit]
+@="Abrir con LazyGit"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithLazygit\command]
+@="wt.exe new-tab --title \"LazyGit\" -- \"C:\\Users\\buble\\AppData\\Local\\Microsoft\\WinGet\\Links\\lazygit.exe\" -p \"%1\""
+
+; También funciona para carpetas en el escritorio (Directory\Background)
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithLazygit]
+@="Abrir con LazyGit"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithLazygit\command]
+@="wt.exe new-tab --title \"LazyGit\" -- \"C:\\Users\\buble\\AppData\\Local\\Microsoft\\WinGet\\Links\\lazygit.exe\" -p \"%V\""
