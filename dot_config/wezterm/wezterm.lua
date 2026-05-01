@@ -1,0 +1,77 @@
+local wezterm = require "wezterm"
+local act = wezterm.action
+local config = wezterm.config_builder()
+local colors = require "colors"
+local font = require "font"
+local launchers = require "launchers"
+local keys = require "keys"
+local tabs = require "tabs"
+local status = require "status"
+local appearance = require "appearance"
+
+-- Launchers
+launchers.setup(config)
+
+-- Keybindings
+keys.setup(config)
+
+-- Set color schema
+config.color_scheme = colors.scheme_name
+
+config.color_schemes = {
+  [colors.scheme_name] = colors.scheme,
+}
+
+-- Font configuration
+font.setup(config)
+
+-- Tabs configuration
+tabs.setup(config, colors.colors)
+
+-- Status configuration
+config.status_update_interval = 2000
+status.setup(colors.colors)
+
+-- Appearance configuration
+appearance.setup(config, colors.colors)
+
+--[[
+============================
+Others
+============================
+]] --
+
+config.enable_scroll_bar = false
+config.warn_about_missing_glyphs = false
+
+-- Maximizar al iniciar
+-- wezterm.on("gui-startup", function(cmd)
+--   local _, _, window = wezterm.mux.spawn_window(cmd or {})
+--   window:gui_window():maximize()
+-- end)
+
+-- SSH
+config.ssh_domains = {
+  {
+    name = 'Jon',
+    remote_address = '157.180.112.216',
+    username = 'buble',
+    ssh_option = {
+      identityfile = '/.ssh/jon',
+    }
+  },
+}
+
+-- Performance settings
+config.max_fps = 120
+config.animation_fps = 120
+-- Auto-detect Wayland based on environment
+local is_wayland = os.getenv("WAYLAND_DISPLAY") ~= nil or
+                   os.getenv("XDG_SESSION_TYPE") == "wayland"
+--config.enable_wayland = is_wayland
+--config.front_end = "OpenGL"
+config.prefer_egl = true
+--config.freetype_load_target = "Light"
+--config.freetype_render_target = "HorizontalLcd"
+
+return config

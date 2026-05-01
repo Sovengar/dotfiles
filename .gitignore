@@ -1,0 +1,13 @@
+# ================================================
+# .gitignore
+# ================================================
+
+# Environment file (NEVER commit this)
+env.toml
+
+# chezmoi internal
+.chezmoi.ignore
+
+# OS temp files
+.DS_Store
+Thumbs.db

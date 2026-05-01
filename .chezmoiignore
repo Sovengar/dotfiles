@@ -1,0 +1,33 @@
+# ================================================
+# .chezmoiignore - Files to never track
+# ================================================
+
+# Credentials and sensitive data
+.local/share/opencode/auth.json
+.local/share/opencode/opencode.db
+.local/share/opencode/opencode.db-*
+.ssh/id_*
+.ssh/known_hosts
+
+# Local app data (not configs)
+.local/share/claude/**
+.local/share/GitKrakenCLI/**
+.local/share/gk/**
+.local/share/snip/**
+.local/share/wezterm/**
+
+# Caches and generated files
+.config/opencode/node_modules/
+.config/opencode/.git/
+.config/cagent/
+.config/jgit/
+
+# PowerToys requires manual import via GUI
+Documents/PowerToys/Backup/*.ptb
+
+# BetterTV/CSGO - destination unknown, leave out for now
+# BetterTV/**
+# CSGO/**
+
+# LazyVim lockfile - regenerated on install
+AppData/Local/nvim/lazy-lock.json

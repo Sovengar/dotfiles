@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; Añadir opción "Abrir con OpenCode" al clic derecho en carpetas (WEZTERM)
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithOpenCode]
+@="Abrir con OpenCode"
+"Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithOpenCode\command]
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%1\" -- pwsh -NoLogo -NoProfile -Command \"opencode '%1'\""
+
+; También funciona para carpetas en el escritorio (Directory\Background)
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithOpenCode]
+@="Abrir con OpenCode"
+"Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithOpenCode\command]
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%V\" -- pwsh -NoLogo -NoProfile -Command \"opencode '%V'\""
