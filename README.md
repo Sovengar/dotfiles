@@ -8,9 +8,19 @@ Gestionados con [chezmoi](https://www.chezmoi.io) para automatizar la configurac
 # Instalar chezmoi
 winget install --id twpayne.chezmoi -e --silent
 
-# Aplicar configuración
-chezmoi init --apply https://github.com/Sovengar/dotfiles
+# 1. CLONAR (sin aplicar aún)
+chezmoi init https://github.com/Sovengar/dotfiles
+
+# 2. PREVISUALIZAR cambios (OBLIGATORIO --dry-run)
+chezmoi diff
+chezmoi apply --dry-run
+
+# 3. APLICAR solo si la previsualización es correcta
+chezmoi apply
 ```
+
+> ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
+> Un `--dry-run` previo evita estados inconsistentes si algo falla a medias.
 
 ## Requisitos previos
 
