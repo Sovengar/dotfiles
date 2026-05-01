@@ -433,7 +433,7 @@
     "forceVolume": false,
     
     // Volume threshold (0-100): force volume if current level is below this
-    "volumeThreshold": 50,
+    "volumeThreshold": 10,
     
     // Show TUI toast notifications in OpenCode terminal
     "enableToast": true,
