@@ -76,15 +76,32 @@ local function get_process_name(tab)
   return nil, nil
 end
 
+local function basename(s)
+  return string.gsub(s, "(.*[/\\])(.*)", "%2")
+end
+
+local function get_cwd_name(tab)
+  local cwd = tab.active_pane.current_working_dir
+  if cwd then
+    local cwd_str = tostring(cwd)
+    return basename(cwd_str)
+  end
+  return nil
+end
+
 local function get_tab_title(tab, max_width)
   local pane_title = tab.active_pane.title
   local icon, process_name = get_process_name(tab)
+  local cwd_name = get_cwd_name(tab)
   local title_with_icon = process_name and (icon .. ' ' .. process_name) or (tab.tab_title or tab.active_pane.title or '')
   if pane_title:match("^Administrator: ") then
     title_with_icon = title_with_icon .. " " .. icons.admin .. " "
   end
 
+  title_with_icon = title_with_icon .. " " .. icons.folder .. " " .. (cwd_name or "")
+  
   return title_with_icon
+  --return " " .. wezterm.truncate_right(title_with_icon, max_width-6) .. " "
 end
 
 local subs = {'₁','₂','₃','₄','₅','₆','₇','₈','₉','₁₀'}
@@ -129,6 +146,10 @@ M.setup = function(config, colors)
     local tab_colors = {
       tab_fg = (hover and colors.tab_hover.fg_color) or (tab.is_active and colors.active_tab.fg_color or colors.inactive_tab.fg_color),
       tab_pane_idx_fg = (hover and colors.tab_hover.fg_color) or (tab.is_active and colors.active_tab.fg_color or colors.inactive_tab.fg_color),
+      --bell = { bg_color = is_bell and colors.bell.bg_color or 'none', fg_color = is_bell and colors.bell.fg_color or 'none' },
+      --unseen = { bg_color = is_unseen and colors.unseen.bg_color or 'none', fg_color = is_unseen and colors.unseen.fg_color or 'none' },
+
+      -- Romboide like edges
       tab_bg = colors.active_tab.bg_color,
       right_edge_lower = 'none',
       right_edge_upper = colors.tab_edge,
@@ -136,21 +157,40 @@ M.setup = function(config, colors)
       left_edge_upper = 'none',
       left_edge_text = tab.tab_index == 0 and icons.left_most or icons.left_arrow,
       right_edge_text = icons.right_arrow,
+
+      --No background colors
+      -- tab_bg = 'none',
+      -- right_edge_lower = 'none',
+      -- right_edge_upper = 'none',
+      -- left_edge_lower = 'none',
+      -- left_edge_upper = 'none',
+      -- left_edge_text = ' ',
+      -- right_edge_text = ' ',
     }
 
     return {
+      -- Left edge
       { Background = { Color = tab_colors.left_edge_upper } },
       { Foreground = { Color = tab_colors.left_edge_lower } },
       { Text = tab_colors.left_edge_text },
-      { Background = { Color = tab_colors.tab_bg } },
+      -- Tab content
+      { Background = { Color = tab_colors.tab_bg } }, 
       { Foreground = { Color = tab_colors.tab_fg } },
+      -- Tab index and title
       { Text = subs[tab.tab_index + 1] or tostring(tab.tab_index + 1) },
       { Text = get_tab_title(tab, max_width) },
       { Foreground = { Color = tab_colors.tab_pane_idx_fg } },
       { Text = sups[tab.active_pane.pane_index + 1] or tostring(tab.active_pane.pane_index + 1) },
+      --Bell
+      --{ Background = { Color = tab_colors.bell.bg_color } }, 
+      --{ Foreground = { Color = tab_colors.bell.fg_color } },
       { Text = is_bell and ' 🔔' or '' },
+      --Unseen
+      --{ Background = { Color = tab_colors.unseen.bg_color } }, 
+     -- { Foreground = { Color = tab_colors.unseen.fg_color } },
       { Text = is_unseen and ' ●' or '' },
-      { Background = { Color = tab_colors.right_edge_lower } },
+      -- Right edge
+      { Background = { Color = tab_colors.right_edge_lower } }, 
       { Foreground = { Color = tab_colors.right_edge_upper } },
       { Text = tab_colors.right_edge_text },
     }

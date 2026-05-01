@@ -4,6 +4,7 @@ local M = {
   left_arrow = utf8.char(0xe0ba),
   left_most = utf8.char(0x2588),
   right_arrow = utf8.char(0xe0bc),
+  folder = wezterm.nerdfonts.md_folder or utf8.char(0xe5ff),
   admin = wezterm.nerdfonts.md_admin or utf8.char(0xf49c),
   cmd = wezterm.nerdfonts.md_console_line or utf8.char(0xe62a),
   nu = utf8.char(0xe7a8) or wezterm.nerdfonts.md_terminal,
