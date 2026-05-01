@@ -84,6 +84,16 @@ local function get_cwd_name(tab)
   local cwd = tab.active_pane.current_working_dir
   if cwd then
     local cwd_str = tostring(cwd)
+    -- Normalize path separators and remove trailing slash
+    cwd_str = cwd_str:gsub("/$", ""):gsub("\\$", "")
+    -- Check if cwd is home directory (compare against USERPROFILE)
+    local home = os.getenv("USERPROFILE") or os.getenv("HOME")
+    if home then
+      home = home:gsub("\\$", "")
+      if cwd_str == home then
+        return "~"
+      end
+    end
     return basename(cwd_str)
   end
   return nil
