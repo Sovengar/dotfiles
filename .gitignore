@@ -1,13 +1,27 @@
-# ================================================
-# .gitignore
-# ================================================
+# .gitignore for chezmoi repo root (not dotfiles themselves)
 
-# Environment file (NEVER commit this)
+# NEVER commit these
 env.toml
+*.env
+.env.local
+*.log
 
 # chezmoi internal
-.chezmoi.ignore
+.chezmoi.local.toml
+.chezmoi.cache/
 
-# OS temp files
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Node/JS artifacts (auxiliary files)
+package-lock.json
+node_modules/
+
+# Auxiliary directories that are NOT dotfiles
+logs/
+scripts/
+themes/
+personas/
+assets/
