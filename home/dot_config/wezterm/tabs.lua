@@ -80,19 +80,27 @@ local function basename(s)
   return string.gsub(s, "(.*[/\\])(.*)", "%2")
 end
 
+local function normalize_path(path)
+  if not path then return nil end
+  -- Convert to string and handle URL format (file:///C:/Users/buble)
+  local s = tostring(path)
+  s = s:gsub("^file://", "")
+  -- Normalize separators to forward slashes
+  s = s:gsub("\\", "/")
+  -- Remove leading slash (e.g., /C:/Users/buble -> C:/Users/buble)
+  s = s:gsub("^/", "")
+  -- Remove trailing slash
+  s = s:gsub("/$", "")
+  return s
+end
+
 local function get_cwd_name(tab)
   local cwd = tab.active_pane.current_working_dir
   if cwd then
-    local cwd_str = tostring(cwd)
-    -- Normalize path separators and remove trailing slash
-    cwd_str = cwd_str:gsub("/$", ""):gsub("\\$", "")
-    -- Check if cwd is home directory (compare against USERPROFILE)
-    local home = os.getenv("USERPROFILE") or os.getenv("HOME")
-    if home then
-      home = home:gsub("\\$", "")
-      if cwd_str == home then
-        return "~"
-      end
+    local cwd_str = normalize_path(cwd)
+    local home = normalize_path(os.getenv("USERPROFILE") or os.getenv("HOME"))
+    if cwd_str and home and cwd_str:lower() == home:lower() then
+      return "~"
     end
     return basename(cwd_str)
   end
@@ -103,12 +111,12 @@ local function get_tab_title(tab, max_width)
   local pane_title = tab.active_pane.title
   local icon, process_name = get_process_name(tab)
   local cwd_name = get_cwd_name(tab)
-  local title_with_icon = process_name and (icon .. ' ' .. process_name) or (tab.tab_title or tab.active_pane.title or '')
+  -- Show: folder_icon + directory + shell_icon (no process name text)
+  local title_with_icon = icons.folder .. " " .. (cwd_name or "")
   if pane_title:match("^Administrator: ") then
-    title_with_icon = title_with_icon .. " " .. icons.admin .. " "
+    title_with_icon = title_with_icon .. " " .. icons.admin
   end
-
-  title_with_icon = title_with_icon .. " " .. icons.folder .. " " .. (cwd_name or "")
+  title_with_icon = title_with_icon .. " " .. (icon or "") .. " "
   
   return title_with_icon
   --return " " .. wezterm.truncate_right(title_with_icon, max_width-6) .. " "
