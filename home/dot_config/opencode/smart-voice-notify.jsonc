@@ -50,7 +50,7 @@
     //   'tts-first'   - Speak TTS immediately, no sound
     //   'both'        - Play sound AND speak TTS immediately
     //   'sound-only'  - Only play sound, no TTS at all
-    "notificationMode": "sound-first",
+    "notificationMode": "sound-only",
     
     // ============================================================
     // TTS REMINDER SETTINGS (When user doesn't respond to sound)
@@ -470,7 +470,7 @@
     // Cross-platform: Windows, macOS, and Linux (X11 via xdotool/xprop, Wayland via gdbus).
     // Default: false (notifications always play regardless of focus)
     // Set to true to avoid notification spam when actively working in terminal
-    "suppressWhenFocused": false,
+    "suppressWhenFocused": true,
     
     // Override focus detection: always send notifications even when terminal is focused
     // Set to true to disable focus-based suppression entirely

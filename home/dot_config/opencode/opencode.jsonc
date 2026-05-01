@@ -12,7 +12,9 @@
     "opencode-firecrawl",
 
     // CONTEXT OPTIMIZER
-    "opencode-snip@latest",
+    // DISABLED: replaced by opencode-selective-snip
+    // "opencode-snip@latest",
+    "opencode-selective-snip",
     "@tarquinen/opencode-dcp@latest",
 
     // AGENTS

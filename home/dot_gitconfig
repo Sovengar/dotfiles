@@ -1,7 +1,3 @@
-{{- $email := "" -}}
-{{- if lookPath "C:/Users/buble/OneDrive/Formateo/env.toml" -}}
-{{- $email = trim (execTemplate "env" "toml" (lookPath "C:/Users/buble/OneDrive/Formateo/env.toml")) "email" -}}
-{{- end -}}
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f
@@ -9,10 +5,6 @@
 	process = git-lfs filter-process
 [user]
 	name = Sovengar
-{{- if $email }}
-	email = {{ $email }}
-{{- else }}
 	email = bubles_2009@hotmail.com
-{{- end }}
 [core]
-	editor = "code" --wait
+	editor = \"C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code\" --wait

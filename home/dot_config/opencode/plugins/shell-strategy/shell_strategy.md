@@ -36,6 +36,8 @@ This strategy enforces strict cognitive patterns. These are not just shell tips;
 
 ## 2. Environment Variables (Auto-Set)
 
+These environment variables help prevent interactive prompts:
+
 | Variable | Value | Purpose |
 |----------|-------|---------|
 | `CI` | `true` | General CI detection |
@@ -153,15 +155,23 @@ timeout 30 ./potentially_hanging_script.sh || echo "Timed out"
 
 1. **Always test commands** mentally for interactive prompts before running
 2. **Check man pages** (via web search) for `-y`, `--yes`, `--non-interactive`, `-f`, `--force` flags
-3. **Use `--help`** to discover non-interactive options
+3. **Use `--help`** to discover non-interactive options: `cmd --help | grep -i "non-interactive\|force\|yes"`
 4. **Prefer OpenCode tools** over shell commands for file operations
 5. **Set timeout** for any command that might unexpectedly prompt
 
-## 7. Advanced Instruction Patterns
+---
+
+## 7. Advanced Instruction Patterns (Cognitive Optimization)
+
+### The Problem: Implicit Constraints
+Large Language Models (LLMs) often struggle with:
+1. **Negative constraints**: Inverting or ignoring "don't do X" instructions.
+2. **Turn termination**: Stopping after tool execution instead of auto-continuing.
+3. **Context weighting**: Failing to prioritize authoritative instructions over general knowledge.
 
 ### Strategy 1: Explicit Action Framing (BAD vs GOOD)
 
-Instead of saying "Don't use interactive flags", provide a concrete "Good" alternative.
+This plugin uses the **BAD vs GOOD** pattern to enforce positive constraints. Instead of saying "Don't use interactive flags", we provide a concrete "Good" alternative.
 
 **Why it works:**
 - "BAD: npm init" → Model identifies the failure pattern.
@@ -176,21 +186,22 @@ In non-interactive environments, the agent must drive the process forward.
 
 **Pattern:**
 ```
-1. Execute command
+1. Execute command (e.g., git status)
 2. Analyze output
-3. Explicitly state next step
+3. Explicitly state next step: "Status is clean. Next: I will run tests."
 4. Execute next step immediately
 ```
 
 ### Strategy 3: Context Hierarchy
 
-When instructions conflict, establish precedence:
+When instructions conflict (e.g., generic docs vs this specific strategy), establish precedence:
+
 1. **Cite the Authority:** "Per shell_strategy.md..."
-2. **Follow the Specifics:** Rules in this file override general model training.
+2. **Follow the Specifics:** Rules in this file override general model training or other documentation.
 
 ### Strategy 4: Applying These Patterns Beyond Shell
 
-The cognitive strategies used here apply to all coding tasks:
+The cognitive strategies used here (Explicit Action Framing) apply to all coding tasks:
 
 **Instead of:**
 ```markdown

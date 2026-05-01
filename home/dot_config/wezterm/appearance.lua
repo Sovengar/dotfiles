@@ -35,7 +35,21 @@ M.setup = function(config, colors)
     border_bottom_color = "transparent",
   }
 
+  -- config.background = {
+  --   {
+  --     source = { File = { path = 'C:/Users/buble/Downloads/wallpaperflare.com_wallpaper (4).jpg', speed = 0.0 } },
+  --     opacity = 0.25,
+  --     width = "100%",
+  --     hsb = { brightness = 0.5, saturation = 0.8, hue = 1.0 },
+  --   }
+  -- }
+
   config.window_background_opacity = 0.96
+
+  --Acrylic (Not working)
+  --config.window_background_opacity = 0.9
+  --config.win32_system_backdrop = 'Acrylic'
+  --config.win32_window_appearance = 'Dark'
 end
 
 return M
