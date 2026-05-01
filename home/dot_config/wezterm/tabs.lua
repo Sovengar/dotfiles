@@ -194,11 +194,12 @@ M.setup = function(config, colors)
       -- Tab content
       { Background = { Color = tab_colors.tab_bg } }, 
       { Foreground = { Color = tab_colors.tab_fg } },
-      -- Tab index and title
+      -- Tab index and pane index (subscript + superscript together)
       { Text = subs[tab.tab_index + 1] or tostring(tab.tab_index + 1) },
-      { Text = get_tab_title(tab, max_width) },
       { Foreground = { Color = tab_colors.tab_pane_idx_fg } },
       { Text = sups[tab.active_pane.pane_index + 1] or tostring(tab.active_pane.pane_index + 1) },
+      { Foreground = { Color = tab_colors.tab_fg } },
+      { Text = get_tab_title(tab, max_width) },
       --Bell
       --{ Background = { Color = tab_colors.bell.bg_color } }, 
       --{ Foreground = { Color = tab_colors.bell.fg_color } },
