@@ -21,7 +21,3 @@ node_modules/
 
 # Auxiliary directories that are NOT dotfiles
 logs/
-scripts/
-themes/
-personas/
-assets/
