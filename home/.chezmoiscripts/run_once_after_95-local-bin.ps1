@@ -78,7 +78,28 @@ if (Test-Path $homeBin) {
 }
 
 # ============================================
-# 3. CREAR SYMLINKS para herramientas WinGet
+# 3. MOVER gh.exe desde GitHub CLI instalación del sistema
+# ============================================
+$ghSystemPath = "C:\Program Files\GitHub CLI\gh.exe"
+$ghLocalPath = Join-Path $localBin "gh.exe"
+if (Test-Path $ghSystemPath) {
+    if (Test-Path $ghLocalPath) { Remove-Item -Path $ghLocalPath -Force }
+    try {
+        Move-Item -Path $ghSystemPath -Destination $ghLocalPath -Force
+        $movedItems += "gh.exe"
+        Write-Host "[OK] Moved gh.exe from system to ~/.local/bin" -ForegroundColor Green
+        # Eliminar directorio vacio si queda vacio
+        $ghDir = "C:\Program Files\GitHub CLI"
+        if ((Get-ChildItem -Path $ghDir -Recurse -File -ErrorAction SilentlyContinue).Count -eq 0) {
+            Remove-Item -Path $ghDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    } catch {
+        $warnings += "Failed to move gh.exe`: $_"
+    }
+}
+
+# ============================================
+# 4. CREAR SYMLINKS para herramientas WinGet
 # ============================================
 $wingetTools = @{
     'rg.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\ripgrep-15.1.0-x86_64-pc-windows-msvc\rg.exe"
@@ -130,7 +151,7 @@ if (-not $starshipFound) {
 }
 
 # ============================================
-# 4. CREAR SYMLINKS para NVM y Node.js
+# 5. CREAR SYMLINKS para NVM y Node.js
 # ============================================
 $nvmHome = "$env:LOCALAPPDATA\nvm"
 $nvmSymlink = "C:\nvm4w\nodejs"
@@ -164,7 +185,7 @@ if (Test-Path $nodeExe) {
 Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================
-# 5. CREAR SYMLINKS para Go
+# 6. CREAR SYMLINKS para Go
 # ============================================
 $goPath = "${env:ProgramFiles}\Go\bin\go.exe"
 if (Test-Path $goPath) {
@@ -181,7 +202,7 @@ if (Test-Path $goPath) {
 }
 
 # ============================================
-# 6. CREAR SYMLINKS para Java JDK
+# 7. CREAR SYMLINKS para Java JDK
 # ============================================
 $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
 if (-not $javaHome) { $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
@@ -207,7 +228,7 @@ if ($javaHome -and (Test-Path $javaHome)) {
 }
 
 # ============================================
-# 7. CREAR SYMLINKS para Maven
+# 8. CREAR SYMLINKS para Maven
 # ============================================
 $mavenHome = [Environment]::GetEnvironmentVariable("MAVEN_HOME", "User")
 if ($mavenHome -and (Test-Path $mavenHome)) {
@@ -227,7 +248,7 @@ if ($mavenHome -and (Test-Path $mavenHome)) {
 }
 
 # ============================================
-# 8. LIMPIAR PATH
+# 9. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -242,10 +263,9 @@ $pathsToRemove = @(
     "C:\Program Files\Go\bin"
     "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin"
     "$env:USERPROFILE\Dropbox\DEV\tools\Maven\bin"
-    # NVM paths
-    "$env:LOCALAPPDATA\nvm"
-    "C:\nvm4w\nodejs"
-    "C:\nvm4w"
+    # GitHub CLI (moved to ~/.local/bin)
+    "C:\Program Files\GitHub CLI"
+    "C:\Program Files\GitHub CLI\"
 )
 
 foreach ($path in $pathsToRemove) {
@@ -271,7 +291,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 6. RESUMEN SILENCIOSO
+# 10. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
