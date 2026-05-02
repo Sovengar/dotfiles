@@ -320,7 +320,26 @@ foreach ($name in $weztermTools) {
 }
 
 # ============================================
-# 13. LIMPIAR PATH
+# 13. CREAR SYMLINKS para Git
+# ============================================
+$gitCmd = "C:\Program Files\Git\cmd"
+$gitTools = @('git.exe', 'git-gui.exe', 'gitk.exe', 'start-ssh-agent.cmd', 'start-ssh-pageant.cmd')
+foreach ($name in $gitTools) {
+    $target = Join-Path $gitCmd $name
+    $link = Join-Path $localBin $name
+    if (Test-Path $target) {
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+            $createdLinks += $name
+        } catch {
+            $warnings += "Failed to create symlink for $name`: $_"
+        }
+    }
+}
+
+# ============================================
+# 14. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -353,6 +372,8 @@ $pathsToRemove = @(
     # WezTerm (symlinked to ~/.local/bin)
     "C:\Program Files\WezTerm"
     "C:\Program Files\WezTerm\"
+    # Git (symlinked to ~/.local/bin)
+    "C:\Program Files\Git\cmd"
 )
 
 foreach ($path in $pathsToRemove) {
@@ -378,7 +399,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 14. LIMPIAR MACHINE PATH (si es posible)
+# 15. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -400,6 +421,8 @@ $machinePathsToRemove = @(
     "C:\Program Files\bottom\bin\"
     # WezTerm (symlinked to ~/.local/bin)
     "C:\Program Files\WezTerm"
+    # Git (symlinked to ~/.local/bin)
+    "C:\Program Files\Git\cmd"
 )
 
 $machineRemoved = @()
@@ -422,7 +445,7 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 15. RESUMEN SILENCIOSO
+# 16. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
