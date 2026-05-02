@@ -7,7 +7,6 @@
 .local/share/opencode/opencode.db
 .local/share/opencode/opencode.db-*
 .ssh/id_*
-.ssh/known_hosts
 
 # Local app data (not configs)
 .local/share/claude/**
