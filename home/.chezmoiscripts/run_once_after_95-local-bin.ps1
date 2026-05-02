@@ -161,39 +161,6 @@ if (Test-Path $nodeExe) {
     }
 }
 
-# Para .cmd wrappers, crear wrappers nuevos en ~/.local/bin
-# (los symlinks a .cmd rompen %~dp0 que apunta al dir del link, no al target)
-$cmdWrappers = @('npm.cmd', 'npx.cmd', 'corepack.cmd', 'codex.cmd', 'firecrawl.cmd')
-foreach ($name in $cmdWrappers) {
-    $target = Join-Path $nvmSymlink $name
-    if (Test-Path $target) {
-        $wrapper = Join-Path $localBin $name
-        if (Test-Path $wrapper) { Remove-Item -Path $wrapper -Force }
-        $content = "@echo off`n`"$target`" %*"
-        Set-Content -Path $wrapper -Value $content -Encoding ASCII
-        $createdLinks += $name
-    }
-}
-
-# Buscar opencode.exe en npm global node_modules
-$opencodePaths = @(
-    "$nvmSymlink\node_modules\opencode-ai\node_modules\opencode-windows-x64\bin\opencode.exe",
-    "$nvmSymlink\node_modules\opencode-ai\node_modules\opencode-windows-x64-baseline\bin\opencode.exe"
-)
-foreach ($path in $opencodePaths) {
-    if (Test-Path $path) {
-        $link = Join-Path $localBin "opencode-npm.exe"
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try {
-            New-Item -ItemType SymbolicLink -Path $link -Target $path -Force | Out-Null
-            $createdLinks += "opencode-npm.exe"
-        } catch {
-            $warnings += "Failed to create symlink for opencode-npm.exe`: $_"
-        }
-        break
-    }
-}
-
 Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================

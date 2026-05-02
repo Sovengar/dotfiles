@@ -337,6 +337,17 @@ function rm {
 }
 
 # ============================================
+# npm, npx, corepack - Node.js tools
+# ============================================
+$script:NvmPath = "C:\nvm4w\nodejs"
+
+function npm { & "$script:NvmPath\npm.cmd" @args }
+function npx { & "$script:NvmPath\npx.cmd" @args }
+function corepack { & "$script:NvmPath\corepack.cmd" @args }
+function codex { & "$script:NvmPath\codex.cmd" @args }
+function firecrawl { & "$script:NvmPath\firecrawl.cmd" @args }
+
+# ============================================
 # btm - Wrapper para bottom
 # ============================================
 function btm {
