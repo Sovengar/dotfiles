@@ -1,4 +1,4 @@
-# run_once_after_95-local-bin.ps1
+# run_once_after_95-config-local-bin-and-path.ps1
 # Consolida todos los ejecutables en ~/.local/bin y limpia el PATH
 # Ejecuta al final del chezmoi apply
 
