@@ -334,6 +334,7 @@ $pathsToRemove = @(
     "$env:USERPROFILE\bin"
     "C:\Program Files\Go\bin"
     "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin"
+    "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\\bin"
     "$env:USERPROFILE\Dropbox\DEV\tools\Maven\bin"
     "%MAVEN_HOME%\bin"
     # GitHub CLI (moved to ~/.local/bin)
