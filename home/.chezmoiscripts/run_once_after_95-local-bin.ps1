@@ -267,6 +267,9 @@ $pathsToRemove = @(
     # GitHub CLI (moved to ~/.local/bin)
     "C:\Program Files\GitHub CLI"
     "C:\Program Files\GitHub CLI\"
+    # Starship (symlinked to ~/.local/bin)
+    "C:\Program Files\starship\bin"
+    "C:\Program Files\starship\bin\"
 )
 
 foreach ($path in $pathsToRemove) {
@@ -300,6 +303,10 @@ $machinePathsToRemove = @(
     "C:\Program Files\Go\bin"
     "C:\Users\buble\Dropbox\DEV\tools\Maven\bin"
     "C:\Users\buble\go\bin"
+    # Starship (symlinked to ~/.local/bin)
+    "C:\Program Files\starship\bin\"
+    # NVM (nvm.exe symlinked to ~/.local/bin, node via C:\nvm4w\nodejs)
+    "$env:LOCALAPPDATA\nvm"
 )
 
 $machineRemoved = @()
