@@ -8,6 +8,92 @@ $script:HasFd = [bool](Get-Command fd -ErrorAction SilentlyContinue)
 $script:HasBtm = [bool](Get-Command btm -ErrorAction SilentlyContinue)
 
 # ============================================
+# ls - Listar archivos (con flags tipo Unix)
+# ============================================
+Remove-Item alias:ls -ErrorAction SilentlyContinue
+
+function ls {
+    param(
+        [switch]$a,
+        [switch]$l,
+        [switch]$la,
+        [switch]$al,
+        [switch]$lah,
+        [switch]$h,
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $RemainingArgs
+    )
+
+    $showHidden = $a -or $la -or $al -or $lah
+    $longFormat = $l -or $la -or $al -or $lah
+    $humanReadable = $h -or $lah
+
+    $gciArgs = @{}
+    if ($showHidden) { $gciArgs['Force'] = $true }
+
+    $paths = $RemainingArgs | Where-Object { $_ -notmatch '^-' }
+    $extraGciArgs = $RemainingArgs | Where-Object { $_ -match '^-' -and $_ -notin @('-a','-l','-la','-al','-lah','-h') } | ForEach-Object { $_ -replace '^-' }
+
+    if (-not $paths) { $paths = '.' }
+
+    foreach ($path in $paths) {
+        $items = Get-ChildItem @gciArgs -Path $path @extraGciArgs -ErrorAction SilentlyContinue
+
+        if ($items.Count -gt 1 -and $paths.Count -gt 1) {
+            Write-Host "$path`:" -ForegroundColor Cyan
+        }
+
+        if (-not $items) { continue }
+
+        if ($longFormat) {
+            foreach ($item in $items) {
+                $mode = ''
+                if ($item.PSIsContainer) { $mode += 'd' } else { $mode += '-' }
+                $mode += if ($item.Mode -match 'r') { 'r' } else { '-' }
+                $mode += if ($item.Mode -match 'w') { 'w' } else { '-' }
+                $mode += if ($item.Mode -match 'x') { 'x' } else { '-' }
+                $mode += 'r--r--'
+
+                $size = $item.Length
+                if ($humanReadable -and $size -ge 0) {
+                    if ($size -ge 1GB) { $sizeStr = '{0:N1}G' -f ($size / 1GB) }
+                    elseif ($size -ge 1MB) { $sizeStr = '{0:N1}M' -f ($size / 1MB) }
+                    elseif ($size -ge 1KB) { $sizeStr = '{0:N1}K' -f ($size / 1KB) }
+                    else { $sizeStr = $size }
+                } else {
+                    $sizeStr = $size
+                }
+
+                $date = $item.LastWriteTime.ToString('MMM dd HH:mm')
+                $name = $item.Name
+
+                if ($item.PSIsContainer) {
+                    Write-Host "$mode  1 buble buble  $($sizeStr.ToString().PadLeft(8))  $date  " -NoNewline
+                    Write-Host $name -ForegroundColor Blue
+                } else {
+                    Write-Host "$mode  1 buble buble  $($sizeStr.ToString().PadLeft(8))  $date  $name"
+                }
+            }
+        } else {
+            $maxPerLine = 7
+            $names = $items | Select-Object -ExpandProperty Name
+            $i = 0
+            foreach ($name in $names) {
+                if (++$i -gt $maxPerLine) { Write-Host; $i = 1 }
+                if ($i -eq 1) { Write-Host -NoNewline $name } else { Write-Host -NoNewline " $name" }
+            }
+            if ($i -gt 0) { Write-Host }
+        }
+    }
+}
+
+# Alias tipo Linux para ls
+function ll { ls -l @args }
+function la { ls -a @args }
+function lla { ls -la @args }
+function lah { ls -lah @args }
+
+# ============================================
 # touch - Crear archivo vacio
 # ============================================
 function touch {
