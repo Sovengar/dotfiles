@@ -153,7 +153,70 @@ foreach ($name in $npmTools) {
 Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================
-# 5. LIMPIAR PATH
+# 5. CREAR SYMLINKS para Go
+# ============================================
+$goPath = "${env:ProgramFiles}\Go\bin\go.exe"
+if (Test-Path $goPath) {
+    $link = Join-Path $localBin "go.exe"
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $goPath -Force | Out-Null
+        $createdLinks += "go.exe"
+    } catch {
+        $warnings += "Failed to create symlink for go.exe`: $_"
+    }
+} else {
+    $warnings += "go.exe not found in $goPath"
+}
+
+# ============================================
+# 6. CREAR SYMLINKS para Java JDK
+# ============================================
+$javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
+if (-not $javaHome) { $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
+
+if ($javaHome -and (Test-Path $javaHome)) {
+    $javaBin = Join-Path $javaHome "bin"
+    $javaTools = @('java.exe', 'javac.exe', 'jar.exe', 'javadoc.exe')
+    foreach ($name in $javaTools) {
+        $target = Join-Path $javaBin $name
+        $link = Join-Path $localBin $name
+        if (Test-Path $target) {
+            if (Test-Path $link) { Remove-Item -Path $link -Force }
+            try {
+                New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+                $createdLinks += $name
+            } catch {
+                $warnings += "Failed to create symlink for $name`: $_"
+            }
+        }
+    }
+} else {
+    $warnings += "JAVA_HOME not found or invalid"
+}
+
+# ============================================
+# 7. CREAR SYMLINKS para Maven
+# ============================================
+$mavenHome = [Environment]::GetEnvironmentVariable("MAVEN_HOME", "User")
+if ($mavenHome -and (Test-Path $mavenHome)) {
+    $mvnCmd = Join-Path $mavenHome "bin\mvn.cmd"
+    if (Test-Path $mvnCmd) {
+        $link = Join-Path $localBin "mvn.cmd"
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $mvnCmd -Force | Out-Null
+            $createdLinks += "mvn.cmd"
+        } catch {
+            $warnings += "Failed to create symlink for mvn.cmd`: $_"
+        }
+    }
+} else {
+    $warnings += "MAVEN_HOME not found or invalid"
+}
+
+# ============================================
+# 8. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -165,6 +228,9 @@ $pathsToRemove = @(
     "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenAI.Codex_Microsoft.Winget.Source_8wekyb3d8bbwe"
     "$env:USERPROFILE\go\bin"
     "$env:USERPROFILE\bin"
+    "C:\Program Files\Go\bin"
+    "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin"
+    "$env:USERPROFILE\Dropbox\DEV\tools\Maven\bin"
 )
 
 foreach ($path in $pathsToRemove) {
