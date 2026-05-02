@@ -341,7 +341,7 @@ function rm {
 # ============================================
 function btm {
     if ($script:HasBtm) {
-        & btm @args
+        & "$env:USERPROFILE\.local\bin\btm.exe" @args
     } else {
         Write-Host "bottom (btm) not installed. Install with: winget install Clement.bottom" -ForegroundColor Red
     }
