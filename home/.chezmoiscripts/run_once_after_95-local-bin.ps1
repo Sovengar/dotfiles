@@ -130,23 +130,67 @@ if (-not $starshipFound) {
 }
 
 # ============================================
-# 4. CREAR SYMLINKS para herramientas npm global
+# 4. CREAR SYMLINKS para NVM y Node.js
 # ============================================
-$npmGlobal = "$env:APPDATA\npm"
-$npmTools = @('opencode.cmd', 'backlog.cmd', 'devcontainer.cmd')
+$nvmHome = "$env:LOCALAPPDATA\nvm"
+$nvmSymlink = "C:\nvm4w\nodejs"
 
-foreach ($name in $npmTools) {
-    $target = Join-Path $npmGlobal $name
-    $link = Join-Path $localBin $name
-    
+# nvm.exe
+$nvmExe = Join-Path $nvmHome 'nvm.exe'
+if (Test-Path $nvmExe) {
+    $link = Join-Path $localBin 'nvm.exe'
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $nvmExe -Force | Out-Null
+        $createdLinks += 'nvm.exe'
+    } catch {
+        $warnings += "Failed to create symlink for nvm.exe`: $_"
+    }
+}
+
+# node.exe (symlink funciona porque es un exe simple)
+$nodeExe = Join-Path $nvmSymlink 'node.exe'
+if (Test-Path $nodeExe) {
+    $link = Join-Path $localBin 'node.exe'
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $nodeExe -Force | Out-Null
+        $createdLinks += 'node.exe'
+    } catch {
+        $warnings += "Failed to create symlink for node.exe`: $_"
+    }
+}
+
+# Para .cmd wrappers, crear wrappers nuevos en ~/.local/bin
+# (los symlinks a .cmd rompen %~dp0 que apunta al dir del link, no al target)
+$cmdWrappers = @('npm.cmd', 'npx.cmd', 'corepack.cmd', 'codex.cmd', 'firecrawl.cmd')
+foreach ($name in $cmdWrappers) {
+    $target = Join-Path $nvmSymlink $name
     if (Test-Path $target) {
+        $wrapper = Join-Path $localBin $name
+        if (Test-Path $wrapper) { Remove-Item -Path $wrapper -Force }
+        $content = "@echo off`n`"$target`" %*"
+        Set-Content -Path $wrapper -Value $content -Encoding ASCII
+        $createdLinks += $name
+    }
+}
+
+# Buscar opencode.exe en npm global node_modules
+$opencodePaths = @(
+    "$nvmSymlink\node_modules\opencode-ai\node_modules\opencode-windows-x64\bin\opencode.exe",
+    "$nvmSymlink\node_modules\opencode-ai\node_modules\opencode-windows-x64-baseline\bin\opencode.exe"
+)
+foreach ($path in $opencodePaths) {
+    if (Test-Path $path) {
+        $link = Join-Path $localBin "opencode-npm.exe"
         if (Test-Path $link) { Remove-Item -Path $link -Force }
         try {
-            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
-            $createdLinks += $name
+            New-Item -ItemType SymbolicLink -Path $link -Target $path -Force | Out-Null
+            $createdLinks += "opencode-npm.exe"
         } catch {
-            $warnings += "Failed to create symlink for $name`: $_"
+            $warnings += "Failed to create symlink for opencode-npm.exe`: $_"
         }
+        break
     }
 }
 
@@ -231,6 +275,10 @@ $pathsToRemove = @(
     "C:\Program Files\Go\bin"
     "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin"
     "$env:USERPROFILE\Dropbox\DEV\tools\Maven\bin"
+    # NVM paths
+    "$env:LOCALAPPDATA\nvm"
+    "C:\nvm4w\nodejs"
+    "C:\nvm4w"
 )
 
 foreach ($path in $pathsToRemove) {
