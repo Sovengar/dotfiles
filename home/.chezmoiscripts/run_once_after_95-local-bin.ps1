@@ -248,7 +248,79 @@ if ($mavenHome -and (Test-Path $mavenHome)) {
 }
 
 # ============================================
-# 9. LIMPIAR PATH
+# 9. CREAR SYMLINKS para Docker CLI
+# ============================================
+$dockerBin = "C:\Program Files\Docker\Docker\resources\bin"
+$dockerTools = @('docker.exe', 'docker-compose.exe', 'kubectl.exe', 'hub-tool.exe')
+foreach ($name in $dockerTools) {
+    $target = Join-Path $dockerBin $name
+    $link = Join-Path $localBin $name
+    if (Test-Path $target) {
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+            $createdLinks += $name
+        } catch {
+            $warnings += "Failed to create symlink for $name`: $_"
+        }
+    }
+}
+
+# ============================================
+# 10. CREAR SYMLINKS para Neovim
+# ============================================
+$nvimBin = "C:\Program Files\Neovim\bin"
+$nvimTools = @('nvim.exe', 'win32yank.exe')
+foreach ($name in $nvimTools) {
+    $target = Join-Path $nvimBin $name
+    $link = Join-Path $localBin $name
+    if (Test-Path $target) {
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+            $createdLinks += $name
+        } catch {
+            $warnings += "Failed to create symlink for $name`: $_"
+        }
+    }
+}
+
+# ============================================
+# 11. CREAR SYMLINKS para PowerShell 7
+# ============================================
+$pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
+if (Test-Path $pwshPath) {
+    $link = Join-Path $localBin "pwsh.exe"
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $pwshPath -Force | Out-Null
+        $createdLinks += "pwsh.exe"
+    } catch {
+        $warnings += "Failed to create symlink for pwsh.exe`: $_"
+    }
+}
+
+# ============================================
+# 12. CREAR SYMLINKS para WezTerm
+# ============================================
+$weztermBin = "C:\Program Files\WezTerm"
+$weztermTools = @('wezterm.exe', 'wezterm-gui.exe')
+foreach ($name in $weztermTools) {
+    $target = Join-Path $weztermBin $name
+    $link = Join-Path $localBin $name
+    if (Test-Path $target) {
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+            $createdLinks += $name
+        } catch {
+            $warnings += "Failed to create symlink for $name`: $_"
+        }
+    }
+}
+
+# ============================================
+# 13. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -270,6 +342,16 @@ $pathsToRemove = @(
     # Starship (symlinked to ~/.local/bin)
     "C:\Program Files\starship\bin"
     "C:\Program Files\starship\bin\"
+    # Docker (symlinked to ~/.local/bin)
+    "C:\Program Files\Docker\Docker\resources\bin"
+    # Neovim (symlinked to ~/.local/bin)
+    "C:\Program Files\Neovim\bin"
+    # PowerShell 7 (symlinked to ~/.local/bin)
+    "C:\Program Files\PowerShell\7"
+    "C:\Program Files\PowerShell\7\"
+    # WezTerm (symlinked to ~/.local/bin)
+    "C:\Program Files\WezTerm"
+    "C:\Program Files\WezTerm\"
 )
 
 foreach ($path in $pathsToRemove) {
@@ -295,7 +377,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 10. LIMPIAR MACHINE PATH (si es posible)
+# 14. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -307,6 +389,16 @@ $machinePathsToRemove = @(
     "C:\Program Files\starship\bin\"
     # NVM (nvm.exe symlinked to ~/.local/bin, node via C:\nvm4w\nodejs)
     "$env:LOCALAPPDATA\nvm"
+    # Docker (symlinked to ~/.local/bin)
+    "C:\Program Files\Docker\Docker\resources\bin"
+    # Neovim (symlinked to ~/.local/bin)
+    "C:\Program Files\Neovim\bin"
+    # PowerShell 7 (symlinked to ~/.local/bin)
+    "C:\Program Files\PowerShell\7\"
+    # Bottom (symlinked to ~/.local/bin)
+    "C:\Program Files\bottom\bin\"
+    # WezTerm (symlinked to ~/.local/bin)
+    "C:\Program Files\WezTerm"
 )
 
 $machineRemoved = @()
@@ -329,7 +421,7 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 11. RESUMEN SILENCIOSO
+# 15. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
@@ -337,7 +429,8 @@ Write-Host "  Local Bin Consolidation Complete" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "[MOVED]   $($movedItems.Count) items physically moved" -ForegroundColor Green
 Write-Host "[LINKED]  $($createdLinks.Count) symlinks created" -ForegroundColor Green
-Write-Host "[CLEANED] $($removedPaths.Count) PATH entries removed" -ForegroundColor Green
+Write-Host "[CLEANED] $($removedPaths.Count) USER PATH entries removed" -ForegroundColor Green
+Write-Host "[CLEANED] $($machineRemoved.Count) MACHINE PATH entries removed" -ForegroundColor Green
 
 if ($warnings.Count -gt 0) {
     Write-Host ""
