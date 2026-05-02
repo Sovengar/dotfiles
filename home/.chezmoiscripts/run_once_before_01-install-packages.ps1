@@ -57,10 +57,7 @@ foreach ($app in $wingetApps) {
 winget install Apache.Maven
 $mavenPath = "$env:USERPROFILE\Dropbox\DEV\tools\Maven"
 [System.Environment]::SetEnvironmentVariable("MAVEN_HOME", $mavenPath, "User")
-$currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-if ($currentPath -notlike "*$mavenPath*") {
-    [System.Environment]::SetEnvironmentVariable("Path", "$currentPath;$mavenPath\bin", "User")
-}
+# NOTA: No añadimos %MAVEN_HOME%\bin al PATH porque los bins se consolidan en ~/.local/bin via symlinks
 
 # Node.js via NVM
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -74,11 +71,7 @@ try {
 
 # Go
 winget install --id=GoLang.Go -e
-$goBinPath = "$env:USERPROFILE\go\bin"
-$currentUserPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-if ($currentUserPath -notlike "*$goBinPath*") {
-    [System.Environment]::SetEnvironmentVariable("PATH", "$currentUserPath;$goBinPath", "User")
-}
+# NOTA: No añadimos ~/go/bin al PATH porque los bins se consolidan en ~/.local/bin via symlinks
 
 # Global npm packages
 npm install -g opencode-ai @openai/codex backlog.md @devcontainers/cli

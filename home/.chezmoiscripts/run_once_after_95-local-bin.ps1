@@ -263,6 +263,7 @@ $pathsToRemove = @(
     "C:\Program Files\Go\bin"
     "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin"
     "$env:USERPROFILE\Dropbox\DEV\tools\Maven\bin"
+    "%MAVEN_HOME%\bin"
     # GitHub CLI (moved to ~/.local/bin)
     "C:\Program Files\GitHub CLI"
     "C:\Program Files\GitHub CLI\"
@@ -287,11 +288,41 @@ $userPath = $userPath -replace '^;', '' -replace ';$', ''
 [Environment]::SetEnvironmentVariable('PATH', $userPath, 'User')
 
 if ($removedPaths.Count -gt 0) {
-    Write-Host "[OK] Removed $($removedPaths.Count) obsolete paths from PATH" -ForegroundColor Green
+    Write-Host "[OK] Removed $($removedPaths.Count) obsolete paths from USER PATH" -ForegroundColor Green
 }
 
 # ============================================
-# 10. RESUMEN SILENCIOSO
+# 10. LIMPIAR MACHINE PATH (si es posible)
+# ============================================
+$machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
+$machinePathsToRemove = @(
+    "C:\Program Files\GitHub CLI\"
+    "C:\Program Files\Go\bin"
+    "C:\Users\buble\Dropbox\DEV\tools\Maven\bin"
+    "C:\Users\buble\go\bin"
+)
+
+$machineRemoved = @()
+foreach ($path in $machinePathsToRemove) {
+    if ($machinePath -like "*$path*") {
+        $machinePath = $machinePath -replace [regex]::Escape($path), ''
+        $machinePath = $machinePath -replace ';;', ';'
+        $machineRemoved += $path
+    }
+}
+
+if ($machineRemoved.Count -gt 0) {
+    $machinePath = $machinePath -replace '^;', '' -replace ';$', ''
+    try {
+        [Environment]::SetEnvironmentVariable('PATH', $machinePath, 'Machine')
+        Write-Host "[OK] Removed $($machineRemoved.Count) obsolete paths from MACHINE PATH" -ForegroundColor Green
+    } catch {
+        $warnings += "Could not clean MACHINE PATH (requires admin): $_"
+    }
+}
+
+# ============================================
+# 11. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
