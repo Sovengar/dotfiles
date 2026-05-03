@@ -113,17 +113,23 @@ if (-not (Test-Path $podmanDesktopExe)) {
     }
 }
 
-# Antigravity
+# Antigravity (via winget with fallback to manual download)
 $antigravityExe = "$toolingPath\Antigravity\Antigravity.exe"
 if (-not (Test-Path $antigravityExe)) {
     try {
-        Write-Host "Downloading Antigravity..." -ForegroundColor Cyan
-        $antigravityInstaller = "$env:TEMP\Antigravity-setup.exe"
-        Invoke-WebRequest -Uri "https://antigravity.google/download/windows" -OutFile $antigravityInstaller -UseBasicParsing
-        Start-Process -FilePath $antigravityInstaller -ArgumentList "/S" -Wait
-        Write-Host "  [OK] Antigravity installed" -ForegroundColor Green
+        Write-Host "Installing Antigravity via winget..." -ForegroundColor Cyan
+        $proc = Start-Process "winget.exe" -ArgumentList "install -e --id Google.Antigravity --silent --accept-package-agreements --accept-source-agreements" -NoNewWindow -PassThru -Wait
+        if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq -1978335189) {
+            Write-Host "  [OK] Antigravity installed via winget" -ForegroundColor Green
+        } else {
+            Write-Host "  [FALLBACK] Downloading Antigravity manually..." -ForegroundColor Yellow
+            $antigravityInstaller = "$env:TEMP\Antigravity-setup.exe"
+            Invoke-WebRequest -Uri "https://antigravity.google/download/windows" -OutFile $antigravityInstaller -UseBasicParsing
+            Start-Process -FilePath $antigravityInstaller -ArgumentList "/S" -Wait
+            Write-Host "  [OK] Antigravity installed manually" -ForegroundColor Green
+        }
     } catch {
-        Write-Host "  [FAIL] Antigravity download failed: $_" -ForegroundColor Red
+        Write-Host "  [FAIL] Antigravity install failed: $_" -ForegroundColor Red
     }
 }
 
