@@ -1,6 +1,9 @@
 {{- /* Load env.toml from OneDrive if it exists */ -}}
 {{- $envFile := "C:/Users/buble/OneDrive/Formateo/env.toml" -}}
 {{- $email := "bubles_2009@hotmail.com" -}}
+{{- $sshHost := "" -}}
+{{- $sshUsername := "" -}}
+{{- $sshIdentity := "" -}}
 {{- if stat $envFile -}}
 {{-   range $key, $value := fromToml (include $envFile) -}}
 {{-     if eq $key "git" -}}
@@ -8,7 +11,21 @@
 {{-         $email = . -}}
 {{-       end -}}
 {{-     end -}}
+{{-     if eq $key "ssh" -}}
+{{-       with $value.host -}}
+{{-         $sshHost = . -}}
+{{-       end -}}
+{{-       with $value.username -}}
+{{-         $sshUsername = . -}}
+{{-       end -}}
+{{-       with $value.identity -}}
+{{-         $sshIdentity = . -}}
+{{-       end -}}
+{{-     end -}}
 {{-   end -}}
 {{- end -}}
 [data]
     email = {{ $email | quote }}
+    ssh_host = {{ $sshHost | quote }}
+    ssh_username = {{ $sshUsername | quote }}
+    ssh_identity = {{ $sshIdentity | quote }}

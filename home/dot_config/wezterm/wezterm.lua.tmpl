@@ -50,17 +50,19 @@ config.warn_about_missing_glyphs = false
 --   window:gui_window():maximize()
 -- end)
 
+{{- if and .ssh_host .ssh_username .ssh_identity -}}
 -- SSH
 config.ssh_domains = {
   {
     name = 'Jon',
-    remote_address = '157.180.112.216',
-    username = 'buble',
+    remote_address = {{ .ssh_host | quote }},
+    username = {{ .ssh_username | quote }},
     ssh_option = {
-      identityfile = '/.ssh/jon',
+      identityfile = wezterm.home_dir .. '/.ssh/{{ .ssh_identity }}',
     }
   },
 }
+{{- end -}}
 
 -- Performance settings
 config.max_fps = 120
