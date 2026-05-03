@@ -228,31 +228,6 @@ foreach ($tool in $tools) {
         }
     }
 }
-
-# Verify PATH
-$requiredPaths = @(
-    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\ripgrep-15.1.0-x86_64-pc-windows-msvc",
-    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\sharkdp.fd_Microsoft.Winget.Source_8wekyb3d8bbwe\fd-v10.4.2-x86_64-pc-windows-msvc",
-    "$env:USERPROFILE\.local\bin"
-)
-$userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$pathUpdated = $false
-foreach ($p in $requiredPaths) {
-    if (Test-Path $p) {
-        if ($userPath -notlike "*$p*") {
-            $userPath += ";$p"
-            $pathUpdated = $true
-            Write-Host "  Adding to PATH: $p" -ForegroundColor DarkYellow
-        } else {
-            Write-Host "  Already in PATH: $p" -ForegroundColor Green
-        }
-    }
-}
-if ($pathUpdated) {
-    [Environment]::SetEnvironmentVariable('PATH', $userPath, 'User')
-    Write-Host "  [OK] PATH updated" -ForegroundColor Green
-}
-
 # ============================================
 # 7. WSL2 TOOLS (opencode)
 # ============================================
