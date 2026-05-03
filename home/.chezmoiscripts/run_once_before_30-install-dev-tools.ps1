@@ -17,7 +17,7 @@ $wingetApps = @(
     "GitHub.GitHubDesktop",
     "GitHub.cli",
     "Microsoft.VisualStudioCode",
-    "wez.wezterm",
+    "wez.wezterm.nightly",
     "Starship.Starship",
     "jdx.mise",
     "DEVCOM.JetBrainsMonoNerdFont",
