@@ -17,6 +17,7 @@ $wingetApps = @(
     "GitHub.GitHubDesktop",
     "GitHub.cli",
     "Microsoft.VisualStudioCode",
+    "Neovim.Neovim",
     "wez.wezterm.nightly",
     "Starship.Starship",
     "jdx.mise",
@@ -68,7 +69,7 @@ if (Test-Path "$miseBinDir\mise.exe") {
 # ============================================
 # 3. GLOBAL PACKAGE MANAGERS (npm, bun, go)
 # ============================================
-npm install -g @openai/codex backlog.md @devcontainers/cli
+npm install -g @openai/codex backlog.md @devcontainers/cli tree-sitter-cli
 bun install -g opencode-ai
 go install github.com/edouard-claude/snip/cmd/snip@latest
 go install github.com/sorenisanerd/gotty@latest
@@ -190,20 +191,19 @@ try {
 # 5. LAZYVIM SETUP
 # ============================================
 $nvimDir = "$env:LOCALAPPDATA\nvim"
-if (Test-Path $nvimDir) {
-    Remove-Item -Recurse -Force $nvimDir
-    Write-Host "Removed existing nvim config" -ForegroundColor Yellow
+if (-not (Test-Path "$nvimDir\init.lua")) {
+    git clone https://github.com/LazyVim/starter "$nvimDir" 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Remove-Item -Path "$nvimDir\.git" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "$nvimDir\README.md" -Force -ErrorAction SilentlyContinue
+        Write-Host "[OK] LazyVim starter cloned" -ForegroundColor Green
+    } else {
+        Write-Host "[FAIL] Could not clone LazyVim starter" -ForegroundColor Red
+    }
+} else {
+    Write-Host "[OK] LazyVim already present" -ForegroundColor Green
 }
-try {
-    git clone https://github.com/LazyVim/starter "$nvimDir"
-    Write-Host "[OK] LazyVim starter cloned" -ForegroundColor Green
-} catch {
-    Write-Host "[FAIL] Could not clone LazyVim starter" -ForegroundColor Red
-    exit 1
-}
-Remove-Item -Path "$nvimDir\.git" -Recurse -Force
-Remove-Item -Path "$nvimDir\README.md" -Force
-Write-Host "LazyVim base installed. Custom configs will be applied by chezmoi." -ForegroundColor Green
+Write-Host "Custom configs will be applied by chezmoi." -ForegroundColor Green
 
 # ============================================
 # 6. LINUX-STYLE CLI TOOLS (via winget)
@@ -211,7 +211,8 @@ Write-Host "LazyVim base installed. Custom configs will be applied by chezmoi." 
 $tools = @(
     @{ Name = "btm"; WingetId = "Clement.bottom"; Description = "Process monitor (htop alternative)" },
     @{ Name = "rg"; WingetId = "BurntSushi.ripgrep.MSVC"; Description = "Fast text search (grep alternative)" },
-    @{ Name = "fd"; WingetId = "sharkdp.fd"; Description = "File finder (find alternative)" }
+    @{ Name = "fd"; WingetId = "sharkdp.fd"; Description = "File finder (find alternative)" },
+    @{ Name = "fzf"; WingetId = "Junegunn.fzf"; Description = "Fuzzy finder" }
 )
 
 foreach ($tool in $tools) {

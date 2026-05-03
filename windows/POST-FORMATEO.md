@@ -75,7 +75,17 @@ Si esta máquina va a recibir conexiones SSH (VPS, PC de trabajo, etc.):
 > **En máquina local** que solo se conecta a servidores: no necesitas este script.
 > La clave `~/.ssh/jon` se genera automáticamente en el primer `chezmoi apply`.
 
-## Paso 8: Acciones manuales post-chezmoi
+## Paso 8: Configurar LazyVim (BuildTools + primer arranque)
+
+```powershell
+.\windows\setup-lazyvim.ps1
+```
+
+> Instala Visual Studio BuildTools (requiere seleccionar C++/SDK/MSVC manualmente),
+> respalda config previa de nvim, clona LazyVim starter y lanza nvim por primera vez
+> para instalar plugins.
+
+## Paso 9: Acciones manuales post-chezmoi
 - [ ] **PowerToys**: Abrir app → Settings → General → Backup & Restore → RESTORE
 - [ ] **Listary**: Re-introducir licencia si aplica (opcional)
 - [ ] **GitHub CLI**: `gh auth login` si es repo privado
@@ -83,7 +93,7 @@ Si esta máquina va a recibir conexiones SSH (VPS, PC de trabajo, etc.):
 - [ ] **WSL**: Si es la primera vez, `wsl --install` y reiniciar
 - [ ] **Docker Desktop**: Iniciar, configurar y habilitar integración WSL2
 
-## Paso 9: Verificaciones
+## Paso 10: Verificaciones
 - [ ] `starship --version` responde
 - [ ] `lazygit --version` responde
 - [ ] `gh auth status` muestra tu usuario
