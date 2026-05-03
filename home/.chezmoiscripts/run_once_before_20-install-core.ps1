@@ -22,4 +22,13 @@ foreach ($app in $wingetApps) {
     }
 }
 
+# OneNote (Microsoft Store)
+Write-Host "Abriendo Microsoft Store para OneNote..." -ForegroundColor Yellow
+try {
+    Start-Process "ms-windows-store://pdp/?productid=9WZDNCRFHVJL"
+    Write-Host "Microsoft Store abierta en OneNote. Instala manualmente desde la tienda." -ForegroundColor Green
+} catch {
+    Write-Host "ERROR abriendo Microsoft Store para OneNote" -ForegroundColor Red
+}
+
 Write-Host "Core system apps installation complete." -ForegroundColor Green

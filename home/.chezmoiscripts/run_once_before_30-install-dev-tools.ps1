@@ -133,15 +133,6 @@ if (-not (Test-Path $antigravityExe)) {
     }
 }
 
-# OneNote (Microsoft Store)
-Write-Host "Abriendo Microsoft Store para OneNote..." -ForegroundColor Yellow
-try {
-    Start-Process "ms-windows-store://pdp/?productid=9WZDNCRFHVJL"
-    Write-Host "Microsoft Store abierta en OneNote. Instala manualmente desde la tienda." -ForegroundColor Green
-} catch {
-    Write-Host "ERROR abriendo Microsoft Store para OneNote" -ForegroundColor Red
-}
-
 # IntelliJ IDEA manual
 $intellijExe = "$toolingPath\IntelliJ IDEA\bin\idea64.exe"
 if (-not (Test-Path $intellijExe)) {
