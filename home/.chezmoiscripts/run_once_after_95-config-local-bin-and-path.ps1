@@ -243,7 +243,8 @@ foreach ($name in $podmanTools) {
 # 9. CREAR SYMLINKS para Neovim
 # ============================================
 $nvimBin = "C:\Program Files\Neovim\bin"
-$nvimTools = @('nvim.exe', 'win32yank.exe')
+# nvim.exe skipped: fails via symlink (needs runtime files from its dir)
+$nvimTools = @('win32yank.exe')
 foreach ($name in $nvimTools) {
     $target = Join-Path $nvimBin $name
     $link = Join-Path $localBin $name
