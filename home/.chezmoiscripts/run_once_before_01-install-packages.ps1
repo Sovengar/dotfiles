@@ -41,8 +41,7 @@ $wingetApps = @(
     "SmartBear.SoapUI",
     "WinSCP.WinSCP",
     "Starship.Starship",
-    "CoreyButler.NVMforWindows",
-    "EclipseAdoptium.Temurin.21.JDK",
+    "jdx.mise",
     "Docker.DockerDesktop",
     "PuTTY.PuTTY",
     "GitHub.cli",
@@ -163,28 +162,26 @@ try {
     Write-Host "  [FAIL] JD-GUI download/install failed" -ForegroundColor Red
 }
 
-# Maven
-winget install Apache.Maven
-$mavenPath = "$env:USERPROFILE\Dropbox\DEV\tools\Maven"
-[System.Environment]::SetEnvironmentVariable("MAVEN_HOME", $mavenPath, "User")
-# NOTA: No añadimos %MAVEN_HOME%\bin al PATH porque los bins se consolidan en ~/.local/bin via symlinks
+# Node.js via mise (instalado después con mise install)
 
-# Node.js via NVM
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-try {
-    nvm install 20.19.0
-    nvm use 20.19.0
-    Write-Host "[OK] Node.js installed via NVM" -ForegroundColor Green
-} catch {
-    Write-Host "[FAIL] Node.js via NVM" -ForegroundColor Red
-}
-
-# Go
-winget install --id=GoLang.Go -e
 # NOTA: No añadimos ~/go/bin al PATH porque los bins se consolidan en ~/.local/bin via symlinks
 
 # Global npm packages
-npm install -g opencode-ai @openai/codex backlog.md @devcontainers/cli
+npm install -g @openai/codex backlog.md @devcontainers/cli
+
+# Global bun packages
+bun install -g opencode-ai
+
+# mise: instalar tools configurados
+$miseBinDir = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin"
+if (Test-Path "$miseBinDir\mise.exe") {
+    $env:Path = "$miseBinDir;$env:Path"
+    Write-Host "[INFO] Installing mise tools..." -ForegroundColor Cyan
+    mise install --force | ForEach-Object { Write-Host "  $_" }
+    Write-Host "[OK] mise tools installed" -ForegroundColor Green
+} else {
+    Write-Host "[WARN] mise not found, skipping mise install" -ForegroundColor Yellow
+}
 
 # Go tools
 go install github.com/edouard-claude/snip/cmd/snip@latest

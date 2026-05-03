@@ -3,6 +3,14 @@
 
 $ErrorActionPreference = "Continue"
 
+# Install OpenCode in WSL2
+Write-Host "[INFO] Installing OpenCode in WSL2..." -ForegroundColor Cyan
+$opencodeInstall = @'
+curl -fsSL https://opencode.ai/install | bash
+'@
+wsl bash -c $opencodeInstall
+Write-Host "[OK] OpenCode installed in WSL2" -ForegroundColor Green
+
 try {
     wsl --update
     Write-Host "[OK] WSL2 updated" -ForegroundColor Green

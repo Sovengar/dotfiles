@@ -108,6 +108,7 @@ $wingetTools = @{
     'fzf.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe\fzf.exe"
     'chezmoi.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\twpayne.chezmoi_Microsoft.Winget.Source_8wekyb3d8bbwe\chezmoi.exe"
     'codex.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenAI.Codex_Microsoft.Winget.Source_8wekyb3d8bbwe\codex-x86_64-pc-windows-msvc.exe"
+    'opencode.exe' = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
 }
 
 foreach ($name in $wingetTools.Keys) {
@@ -127,6 +128,28 @@ foreach ($name in $wingetTools.Keys) {
     } else {
         $warnings += "Tool not found: $target"
     }
+}
+
+# mise-en-place (winget: jdx.mise)
+$misePaths = @(
+    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin\mise.exe",
+    "$env:LOCALAPPDATA\Programs\mise\bin\mise.exe",
+    "$env:LOCALAPPDATA\mise\bin\mise.exe",
+    "$env:ProgramFiles\mise\bin\mise.exe"
+)
+$miseFound = $false
+foreach ($path in $misePaths) {
+    if (Test-Path $path) {
+        $link = Join-Path $localBin "mise.exe"
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        New-Item -ItemType SymbolicLink -Path $link -Target $path -Force | Out-Null
+        $createdLinks += "mise.exe"
+        $miseFound = $true
+        break
+    }
+}
+if (-not $miseFound) {
+    $warnings += "mise.exe not found in standard locations"
 }
 
 # Starship (usualmente en Program Files)
@@ -151,55 +174,11 @@ if (-not $starshipFound) {
 }
 
 # ============================================
-# 5. CREAR SYMLINKS para NVM y Node.js
+# 5. Node.js (instalado via mise)
 # ============================================
-$nvmHome = "$env:LOCALAPPDATA\nvm"
-$nvmSymlink = "C:\nvm4w\nodejs"
-
-# nvm.exe
-$nvmExe = Join-Path $nvmHome 'nvm.exe'
-if (Test-Path $nvmExe) {
-    $link = Join-Path $localBin 'nvm.exe'
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try {
-        New-Item -ItemType SymbolicLink -Path $link -Target $nvmExe -Force | Out-Null
-        $createdLinks += 'nvm.exe'
-    } catch {
-        $warnings += "Failed to create symlink for nvm.exe`: $_"
-    }
-}
-
-# node.exe (symlink funciona porque es un exe simple)
-$nodeExe = Join-Path $nvmSymlink 'node.exe'
-if (Test-Path $nodeExe) {
-    $link = Join-Path $localBin 'node.exe'
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try {
-        New-Item -ItemType SymbolicLink -Path $link -Target $nodeExe -Force | Out-Null
-        $createdLinks += 'node.exe'
-    } catch {
-        $warnings += "Failed to create symlink for node.exe`: $_"
-    }
-}
-
-Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================
-# 6. CREAR SYMLINKS para Go
-# ============================================
-$goPath = "${env:ProgramFiles}\Go\bin\go.exe"
-if (Test-Path $goPath) {
-    $link = Join-Path $localBin "go.exe"
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try {
-        New-Item -ItemType SymbolicLink -Path $link -Target $goPath -Force | Out-Null
-        $createdLinks += "go.exe"
-    } catch {
-        $warnings += "Failed to create symlink for go.exe`: $_"
-    }
-} else {
-    $warnings += "go.exe not found in $goPath"
-}
+# 6. Go (instalado via mise)
 
 # ============================================
 # 7. CREAR SYMLINKS para Docker CLI
@@ -248,7 +227,7 @@ $nvimBin = "C:\Program Files\Neovim\bin"
 $nvimExe = Join-Path $nvimBin "nvim.exe"
 if (Test-Path $nvimExe) {
     $wrapper = Join-Path $localBin "nvim.cmd"
-    $content = "@echo off`n\"$nvimExe\" %*"
+    $content = "@echo off`n`"$nvimExe`" %*"
     Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
     $createdLinks += "nvim.cmd (wrapper)"
 }
@@ -267,46 +246,7 @@ if (Test-Path $win32yank) {
 }
 
 # ============================================
-# 10. CREAR WRAPPERS para Java JDK
-# ============================================
-$javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
-if (-not $javaHome) { $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
-
-if ($javaHome -and (Test-Path $javaHome)) {
-    $javaBin = Join-Path $javaHome "bin"
-    $javaTools = @('java.exe', 'javac.exe', 'jar.exe', 'javadoc.exe')
-    foreach ($name in $javaTools) {
-        $target = Join-Path $javaBin $name
-        if (Test-Path $target) {
-            $wrapperName = $name -replace '\.exe$', '.cmd'
-            $wrapper = Join-Path $localBin $wrapperName
-            $content = "@echo off`n\"$target\" %*"
-            Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
-            $createdLinks += "$wrapperName (wrapper)"
-        }
-    }
-} else {
-    $warnings += "JAVA_HOME not found or invalid"
-}
-
-# ============================================
-# 11. CREAR WRAPPER para Maven
-# ============================================
-$mavenHome = [Environment]::GetEnvironmentVariable("MAVEN_HOME", "User")
-if ($mavenHome -and (Test-Path $mavenHome)) {
-    $mvnCmd = Join-Path $mavenHome "bin\mvn.cmd"
-    if (Test-Path $mvnCmd) {
-        $wrapper = Join-Path $localBin "mvn.cmd"
-        $content = "@echo off`ncall \"$mvnCmd\" %*"
-        Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
-        $createdLinks += "mvn.cmd (wrapper)"
-    }
-} else {
-    $warnings += "MAVEN_HOME not found or invalid"
-}
-
-# ============================================
-# 13. CREAR SYMLINKS para WezTerm
+# 10. CREAR SYMLINKS para WezTerm
 # ============================================
 $weztermBin = "C:\Program Files\WezTerm"
 $weztermTools = @('wezterm.exe', 'wezterm-gui.exe')
@@ -344,7 +284,26 @@ foreach ($name in $gitTools) {
 }
 
 # ============================================
-# 15. LIMPIAR PATH
+# 15. LIMPIAR VARIABLES OBSOLETAS
+# ============================================
+[Environment]::SetEnvironmentVariable("JAVA_HOME", $null, "User")
+[Environment]::SetEnvironmentVariable("MAVEN_HOME", $null, "User")
+Write-Host "[OK] Removed obsolete JAVA_HOME and MAVEN_HOME" -ForegroundColor Green
+
+# ============================================
+# 16. CONFIGURAR VARIABLES DE ENTORNO MISE
+# ============================================
+$miseDataDir = "$env:USERPROFILE\.local\share\mise"
+$miseConfigDir = "$env:USERPROFILE\.config\mise"
+$miseShimsDir = "$miseDataDir\shims"
+
+[Environment]::SetEnvironmentVariable("MISE_DATA_DIR", $miseDataDir, "User")
+[Environment]::SetEnvironmentVariable("MISE_CONFIG_DIR", $miseConfigDir, "User")
+Write-Host "[OK] Set MISE_DATA_DIR=$miseDataDir" -ForegroundColor Green
+Write-Host "[OK] Set MISE_CONFIG_DIR=$miseConfigDir" -ForegroundColor Green
+
+# ============================================
+# 17. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -389,9 +348,18 @@ foreach ($path in $pathsToRemove) {
     }
 }
 
-# Asegurar que ~/.local/bin esta en PATH
+# Asegurar que ~/.local/bin y mise shims estan en PATH
 if ($userPath -notlike "*$localBin*") {
     $userPath = "$localBin;$userPath"
+}
+if ($userPath -notlike "*$miseShimsDir*") {
+    $userPath = "$miseShimsDir;$userPath"
+}
+
+# Asegurar que mise bin está en PATH (para poder usar mise directamente)
+$miseBinDir = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin"
+if ($userPath -notlike "*jdx.mise*") {
+    $userPath = "$miseBinDir;$userPath"
 }
 
 # Limpiar ; inicial o final
@@ -404,7 +372,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 16. LIMPIAR MACHINE PATH (si es posible)
+# 18. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -414,8 +382,6 @@ $machinePathsToRemove = @(
     "C:\Users\buble\go\bin"
     # Starship (symlinked to ~/.local/bin)
     "C:\Program Files\starship\bin\"
-    # NVM (nvm.exe symlinked to ~/.local/bin, node via C:\nvm4w\nodejs)
-    "$env:LOCALAPPDATA\nvm"
     # Docker (symlinked to ~/.local/bin)
     "C:\Program Files\Docker\Docker\resources\bin"
     # Neovim (symlinked to ~/.local/bin)
