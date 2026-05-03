@@ -77,7 +77,7 @@ opencode login
 # 10. Listary — re-introducir licencia (opcional)
 ```
 
-> Para un checklist más detallado, ver: `OneDrive\Formateo\POST-FORMATEO.md`
+> Para un checklist más detallado, ver: `windows/POST-FORMATEO.md`
 
 ---
 
