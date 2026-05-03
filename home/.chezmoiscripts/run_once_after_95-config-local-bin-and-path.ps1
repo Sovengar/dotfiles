@@ -108,7 +108,16 @@ $wingetTools = @{
     'fzf.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe\fzf.exe"
     'chezmoi.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\twpayne.chezmoi_Microsoft.Winget.Source_8wekyb3d8bbwe\chezmoi.exe"
     'codex.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenAI.Codex_Microsoft.Winget.Source_8wekyb3d8bbwe\codex-x86_64-pc-windows-msvc.exe"
-    'opencode.exe' = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
+    # opencode (installed via bun, use wrapper instead of symlink)
+$opencodeTarget = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
+$opencodeWrapper = Join-Path $localBin "opencode.exe"
+if (Test-Path $opencodeTarget) {
+    if (Test-Path $opencodeWrapper) { Remove-Item -Path $opencodeWrapper -Force }
+    $wrapperContent = "@echo off`n`"$opencodeTarget`" %*"
+    Set-Content -Path $opencodeWrapper -Value $wrapperContent -Encoding ASCII -Force
+    $createdLinks += "opencode.exe (wrapper)"
+    Write-Host "[OK] Created opencode.exe wrapper" -ForegroundColor Green
+}
 }
 
 foreach ($name in $wingetTools.Keys) {
