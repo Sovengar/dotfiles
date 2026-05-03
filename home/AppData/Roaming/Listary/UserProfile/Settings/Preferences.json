@@ -1,0 +1,357 @@
+{
+  "AppConfigs": {
+    "TypeConfigs": {
+      "DirectoryOpus": {},
+      "WindowsExplorer": {},
+      "FileDialog": {},
+      "FolderDialog": {},
+      "Desktop": {},
+      "TotalCommander": {},
+      "FreeCommander": {},
+      "XYplorer": {},
+      "xplorer2": {},
+      "Bandizip": {},
+      "AutoCAD": {},
+      "Explzh": {},
+      "Files": {},
+      "OneCommander": {},
+      "WinRAR.ExtractDialog": {},
+      "WPS.FileDialog": {}
+    },
+    "PathConfigs": {}
+  },
+  "Menus": {
+    "Favorites": {
+      "Deletions": [
+        "75864775-974b-4763-a9ce-3a3560323666",
+        "ffab8ecb-899a-47c0-9c0d-0bc3f7f26d6c",
+        "4a57b0a8-7b52-45d1-8008-7b3f2fe387e3"
+      ],
+      "Moves": [],
+      "Insertions": [
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "CustomCommandId": "da47b8cf-6125-49b0-b30e-ab63ebb43224",
+            "$customType": "CustomCommand"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Home",
+            "Path": "C:\\Users\\buble",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Programs",
+            "Path": "C:\\Users\\buble\\Dropbox\\Programs",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Music",
+            "Path": "D:\\Music",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "$customType": "Separator"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "DEV",
+            "Path": "C:\\Users\\buble\\Dropbox\\DEV",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Projects",
+            "Path": "C:\\Users\\buble\\OneDrive\\DEV\\Projects",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Scripts",
+            "Path": "C:\\Users\\buble\\OneDrive\\Scripts",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "$customType": "Separator"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Elements",
+            "Path": "D:\\",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Dropbox",
+            "Path": "C:\\Users\\buble\\Dropbox",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Drive",
+            "Path": "G:\\Mi unidad",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "OneDrive",
+            "Path": "C:\\Users\\buble\\OneDrive",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "$customType": "Separator"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Games",
+            "Path": "C:\\Users\\buble\\Dropbox\\Games",
+            "$customType": "FavoriteFolder"
+          }
+        }
+      ],
+      "Updates": []
+    }
+  },
+  "DiskSearch": {
+    "FolderPriority": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": []
+    },
+    "FileNamePriority": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": []
+    },
+    "SearchFilter": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": []
+    },
+    "CustomFolders": [
+      {
+        "Path": "I:\\OTHERS - TODO\\Audio\\-\\P\\",
+        "UpdateType": 1,
+        "UpdateIntervalType": 0,
+        "UpdateInterval": 1440,
+        "UpdateDayOfWeek": 0,
+        "UpdateTimeOfDay": null
+      }
+    ]
+  },
+  "FileSearchWindow": {
+    "Columns": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": [
+        {
+          "Id": "FileName",
+          "UpdatedProperties": {
+            "Width": 200
+          }
+        },
+        {
+          "Id": "Path",
+          "UpdatedProperties": {
+            "Width": 572
+          }
+        },
+        {
+          "Id": "DateModified",
+          "UpdatedProperties": {
+            "Width": 200
+          }
+        }
+      ]
+    },
+    "WindowWidth": 1549,
+    "WindowHeight": 1407,
+    "PreviewWidth": 300,
+    "SideBarWidth": 225
+  },
+  "Commands": {
+    "Items": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Title": "AOT",
+            "Path": "C:\\Users\\buble\\Dropbox\\Programs\\always-on-top.exe",
+            "Parameter": "",
+            "Id": "da47b8cf-6125-49b0-b30e-ab63ebb43224",
+            "Enabled": false,
+            "$customType": "CustomCommand"
+          }
+        }
+      ],
+      "Updates": [
+        {
+          "Id": "d96ec8a4-8491-46c5-ae78-018519d9933b",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "4956a5b5-f5d1-4871-8f70-063d23222ee1",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "abda7ddb-aa20-4c97-ab31-3566a06fa22f",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "e95b87aa-9cf6-48aa-82c7-603e9af0f80b",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "56ba2121-3822-4cf8-a16d-33b0797ab409",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "71135870-ef2b-4eb6-a6d7-baddbf1f3802",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "c0a55d83-503c-42ec-863e-caca89933159",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "ac0dd5f5-3eb4-4705-966b-f90ba9cd6906",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "a45c5a46-406a-42b6-8176-068a85081630",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "f1075887-f8b7-4597-86f8-6e19ee611d1d",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "933180d5-67aa-4f24-8079-9c7a89e3a357",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "e3115360-9c5a-4e93-88d3-b3d68fd27510",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "0d400323-1f22-47ed-aee4-032e0fcbb000",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        },
+        {
+          "Id": "c9407c74-b6f8-4679-a15d-b023ec772d54",
+          "UpdatedProperties": {
+            "Enabled": false
+          }
+        }
+      ]
+    }
+  },
+  "WebSearch": {
+    "Items": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": []
+    }
+  },
+  "Actions": {
+    "Items": {
+      "Deletions": [],
+      "Moves": [],
+      "Insertions": [],
+      "Updates": []
+    }
+  },
+  "AutoUpdate": {},
+  "Settings": {
+    "Tutorial.ShowMainV3": false,
+    "Listary5.SettingsImported": true
+  },
+  "Extensions": {
+    "Extensions": {
+      "1a63ea9d-bf25-431f-96e3-17b80027efab": {}
+    }
+  }
+}
