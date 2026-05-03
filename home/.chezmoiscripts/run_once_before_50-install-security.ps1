@@ -1,0 +1,20 @@
+# run_once_before_50-install-security.ps1
+# Installs security applications.
+
+$ErrorActionPreference = "Continue"
+
+$wingetApps = @(
+    "Malwarebytes.Malwarebytes"
+)
+
+foreach ($app in $wingetApps) {
+    Write-Host "Installing: $app" -ForegroundColor Cyan
+    $proc = Start-Process "winget.exe" -ArgumentList "install -e --id $app --silent --accept-package-agreements --accept-source-agreements" -NoNewWindow -PassThru -Wait
+    if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq -1978335189) {
+        Write-Host "  [OK] $app" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] $app (ExitCode: $($proc.ExitCode))" -ForegroundColor Red
+    }
+}
+
+Write-Host "Security apps installation complete." -ForegroundColor Green

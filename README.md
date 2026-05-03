@@ -4,23 +4,40 @@ Gestionados con [chezmoi](https://www.chezmoi.io) para automatizar la configurac
 
 ## Uso
 
+### Windows (primera instalación en máquina nueva)
+
 ```powershell
-# Instalar chezmoi
+# 0. Instalar chezmoi
 winget install --id twpayne.chezmoi -e --silent
 
 # 1. CLONAR (sin aplicar aún)
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 2. PREVISUALIZAR cambios (OBLIGATORIO --dry-run)
+# 2. HABILITAR WSL2 (requiere reinicio)
+# Ejecutar como Administrador:
+~\.local\share\chezmoi\windows\setup-wsl-pre-reboot.ps1
+# Reiniciar el equipo cuando el script lo indique
+
+# 3. INSTALAR WSL2 + Ubuntu (después del reinicio)
+~\.local\share\chezmoi\windows\setup-wsl-post-reboot.ps1
+
+# 4. PREVISUALIZAR cambios (OBLIGATORIO --dry-run)
 chezmoi diff
 chezmoi apply --dry-run
 
-# 3. APLICAR solo si la previsualización es correcta
+# 5. APLICAR solo si la previsualización es correcta
 chezmoi apply
 ```
 
 > ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
 > Un `--dry-run` previo evita estados inconsistentes si algo falla a medias.
+
+### Reaplicación (máquina ya configurada)
+
+```powershell
+# Si WSL2 ya está instalado, saltar los pasos 2 y 3
+chezmoi apply
+```
 
 ## Requisitos previos
 
