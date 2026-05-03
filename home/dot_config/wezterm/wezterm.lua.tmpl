@@ -1,7 +1,7 @@
 local wezterm = require "wezterm"
 local act = wezterm.action
 local config = wezterm.config_builder()
-local colors = require "colors"
+local theme = require "theme"
 local font = require "font"
 local launchers = require "launchers"
 local keys = require "keys"
@@ -16,24 +16,24 @@ launchers.setup(config)
 keys.setup(config)
 
 -- Set color schema
-config.color_scheme = colors.scheme_name
+config.color_scheme = theme.scheme_name
 
 config.color_schemes = {
-  [colors.scheme_name] = colors.scheme,
+  [theme.scheme_name] = theme.scheme,
 }
 
 -- Font configuration
 font.setup(config)
 
 -- Tabs configuration
-tabs.setup(config, colors.colors)
+tabs.setup(config, theme.colors)
 
 -- Status configuration
 config.status_update_interval = 2000
-status.setup(colors.colors)
+status.setup(theme.colors)
 
 -- Appearance configuration
-appearance.setup(config, colors.colors)
+appearance.setup(config, theme.colors)
 
 --[[
 ============================
