@@ -1,7 +1,7 @@
 New-Alias g goto
 New-Alias op opencode
 New-Alias lgit lazygit
-New-Alias lvim lazyvim
+New-Alias vim nvim
 
 function goto {
     param ($location)
@@ -13,7 +13,7 @@ function goto {
 }
 
 # Configura EDITOR para que abra VS Code: con --wait
-$env:EDITOR = "code --wait"
+$env:EDITOR = "nvim"
 
 #Starlship
 $ENV:STARSHIP_CONFIG = "$HOME\.starship\starship.toml"
