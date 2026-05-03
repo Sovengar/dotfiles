@@ -267,7 +267,26 @@ foreach ($name in $dockerTools) {
 }
 
 # ============================================
-# 10. CREAR SYMLINKS para Neovim
+# 10. CREAR SYMLINKS para Podman CLI
+# ============================================
+$podmanBin = "C:\Program Files\RedHat\Podman"
+$podmanTools = @('podman.exe')
+foreach ($name in $podmanTools) {
+    $target = Join-Path $podmanBin $name
+    $link = Join-Path $localBin $name
+    if (Test-Path $target) {
+        if (Test-Path $link) { Remove-Item -Path $link -Force }
+        try {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
+            $createdLinks += $name
+        } catch {
+            $warnings += "Failed to create symlink for $name`: $_"
+        }
+    }
+}
+
+# ============================================
+# 11. CREAR SYMLINKS para Neovim
 # ============================================
 $nvimBin = "C:\Program Files\Neovim\bin"
 $nvimTools = @('nvim.exe', 'win32yank.exe')
@@ -282,21 +301,6 @@ foreach ($name in $nvimTools) {
         } catch {
             $warnings += "Failed to create symlink for $name`: $_"
         }
-    }
-}
-
-# ============================================
-# 11. CREAR SYMLINKS para PowerShell 7
-# ============================================
-$pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
-if (Test-Path $pwshPath) {
-    $link = Join-Path $localBin "pwsh.exe"
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try {
-        New-Item -ItemType SymbolicLink -Path $link -Target $pwshPath -Force | Out-Null
-        $createdLinks += "pwsh.exe"
-    } catch {
-        $warnings += "Failed to create symlink for pwsh.exe`: $_"
     }
 }
 
@@ -366,14 +370,14 @@ $pathsToRemove = @(
     "C:\Program Files\Docker\Docker\resources\bin"
     # Neovim (symlinked to ~/.local/bin)
     "C:\Program Files\Neovim\bin"
-    # PowerShell 7 (symlinked to ~/.local/bin)
-    "C:\Program Files\PowerShell\7"
-    "C:\Program Files\PowerShell\7\"
     # WezTerm (symlinked to ~/.local/bin)
     "C:\Program Files\WezTerm"
     "C:\Program Files\WezTerm\"
     # Git (symlinked to ~/.local/bin)
     "C:\Program Files\Git\cmd"
+    # Podman CLI (symlinked to ~/.local/bin)
+    "C:\Program Files\RedHat\Podman"
+    "C:\Program Files\RedHat\Podman\"
 )
 
 foreach ($path in $pathsToRemove) {
@@ -415,8 +419,6 @@ $machinePathsToRemove = @(
     "C:\Program Files\Docker\Docker\resources\bin"
     # Neovim (symlinked to ~/.local/bin)
     "C:\Program Files\Neovim\bin"
-    # PowerShell 7 (symlinked to ~/.local/bin)
-    "C:\Program Files\PowerShell\7\"
     # Bottom (symlinked to ~/.local/bin)
     "C:\Program Files\bottom\bin\"
     # WezTerm (symlinked to ~/.local/bin)
