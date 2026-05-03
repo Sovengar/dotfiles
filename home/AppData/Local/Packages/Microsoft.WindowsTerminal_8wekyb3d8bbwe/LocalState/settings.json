@@ -73,7 +73,7 @@
                 "name": "CMD"
             },
             {
-                "backgroundImage": "https://raw.githubusercontent.com/Sovengar/dotfiles-win/main/Windows%20Terminal/LinuxCS.png",
+                "backgroundImage": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\LinuxCS.png",
                 "backgroundImageOpacity": 0.71,
                 "backgroundImageStretchMode": "fill",
                 "commandline": "ubuntu.exe",
