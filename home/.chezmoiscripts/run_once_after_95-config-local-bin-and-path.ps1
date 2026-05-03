@@ -185,70 +185,7 @@ if (Test-Path $nodeExe) {
 Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================
-# 6. CREAR SYMLINKS para Go
-# ============================================
-$goPath = "${env:ProgramFiles}\Go\bin\go.exe"
-if (Test-Path $goPath) {
-    $link = Join-Path $localBin "go.exe"
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try {
-        New-Item -ItemType SymbolicLink -Path $link -Target $goPath -Force | Out-Null
-        $createdLinks += "go.exe"
-    } catch {
-        $warnings += "Failed to create symlink for go.exe`: $_"
-    }
-} else {
-    $warnings += "go.exe not found in $goPath"
-}
-
-# ============================================
-# 7. CREAR SYMLINKS para Java JDK
-# ============================================
-$javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
-if (-not $javaHome) { $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
-
-if ($javaHome -and (Test-Path $javaHome)) {
-    $javaBin = Join-Path $javaHome "bin"
-    $javaTools = @('java.exe', 'javac.exe', 'jar.exe', 'javadoc.exe')
-    foreach ($name in $javaTools) {
-        $target = Join-Path $javaBin $name
-        $link = Join-Path $localBin $name
-        if (Test-Path $target) {
-            if (Test-Path $link) { Remove-Item -Path $link -Force }
-            try {
-                New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
-                $createdLinks += $name
-            } catch {
-                $warnings += "Failed to create symlink for $name`: $_"
-            }
-        }
-    }
-} else {
-    $warnings += "JAVA_HOME not found or invalid"
-}
-
-# ============================================
-# 8. CREAR SYMLINKS para Maven
-# ============================================
-$mavenHome = [Environment]::GetEnvironmentVariable("MAVEN_HOME", "User")
-if ($mavenHome -and (Test-Path $mavenHome)) {
-    $mvnCmd = Join-Path $mavenHome "bin\mvn.cmd"
-    if (Test-Path $mvnCmd) {
-        $link = Join-Path $localBin "mvn.cmd"
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try {
-            New-Item -ItemType SymbolicLink -Path $link -Target $mvnCmd -Force | Out-Null
-            $createdLinks += "mvn.cmd"
-        } catch {
-            $warnings += "Failed to create symlink for mvn.cmd`: $_"
-        }
-    }
-} else {
-    $warnings += "MAVEN_HOME not found or invalid"
-}
-
-# ============================================
-# 9. CREAR SYMLINKS para Docker CLI
+# 6. CREAR SYMLINKS para Docker CLI
 # ============================================
 $dockerBin = "C:\Program Files\Docker\Docker\resources\bin"
 $dockerTools = @('docker.exe', 'docker-compose.exe', 'kubectl.exe')
@@ -267,7 +204,7 @@ foreach ($name in $dockerTools) {
 }
 
 # ============================================
-# 10. CREAR SYMLINKS para Podman CLI
+# 7. CREAR SYMLINKS para Podman CLI
 # ============================================
 $podmanBin = "C:\Program Files\RedHat\Podman"
 $podmanTools = @('podman.exe')
@@ -286,7 +223,7 @@ foreach ($name in $podmanTools) {
 }
 
 # ============================================
-# 11. CREAR SYMLINKS para Neovim
+# 8. CREAR SYMLINKS para Neovim
 # ============================================
 $nvimBin = "C:\Program Files\Neovim\bin"
 $nvimTools = @('nvim.exe', 'win32yank.exe')
@@ -305,7 +242,7 @@ foreach ($name in $nvimTools) {
 }
 
 # ============================================
-# 12. CREAR SYMLINKS para WezTerm
+# 9. CREAR SYMLINKS para WezTerm
 # ============================================
 $weztermBin = "C:\Program Files\WezTerm"
 $weztermTools = @('wezterm.exe', 'wezterm-gui.exe')
@@ -324,7 +261,7 @@ foreach ($name in $weztermTools) {
 }
 
 # ============================================
-# 13. CREAR SYMLINKS para Git
+# 10. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
 $gitTools = @('git.exe')
@@ -343,7 +280,7 @@ foreach ($name in $gitTools) {
 }
 
 # ============================================
-# 14. LIMPIAR PATH
+# 11. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -403,7 +340,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 15. LIMPIAR MACHINE PATH (si es posible)
+# 12. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -447,7 +384,7 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 16. RESUMEN SILENCIOSO
+# 13. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
