@@ -1,0 +1,15 @@
+[tools]
+node = "20.19.0"
+java = "temurin-21"
+maven = "3.9.9"
+go = "latest"
+python = "3.12"
+terraform = "latest"
+kubectl = "latest"
+rust = "latest"
+"aws-cli" = "latest"
+deno = "latest"
+bun = "latest"
+
+[settings]
+experimental = true
