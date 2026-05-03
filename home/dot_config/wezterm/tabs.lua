@@ -5,17 +5,6 @@ local M = {}
 
 local bells = {}
 
-local function get_indicator(is_bell, is_unseen)
-  local indicator = ''
-  if is_bell then
-    indicator = indicator .. ' 🔔'
-  end
-  if is_unseen then
-    indicator = indicator .. ' ●'
-  end
-  return indicator
-end
-
 local function has_unseen_output(tab)
   if tab.is_active then
     return false
@@ -82,50 +71,55 @@ end
 
 local function normalize_path(path)
   if not path then return nil end
-  -- Convert to string and handle URL format (file:///C:/Users/buble)
   local s = tostring(path)
   s = s:gsub("^file://", "")
-  -- Normalize separators to forward slashes
   s = s:gsub("\\", "/")
-  -- Remove leading slash (e.g., /C:/Users/buble -> C:/Users/buble)
   s = s:gsub("^/", "")
-  -- Remove trailing slash
   s = s:gsub("/$", "")
   return s
 end
 
-local function get_cwd_name(tab)
+local function get_cwd_name(tab, full)
   local cwd = tab.active_pane.current_working_dir
   if cwd then
     local cwd_str = normalize_path(cwd)
     local home = normalize_path(os.getenv("USERPROFILE") or os.getenv("HOME"))
-    if cwd_str and home and cwd_str:lower() == home:lower() then
-      return "~"
+    
+    if cwd_str and home then
+      if cwd_str:lower() == home:lower() then
+        return "~"
+      end
+      if full then
+        if cwd_str:lower():find(home:lower(), 1, true) == 1 then
+          return "~" .. cwd_str:sub(#home + 1)
+        end
+        return cwd_str
+      end
     end
     return basename(cwd_str)
   end
   return nil
 end
 
-local function get_tab_title(tab, max_width)
+local function get_tab_title(tab, _max_width, hover)
   local pane_title = tab.active_pane.title
-  local icon, process_name = get_process_name(tab)
-  local cwd_name = get_cwd_name(tab)
-  -- Show: folder_icon + directory + shell_icon (no process name text)
-  local title_with_icon = icons.folder .. " " .. (cwd_name or "")
-  if pane_title:match("^Administrator: ") then
-    title_with_icon = title_with_icon .. " " .. icons.admin
-  end
-  title_with_icon = title_with_icon .. " " .. (icon or "") .. " "
+  local icon, _process_name = get_process_name(tab)
+  local cwd_name = get_cwd_name(tab, hover)
   
-  return title_with_icon
-  --return " " .. wezterm.truncate_right(title_with_icon, max_width-6) .. " "
+  local title = icons.folder .. " " .. (cwd_name or "")
+  title = title .. " " .. (icon or "") .. " "
+  
+  if pane_title:match("^Administrator: ") then
+    title = title .. " " .. icons.admin
+  end
+  
+  return title
 end
 
 local subs = {'₁','₂','₃','₄','₅','₆','₇','₈','₉','₁₀'}
 local sups = {'¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹','¹⁰'}
 
-M.setup = function(config, colors)
+M.setup = function(config, theme)
   config.enable_tab_bar = true
   config.use_fancy_tab_bar = false
   config.hide_tab_bar_if_only_one_tab = false
@@ -134,11 +128,9 @@ M.setup = function(config, colors)
 
   config.colors = {
     tab_bar = {
-      background = colors.tab_bar_bg,
-      new_tab = colors.new_tab,
-      new_tab_hover = colors.new_tab_hover,
-      active_tab = colors.active_tab,
-      inactive_tab_edge = colors.inactive_tab_edge,
+      background = theme.tab_bar_bg,
+      new_tab = theme.new_tab,
+      new_tab_hover = theme.new_tab_hover,
     }
   }
 
@@ -158,57 +150,64 @@ M.setup = function(config, colors)
   end)
 
   wezterm.on('format-tab-title', function(tab, tabs, panes, conf, hover, max_width)
+    local is_hover = hover
+    if type(hover) == 'number' then
+      is_hover = max_width
+    end
+
     local is_bell = bells[tab.tab_id]
     local is_unseen = has_unseen_output(tab)
 
+    local state = "inactive"
+    if tab.is_active then state = "active" end
+    if is_hover then state = "hover" end
+
+    local bell_color = theme[state .. "_bell"] or { bg_color = "none", fg_color = "none" }
+    local unseen_color = theme[state .. "_unseen"] or { bg_color = "none", fg_color = "none" }
+
+    local tab_fg, tab_bg
+    if is_hover then
+      tab_fg = theme.tab_hover.fg_color
+      tab_bg = theme.tab_hover.bg_color
+    elseif tab.is_active then
+      tab_fg = theme.active_tab.fg_color
+      tab_bg = theme.active_tab.bg_color
+    else
+      tab_fg = theme.inactive_tab.fg_color
+      tab_bg = theme.inactive_tab.bg_color
+    end
+
     local tab_colors = {
-      tab_fg = (hover and colors.tab_hover.fg_color) or (tab.is_active and colors.active_tab.fg_color or colors.inactive_tab.fg_color),
-      tab_pane_idx_fg = (hover and colors.tab_hover.fg_color) or (tab.is_active and colors.active_tab.fg_color or colors.inactive_tab.fg_color),
-      --bell = { bg_color = is_bell and colors.bell.bg_color or 'none', fg_color = is_bell and colors.bell.fg_color or 'none' },
-      --unseen = { bg_color = is_unseen and colors.unseen.bg_color or 'none', fg_color = is_unseen and colors.unseen.fg_color or 'none' },
-
-      -- Romboide like edges
-      tab_bg = colors.active_tab.bg_color,
-      right_edge_lower = 'none',
-      right_edge_upper = colors.tab_edge,
-      left_edge_lower = colors.tab_edge,
-      left_edge_upper = 'none',
-      left_edge_text = tab.tab_index == 0 and icons.left_most or icons.left_arrow,
-      right_edge_text = icons.right_arrow,
-
-      --No background colors
-      -- tab_bg = 'none',
-      -- right_edge_lower = 'none',
-      -- right_edge_upper = 'none',
-      -- left_edge_lower = 'none',
-      -- left_edge_upper = 'none',
-      -- left_edge_text = ' ',
-      -- right_edge_text = ' ',
+      tab_fg = tab_fg,
+      tab_bg = tab_bg,
+      tab_pane_idx_fg = tab_fg,
+      bell = bell_color,
+      unseen = unseen_color,
+      right_edge_lower = theme[state .. "_right_edge_lower"],
+      right_edge_upper = theme[state .. "_right_edge_upper"],
+      left_edge_lower = theme[state .. "_left_edge_lower"],
+      left_edge_upper = theme[state .. "_left_edge_upper"],
+      left_edge_text = tab.tab_index == 0 and theme.tab_style.left_most or theme.tab_style.left_arrow,
+      right_edge_text = theme.tab_style.right_arrow,
     }
 
     return {
-      -- Left edge
       { Background = { Color = tab_colors.left_edge_upper } },
       { Foreground = { Color = tab_colors.left_edge_lower } },
       { Text = tab_colors.left_edge_text },
-      -- Tab content
       { Background = { Color = tab_colors.tab_bg } }, 
       { Foreground = { Color = tab_colors.tab_fg } },
-      -- Tab index and pane index (subscript + superscript together)
       { Text = subs[tab.tab_index + 1] or tostring(tab.tab_index + 1) },
       { Foreground = { Color = tab_colors.tab_pane_idx_fg } },
       { Text = sups[tab.active_pane.pane_index + 1] or tostring(tab.active_pane.pane_index + 1) },
       { Foreground = { Color = tab_colors.tab_fg } },
-      { Text = get_tab_title(tab, max_width) },
-      --Bell
-      --{ Background = { Color = tab_colors.bell.bg_color } }, 
-      --{ Foreground = { Color = tab_colors.bell.fg_color } },
+      { Text = get_tab_title(tab, max_width, is_hover) },
+      { Background = { Color = is_bell and tab_colors.bell.bg_color or tab_colors.tab_bg } }, 
+      { Foreground = { Color = is_bell and tab_colors.bell.fg_color or tab_colors.tab_fg } },
       { Text = is_bell and ' 🔔' or '' },
-      --Unseen
-      --{ Background = { Color = tab_colors.unseen.bg_color } }, 
-     -- { Foreground = { Color = tab_colors.unseen.fg_color } },
+      { Background = { Color = is_unseen and tab_colors.unseen.bg_color or tab_colors.tab_bg } }, 
+      { Foreground = { Color = is_unseen and tab_colors.unseen.fg_color or tab_colors.tab_fg } },
       { Text = is_unseen and ' ●' or '' },
-      -- Right edge
       { Background = { Color = tab_colors.right_edge_lower } }, 
       { Foreground = { Color = tab_colors.right_edge_upper } },
       { Text = tab_colors.right_edge_text },

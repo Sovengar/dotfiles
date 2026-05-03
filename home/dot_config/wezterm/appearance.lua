@@ -2,7 +2,7 @@ local wezterm = require "wezterm"
 
 local M = {}
 
-M.setup = function(config, colors)
+M.setup = function(config, theme)
   config.default_cursor_style = 'BlinkingUnderline'
 
   config.window_background_gradient = {
@@ -10,7 +10,7 @@ M.setup = function(config, colors)
     interpolation = "Linear",
     blend = "Rgb",
     colors = {
-      colors.bg,
+      theme.bg,
       "#161b22"
     },
   }

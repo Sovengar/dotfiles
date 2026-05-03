@@ -51,41 +51,41 @@ local function is_dark_mode()
   return false
 end
 
-M.setup = function(colors)
-  local theme = {
-    highlight = colors.active_tab.fg_color,
-    dim = colors.inactive_tab.fg_color,
+M.setup = function(theme)
+  local styles = {
+    highlight = theme.active_status.fg_color,
+    dim = theme.inactive_status.fg_color,
   }
 
   wezterm.on("update-status", function(window, pane)
     local cells = {}
 
     if window:leader_is_active() then
-      table.insert(cells, { Foreground = { Color = theme.highlight } })
+      table.insert(cells, { Foreground = { Color = styles.highlight } })
       table.insert(cells, { Text = ' 󰬓 ' })
     end
 
     local ssh_active = is_ssh_active(pane)
-    local ssh_color = ssh_active and theme.highlight or theme.dim
+    local ssh_color = ssh_active and styles.highlight or styles.dim
     table.insert(cells, { Foreground = { Color = ssh_color } })
     table.insert(cells, { Text = ' 󰲝󰣀 ' })
 
     local vpn_active = check_vpn_status()
-    local vpn_color = vpn_active and theme.highlight or theme.dim
+    local vpn_color = vpn_active and styles.highlight or styles.dim
     table.insert(cells, { Foreground = { Color = vpn_color } })
     table.insert(cells, { Text = ' 󱘖 ' })
 
     local dark_mode = is_dark_mode()
-    local mode_color = dark_mode and theme.highlight or theme.dim
+    local mode_color = dark_mode and styles.highlight or styles.dim
     table.insert(cells, { Foreground = { Color = mode_color } })
     table.insert(cells, { Text = ' 󰔎 ' })
 
     local cpu = get_cpu_usage()
-    table.insert(cells, { Foreground = { Color = theme.dim } })
+    table.insert(cells, { Foreground = { Color = styles.dim } })
     table.insert(cells, { Text = ' 󰻠 ' .. cpu .. '%' })
 
     local mem = get_mem_usage()
-    table.insert(cells, { Foreground = { Color = theme.dim } })
+    table.insert(cells, { Foreground = { Color = styles.dim } })
     table.insert(cells, { Text = ' 󰾭 ' .. mem .. '%' })
 
     window:set_right_status(wezterm.format(cells))
