@@ -50,7 +50,7 @@ config.warn_about_missing_glyphs = false
 --   window:gui_window():maximize()
 -- end)
 
-{{- if and .ssh_host .ssh_username .ssh_identity -}}
+{{- if and .ssh_host .ssh_username .ssh_identity }}
 -- SSH
 config.ssh_domains = {
   {
@@ -62,7 +62,7 @@ config.ssh_domains = {
     }
   },
 }
-{{- end -}}
+{{ end -}}
 
 -- Performance settings
 config.max_fps = 120
