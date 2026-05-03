@@ -414,7 +414,23 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 17. RESUMEN SILENCIOSO
+# 18. WSL-OPENCODE WRAPPER
+# ============================================
+$wslOpencodeContent = @'
+#!/usr/bin/env pwsh
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
+)
+
+$opencodePath = "/home/jon/.opencode/bin/opencode"
+$command = "$opencodePath $Args"
+wsl bash -lc "$command"
+'@
+
+$wslOpencodePath = Join-Path $localBin "wsl-opencode.ps1"
+Set-Content -Path $wslOpencodePath -Value $wslOpencodeContent -Encoding UTF8 -Force
+Write-Host "[OK] Created wsl-opencode.ps1 wrapper" -ForegroundColor Green
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
