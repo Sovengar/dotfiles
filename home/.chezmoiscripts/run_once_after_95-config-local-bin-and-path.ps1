@@ -251,7 +251,7 @@ if ($mavenHome -and (Test-Path $mavenHome)) {
 # 9. CREAR SYMLINKS para Docker CLI
 # ============================================
 $dockerBin = "C:\Program Files\Docker\Docker\resources\bin"
-$dockerTools = @('docker.exe', 'docker-compose.exe', 'kubectl.exe', 'hub-tool.exe')
+$dockerTools = @('docker.exe', 'docker-compose.exe', 'kubectl.exe')
 foreach ($name in $dockerTools) {
     $target = Join-Path $dockerBin $name
     $link = Join-Path $localBin $name
