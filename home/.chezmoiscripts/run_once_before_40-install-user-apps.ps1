@@ -2,6 +2,7 @@
 # Installs general user applications (non-essential, non-dev, non-gaming, non-security).
 
 $ErrorActionPreference = "Continue"
+$errorFile = "$env:TEMP\chezmoi-install-errors.log"
 
 $wingetApps = @(
     "Bopsoft.Listary",
@@ -26,6 +27,16 @@ foreach ($app in $wingetApps) {
     } else {
         Write-Host "  [FAIL] $app (ExitCode: $($proc.ExitCode))" -ForegroundColor Red
     }
+}
+
+# Raycast (no disponible en winget, abrir pagina de descarga)
+Write-Host "Abriendo pagina de descarga de Raycast..." -ForegroundColor Yellow
+try {
+    Start-Process "https://raycast.com"
+    Write-Host "Raycast abierto en el navegador. Descarga e instala la version para Windows." -ForegroundColor Green
+} catch {
+    Write-Host "ERROR abriendo pagina de Raycast" -ForegroundColor Red
+    Add-Content -Path $errorFile -Value "Error abriendo pagina de Raycast"
 }
 
 Write-Host "User apps installation complete." -ForegroundColor Green
