@@ -1,72 +1,100 @@
 # Dotfiles
 
-Gestionados con [chezmoi](https://www.chezmoi.io) para automatizar la configuración tras formateo.
+Gestionados con [chezmoi](https://www.chezmoi.io).
 
-## Uso
+Dos flujos independientes:
 
-### Windows (primera instalación en máquina nueva)
+| Flujo | ¿Cuándo? | ¿Cómo? |
+|-------|----------|--------|
+| **Dotfiles** `(1)` | Cualquier máquina | `chezmoi apply` |
+| **Formateo** `(2)` | Solo máquina nueva tras formateo | Scripts manuales en `windows/` |
+
+---
+
+## (1) Flujo Dotfiles — máquina ya configurada
 
 ```powershell
-# 0. Instalar chezmoi
+chezmoi apply
+```
+
+Aplica dotfiles, instala herramientas vía winget, configura PATH y menús contextuales.
+
+---
+
+## (2) Flujo Formateo — máquina nueva
+
+SecciOnado en tres fases: antes de chezmoi → chezmoi apply → después de chezmoi.
+
+### Fase A: Pre-chezmoi
+
+```powershell
+# 0. Sincronizar OneDrive (necesario para env.toml)
+# 1. Instalar chezmoi
 winget install --id twpayne.chezmoi -e --silent
 
-# 1. CLONAR (sin aplicar aún)
+# 2. Clonar configuración
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 2. HABILITAR WSL2 (requiere reinicio)
+# 3. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
 # Ejecutar como Administrador:
-~\.local\share\chezmoi\windows\setup-wsl-pre-reboot.ps1
-# Reiniciar el equipo cuando el script lo indique
+.\windows\setup-wsl-pre-reboot.ps1
+# ... reiniciar ...
 
-# 3. INSTALAR WSL2 + Ubuntu (después del reinicio)
-~\.local\share\chezmoi\windows\setup-wsl-post-reboot.ps1
+# 4. WSL2: instalar Ubuntu (después del reinicio)
+.\windows\setup-wsl-post-reboot.ps1
+```
 
-# 4. PREVISUALIZAR cambios (OBLIGATORIO --dry-run)
+> **Nota:** Si WSL2 ya está instalado en esta máquina, saltar pasos 3-4.
+
+### Fase B: chezmoi apply
+
+```powershell
+# 5. Previsualizar cambios (OBLIGATORIO)
 chezmoi diff
 chezmoi apply --dry-run
 
-# 5. APLICAR solo si la previsualización es correcta
+# 6. Aplicar solo si la previsualización es correcta
 chezmoi apply
 ```
 
 > ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
-> Un `--dry-run` previo evita estados inconsistentes si algo falla a medias.
 
-### Reaplicación (máquina ya configurada)
+### Fase C: Post-apply (pasos manuales)
 
-```powershell
-# Si WSL2 ya está instalado, saltar los pasos 2 y 3
-chezmoi apply
-```
-
-## Requisitos previos
-
-1. OneDrive sincronizado (para `env.toml`)
-2. GitHub CLI instalado (`gh auth login` si el repo es privado)
-
-## Windows Registry (Menús contextuales)
-
-Los archivos `.reg` para menús contextuales están en `windows/registry/` y **no son gestionados por chezmoi** (no son dotfiles).
+Ejecutar en orden:
 
 ```powershell
-# Aplicar todos los menús contextuales de WezTerm y Windows Terminal
-cd windows/registry
-.\apply-registry.ps1
+# 7. Autenticación en herramientas CLI
+gh auth login
+opencode login
 
-# O aplicar manualmente un archivo específico
-reg import "context-menus\Wezterm\open-with-opencode.reg"
+# 8. Docker Desktop — configurar integración WSL2
+.\windows\setup-docker-post-apply.ps1
+
+# 9. PowerToys — restaurar configuración desde GUI
+# Abrir PowerToys Settings → General → Backup & Restore → RESTORE
+
+# 10. Listary — re-introducir licencia (opcional)
 ```
 
-**Estructura:**
-- `context-menus/Wezterm/` - Menús para WezTerm
-- `context-menus/WindowsTerminal/` - Menús para Windows Terminal
-- `context-menus/Removers/` - Archivos para eliminar los menús (desinstalación)
+> Para un checklist más detallado, ver: `OneDrive\Formateo\POST-FORMATEO.md`
 
-## Estructura
+---
 
-- `.chezmoiscripts/` - Scripts de automatización (instalan apps, configuran WSL, etc.)
-- `home/` - Dotfiles gestionados por chezmoi (se sincronizan a `~`)
-  - `dot_*/` - Dotfiles raíz (`~/.bashrc`, `~/.gitconfig`, etc.)
-  - `dot_config/` - Configuraciones en `~/.config`
-  - `AppData/` - Configuraciones de Windows
-- `windows/` - Configuraciones de Windows **NO gestionadas por chezmoi** (archivos de registro, scripts de setup, etc.)
+## Estructura del repositorio
+
+- `.chezmoiscripts/` — Scripts **automáticos** del flujo dotfiles (instalan apps, configuran PATH, etc.)
+- `home/` — Dotfiles gestionados por chezmoi (se sincronizan a `~`)
+  - `dot_*/` — Dotfiles raíz (`~/.bashrc`, `~/.gitconfig`, etc.)
+  - `dot_config/` — Configuraciones en `~/.config`
+- `windows/` — Scripts **manuales** del flujo formateo (NO ejecutados por chezmoi)
+  - `setup-wsl-pre-reboot.ps1` — Activa virtualización para WSL2
+  - `setup-wsl-post-reboot.ps1` — Instala WSL2 + Ubuntu
+  - `setup-docker-post-apply.ps1` — Configura Docker Desktop + WSL2
+  - `registry/` — Menús contextuales (aplicados automáticamente por `before_30-registry.ps1`)
+
+## Requisitos
+
+- OneDrive sincronizado (para `env.toml` con API keys)
+- PowerShell 7
+- GitHub CLI (`gh auth login` si el repo es privado)
