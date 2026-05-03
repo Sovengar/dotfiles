@@ -109,7 +109,9 @@ $wingetTools = @{
     'fzf.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe\fzf.exe"
     'chezmoi.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\twpayne.chezmoi_Microsoft.Winget.Source_8wekyb3d8bbwe\chezmoi.exe"
     'codex.exe' = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenAI.Codex_Microsoft.Winget.Source_8wekyb3d8bbwe\codex-x86_64-pc-windows-msvc.exe"
-    # opencode (installed via bun, use .cmd wrapper)
+}
+
+# opencode (installed via bun, use .cmd wrapper)
 $opencodeTarget = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
 $opencodeWrapper = Join-Path $localBin "opencode.cmd"
 if (Test-Path $opencodeTarget) {
@@ -118,8 +120,6 @@ if (Test-Path $opencodeTarget) {
     Set-Content -Path $opencodeWrapper -Value $wrapperContent -Encoding ASCII -Force
     $createdLinks += "opencode.cmd"
     Write-Host "[OK] Created opencode.cmd wrapper" -ForegroundColor Green
-}
-}
 }
 
 foreach ($name in $wingetTools.Keys) {
