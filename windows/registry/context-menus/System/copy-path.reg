@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; Copiar ruta completa de un fichero al portapapeles
+[HKEY_CURRENT_USER\Software\Classes\*\shell\CopyPath]
+@="Copiar ruta completa"
+"Icon"="imageres.dll,-5302"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\CopyPath\command]
+@="pwsh -NoLogo -Command \"Set-Clipboard '%1'\""
+
+; Copiar ruta completa de una carpeta
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\CopyPath]
+@="Copiar ruta completa"
+"Icon"="imageres.dll,-5302"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\CopyPath\command]
+@="pwsh -NoLogo -Command \"Set-Clipboard '%1'\""

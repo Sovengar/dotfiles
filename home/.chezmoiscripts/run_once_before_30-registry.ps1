@@ -1,32 +1,25 @@
 # run_once_before_30-registry.ps1
-# Imports WezTerm context menu registry files (per-user, no admin needed)
+# Imports context menu registry files (per-user, no admin needed)
 
 $ErrorActionPreference = "Continue"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $chezmoiRoot = Resolve-Path "$scriptDir\..\.."
-$regDir = Join-Path $chezmoiRoot "windows\registry\context-menus\Wezterm"
+$contextMenusDir = Join-Path $chezmoiRoot "windows\registry\context-menus"
 
-$regFiles = @(
-    "open-with-lazygit.reg",
-    "open-with-opencode.reg"
-)
+$categories = @("Wezterm", "System")
 
-if (-not (Test-Path $regDir)) {
-    Write-Host "[SKIP] Wezterm reg folder not found: $regDir" -ForegroundColor Yellow
-    return
-}
+foreach ($category in $categories) {
+    $catDir = Join-Path $contextMenusDir $category
+    if (-not (Test-Path $catDir)) { continue }
 
-foreach ($regFile in $regFiles) {
-    $path = Join-Path $regDir $regFile
-    if (Test-Path $path) {
+    $regFiles = Get-ChildItem -Path $catDir -Filter "*.reg" -File
+    foreach ($regFile in $regFiles) {
         try {
-            reg import "$path"
-            Write-Host "[OK] Imported: $regFile" -ForegroundColor Green
+            reg import "$($regFile.FullName)"
+            Write-Host "[OK] Imported: $($regFile.Name)" -ForegroundColor Green
         } catch {
-            Write-Host "[FAIL] Could not import: $regFile - $_" -ForegroundColor Red
+            Write-Host "[FAIL] Could not import: $($regFile.Name) - $_" -ForegroundColor Red
         }
-    } else {
-        Write-Host "[SKIP] Not found: $regFile" -ForegroundColor Yellow
     }
 }
