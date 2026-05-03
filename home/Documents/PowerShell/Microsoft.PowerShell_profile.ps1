@@ -12,24 +12,15 @@ function goto {
     }
 }
 
-# Configura EDITOR para que abra VS Code con --wait
+# Configura EDITOR para que abra VS Code: con --wait
 $env:EDITOR = "code --wait"
 
-#[[
-#============================
 #Starlship
-#============================
-##]]
-
 $ENV:STARSHIP_CONFIG = "$HOME\.starship\starship.toml"
 $ENV:STARSHIP_DISTRO = "者 xcad"
 Invoke-Expression (&starship init powershell)
 
-#[[
-#============================
 #Kubernetes
-#============================
-##]]
 New-Alias k kubectl
 
 $ENV:KUBECONFIG = ".kube/prod-k8s-clcreative-kubeconfig.yaml;.kube/civo-k8s_test_1-kubeconfig;.kube/k8s_test_1.yml"
@@ -46,19 +37,12 @@ function kn {
     }
 }
 
-#============================
 # Maven Wrapper mvnw
-#============================
 function mvnw {
     & ".\mvnw.cmd" $args
 }
 
-#[[
-#============================
 #WezTerm OSC 7 Shell Integration
-#============================
-##]]
-
 $PromptOld = $function:prompt
 function prompt {
     $loc = Get-Location
@@ -68,6 +52,10 @@ function prompt {
     }
     & $PromptOld
 }
+
+# Cargar comandos tipo Linux
+$linuxAliases = Join-Path $PSScriptRoot 'LinuxAliases.ps1'
+if (Test-Path $linuxAliases) { . $linuxAliases }
 
 #[[
 #============================
@@ -109,7 +97,13 @@ if (Get-Module -ListAvailable -Name PSFzf) {
 $datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
 if (Test-Path $datreeCompletion) { . $datreeCompletion }
 
+#[[
+#============================
+# Others
+#============================
+##]]
 
-# Cargar comandos tipo Linux
-$linuxAliases = Join-Path $PSScriptRoot 'LinuxAliases.ps1'
-if (Test-Path $linuxAliases) { . $linuxAliases }
+# mise-en-place
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    (&mise activate pwsh) | Out-String | Invoke-Expression
+}
