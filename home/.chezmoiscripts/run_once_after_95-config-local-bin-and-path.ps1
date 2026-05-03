@@ -327,7 +327,7 @@ foreach ($name in $weztermTools) {
 # 13. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
-$gitTools = @('git.exe', 'git-gui.exe', 'gitk.exe', 'start-ssh-agent.cmd', 'start-ssh-pageant.cmd')
+$gitTools = @('git.exe', 'start-ssh-agent.cmd', 'start-ssh-pageant.cmd')
 foreach ($name in $gitTools) {
     $target = Join-Path $gitCmd $name
     $link = Join-Path $localBin $name
