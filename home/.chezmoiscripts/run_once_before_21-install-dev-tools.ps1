@@ -190,7 +190,7 @@ try {
 # ============================================
 # 5. LAZYVIM SETUP
 # ============================================
-$nvimDir = "$env:LOCALAPPDATA\nvim"
+$nvimDir = "$env:USERPROFILE\.config\nvim"
 if (-not (Test-Path "$nvimDir\init.lua")) {
     git clone https://github.com/LazyVim/starter "$nvimDir" 2>$null
     if ($LASTEXITCODE -eq 0) {

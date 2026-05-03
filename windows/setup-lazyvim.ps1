@@ -59,9 +59,10 @@ Write-Host ""
 
 # ============================================
 # 3. Backup existing nvim config (if any)
+# NOTE: Neovim 0.12+ uses ~/.config/nvim/ (not %LOCALAPPDATA%/nvim/)
 # ============================================
-$nvimDir = "$env:LOCALAPPDATA\nvim"
-$nvimDataDir = "$env:LOCALAPPDATA\nvim-data"
+$nvimDir = "$env:USERPROFILE\.config\nvim"
+$nvimDataDir = "$env:USERPROFILE\.local\share\nvim-data"
 
 if (Test-Path $nvimDir) {
     $backupDir = "$nvimDir.bak.$(Get-Date -Format yyyyMMdd-HHmmss)"

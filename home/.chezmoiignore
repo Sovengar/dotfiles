@@ -30,4 +30,4 @@ Documents/PowerToys/Backup/*.ptb
 # CSGO/**
 
 # LazyVim lockfile - regenerated on install
-AppData/Local/nvim/lazy-lock.json
+dot_config/nvim/lazy-lock.json
