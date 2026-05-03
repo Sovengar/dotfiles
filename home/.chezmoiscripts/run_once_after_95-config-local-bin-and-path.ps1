@@ -185,7 +185,24 @@ if (Test-Path $nodeExe) {
 Write-Host "[OK] Created $($createdLinks.Count) symlinks" -ForegroundColor Green
 
 # ============================================
-# 6. CREAR SYMLINKS para Docker CLI
+# 6. CREAR SYMLINKS para Go
+# ============================================
+$goPath = "${env:ProgramFiles}\Go\bin\go.exe"
+if (Test-Path $goPath) {
+    $link = Join-Path $localBin "go.exe"
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $goPath -Force | Out-Null
+        $createdLinks += "go.exe"
+    } catch {
+        $warnings += "Failed to create symlink for go.exe`: $_"
+    }
+} else {
+    $warnings += "go.exe not found in $goPath"
+}
+
+# ============================================
+# 7. CREAR SYMLINKS para Docker CLI
 # ============================================
 $dockerBin = "C:\Program Files\Docker\Docker\resources\bin"
 $dockerTools = @('docker.exe', 'docker-compose.exe', 'kubectl.exe')
@@ -204,7 +221,7 @@ foreach ($name in $dockerTools) {
 }
 
 # ============================================
-# 7. CREAR SYMLINKS para Podman CLI
+# 8. CREAR SYMLINKS para Podman CLI
 # ============================================
 $podmanBin = "C:\Program Files\RedHat\Podman"
 $podmanTools = @('podman.exe')
@@ -223,7 +240,7 @@ foreach ($name in $podmanTools) {
 }
 
 # ============================================
-# 8. CREAR SYMLINKS para Neovim
+# 9. CREAR SYMLINKS para Neovim
 # ============================================
 $nvimBin = "C:\Program Files\Neovim\bin"
 $nvimTools = @('nvim.exe', 'win32yank.exe')
@@ -242,7 +259,7 @@ foreach ($name in $nvimTools) {
 }
 
 # ============================================
-# 9. CREAR SYMLINKS para WezTerm
+# 10. CREAR SYMLINKS para WezTerm
 # ============================================
 $weztermBin = "C:\Program Files\WezTerm"
 $weztermTools = @('wezterm.exe', 'wezterm-gui.exe')
@@ -261,7 +278,7 @@ foreach ($name in $weztermTools) {
 }
 
 # ============================================
-# 10. CREAR SYMLINKS para Git
+# 11. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
 $gitTools = @('git.exe')
@@ -280,7 +297,7 @@ foreach ($name in $gitTools) {
 }
 
 # ============================================
-# 11. LIMPIAR PATH
+# 12. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -340,7 +357,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 12. LIMPIAR MACHINE PATH (si es posible)
+# 13. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -384,7 +401,7 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 13. RESUMEN SILENCIOSO
+# 14. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
