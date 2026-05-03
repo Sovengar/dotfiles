@@ -113,10 +113,18 @@ if (-not (Test-Path $podmanDesktopExe)) {
     }
 }
 
-# Antigravity check
+# Antigravity
 $antigravityExe = "$toolingPath\Antigravity\Antigravity.exe"
 if (-not (Test-Path $antigravityExe)) {
-    Write-Host "  [SKIP] Antigravity not found - add download URL manually if needed" -ForegroundColor Yellow
+    try {
+        Write-Host "Downloading Antigravity..." -ForegroundColor Cyan
+        $antigravityInstaller = "$env:TEMP\Antigravity-setup.exe"
+        Invoke-WebRequest -Uri "https://antigravity.google/download/windows" -OutFile $antigravityInstaller -UseBasicParsing
+        Start-Process -FilePath $antigravityInstaller -ArgumentList "/S" -Wait
+        Write-Host "  [OK] Antigravity installed" -ForegroundColor Green
+    } catch {
+        Write-Host "  [FAIL] Antigravity download failed: $_" -ForegroundColor Red
+    }
 }
 
 # IntelliJ IDEA manual
