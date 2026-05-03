@@ -35,16 +35,6 @@ $wingetApps = @(
     "GitKraken.cli"
 )
 
-# ============================================
-# 1b. POST-INSTALL: Symlinks for winget tools
-# ============================================
-$gkSource = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\GitKraken.cli_Microsoft.Winget.Source_8wekyb3d8bbwe\gk.exe"
-$gkLink = "$env:USERPROFILE\.local\bin\gk.exe"
-if (Test-Path $gkSource -and -not (Test-Path $gkLink)) {
-    New-Item -ItemType SymbolicLink -Path $gkLink -Target $gkSource -Force | Out-Null
-    Write-Host "[OK] Symlink created: gk.exe -> $gkLink" -ForegroundColor Green
-}
-
 foreach ($app in $wingetApps) {
     Write-Host "Installing: $app" -ForegroundColor Cyan
     $proc = Start-Process "winget.exe" -ArgumentList "install -e --id $app --silent --accept-package-agreements --accept-source-agreements" -NoNewWindow -PassThru -Wait
