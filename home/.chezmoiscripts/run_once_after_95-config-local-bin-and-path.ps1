@@ -240,27 +240,73 @@ foreach ($name in $podmanTools) {
 }
 
 # ============================================
-# 9. CREAR SYMLINKS para Neovim
+# 9. CREAR WRAPPERS para Neovim
 # ============================================
 $nvimBin = "C:\Program Files\Neovim\bin"
-# nvim.exe skipped: fails via symlink (needs runtime files from its dir)
-$nvimTools = @('win32yank.exe')
-foreach ($name in $nvimTools) {
-    $target = Join-Path $nvimBin $name
-    $link = Join-Path $localBin $name
-    if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try {
-            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
-            $createdLinks += $name
-        } catch {
-            $warnings += "Failed to create symlink for $name`: $_"
-        }
+
+# nvim.exe: wrapper .cmd porque symlink falla (necesita runtime files)
+$nvimExe = Join-Path $nvimBin "nvim.exe"
+if (Test-Path $nvimExe) {
+    $wrapper = Join-Path $localBin "nvim.cmd"
+    $content = "@echo off`n\"$nvimExe\" %*"
+    Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+    $createdLinks += "nvim.cmd (wrapper)"
+}
+
+# win32yank.exe: symlink funciona (autocontenido)
+$win32yank = Join-Path $nvimBin "win32yank.exe"
+if (Test-Path $win32yank) {
+    $link = Join-Path $localBin "win32yank.exe"
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $win32yank -Force | Out-Null
+        $createdLinks += "win32yank.exe"
+    } catch {
+        $warnings += "Failed to create symlink for win32yank.exe`: $_"
     }
 }
 
 # ============================================
-# 10. CREAR SYMLINKS para WezTerm
+# 10. CREAR WRAPPERS para Java JDK
+# ============================================
+$javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
+if (-not $javaHome) { $javaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
+
+if ($javaHome -and (Test-Path $javaHome)) {
+    $javaBin = Join-Path $javaHome "bin"
+    $javaTools = @('java.exe', 'javac.exe', 'jar.exe', 'javadoc.exe')
+    foreach ($name in $javaTools) {
+        $target = Join-Path $javaBin $name
+        if (Test-Path $target) {
+            $wrapperName = $name -replace '\.exe$', '.cmd'
+            $wrapper = Join-Path $localBin $wrapperName
+            $content = "@echo off`n\"$target\" %*"
+            Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+            $createdLinks += "$wrapperName (wrapper)"
+        }
+    }
+} else {
+    $warnings += "JAVA_HOME not found or invalid"
+}
+
+# ============================================
+# 11. CREAR WRAPPER para Maven
+# ============================================
+$mavenHome = [Environment]::GetEnvironmentVariable("MAVEN_HOME", "User")
+if ($mavenHome -and (Test-Path $mavenHome)) {
+    $mvnCmd = Join-Path $mavenHome "bin\mvn.cmd"
+    if (Test-Path $mvnCmd) {
+        $wrapper = Join-Path $localBin "mvn.cmd"
+        $content = "@echo off`ncall \"$mvnCmd\" %*"
+        Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+        $createdLinks += "mvn.cmd (wrapper)"
+    }
+} else {
+    $warnings += "MAVEN_HOME not found or invalid"
+}
+
+# ============================================
+# 13. CREAR SYMLINKS para WezTerm
 # ============================================
 $weztermBin = "C:\Program Files\WezTerm"
 $weztermTools = @('wezterm.exe', 'wezterm-gui.exe')
@@ -279,7 +325,7 @@ foreach ($name in $weztermTools) {
 }
 
 # ============================================
-# 11. CREAR SYMLINKS para Git
+# 14. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
 $gitTools = @('git.exe')
@@ -298,7 +344,7 @@ foreach ($name in $gitTools) {
 }
 
 # ============================================
-# 12. LIMPIAR PATH
+# 15. LIMPIAR PATH
 # ============================================
 $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $pathsToRemove = @(
@@ -358,7 +404,7 @@ if ($removedPaths.Count -gt 0) {
 }
 
 # ============================================
-# 13. LIMPIAR MACHINE PATH (si es posible)
+# 16. LIMPIAR MACHINE PATH (si es posible)
 # ============================================
 $machinePath = [Environment]::GetEnvironmentVariable('PATH', 'Machine')
 $machinePathsToRemove = @(
@@ -402,7 +448,7 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 14. RESUMEN SILENCIOSO
+# 17. RESUMEN SILENCIOSO
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
