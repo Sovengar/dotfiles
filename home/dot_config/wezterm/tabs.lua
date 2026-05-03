@@ -71,10 +71,14 @@ end
 
 local function normalize_path(path)
   if not path then return nil end
+  -- Convert to string and handle URL format (file:///C:/Users/buble)
   local s = tostring(path)
   s = s:gsub("^file://", "")
+  -- Normalize separators to forward slashes
   s = s:gsub("\\", "/")
+  -- Remove leading slash (e.g., /C:/Users/buble -> C:/Users/buble)
   s = s:gsub("^/", "")
+  -- Remove trailing slash
   s = s:gsub("/$", "")
   return s
 end
@@ -192,22 +196,28 @@ M.setup = function(config, theme)
     }
 
     return {
+      -- Left edge
       { Background = { Color = tab_colors.left_edge_upper } },
       { Foreground = { Color = tab_colors.left_edge_lower } },
       { Text = tab_colors.left_edge_text },
+      -- Tab suffixes
       { Background = { Color = tab_colors.tab_bg } }, 
       { Foreground = { Color = tab_colors.tab_fg } },
       { Text = subs[tab.tab_index + 1] or tostring(tab.tab_index + 1) },
       { Foreground = { Color = tab_colors.tab_pane_idx_fg } },
       { Text = sups[tab.active_pane.pane_index + 1] or tostring(tab.active_pane.pane_index + 1) },
+      -- Tab title
       { Foreground = { Color = tab_colors.tab_fg } },
       { Text = get_tab_title(tab, max_width, is_hover) },
+      -- Bell icon
       { Background = { Color = is_bell and tab_colors.bell.bg_color or tab_colors.tab_bg } }, 
       { Foreground = { Color = is_bell and tab_colors.bell.fg_color or tab_colors.tab_fg } },
       { Text = is_bell and ' 🔔' or '' },
+      -- Unseen icon
       { Background = { Color = is_unseen and tab_colors.unseen.bg_color or tab_colors.tab_bg } }, 
       { Foreground = { Color = is_unseen and tab_colors.unseen.fg_color or tab_colors.tab_fg } },
       { Text = is_unseen and ' ●' or '' },
+      -- Right edge
       { Background = { Color = tab_colors.right_edge_lower } }, 
       { Foreground = { Color = tab_colors.right_edge_upper } },
       { Text = tab_colors.right_edge_text },
