@@ -6,7 +6,7 @@ Windows Registry Editor Version 5.00
 "Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\OpenWithLazygit\command]
-@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%1\" -- pwsh -NoLogo -NoProfile -Command \"lazygit -p '%1'\""
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --always-new-process --no-auto-connect --cwd \"%1\" -- lazygit -p \"%1\""
 
 
 ; También funciona para carpetas en el escritorio (Directory\Background)
@@ -15,4 +15,4 @@ Windows Registry Editor Version 5.00
 "Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OpenWithLazygit\command]
-@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%V\" -- pwsh -NoLogo -NoProfile -Command \"lazygit -p '%V'\""
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --always-new-process --no-auto-connect --cwd \"%V\" -- lazygit -p \"%V\""

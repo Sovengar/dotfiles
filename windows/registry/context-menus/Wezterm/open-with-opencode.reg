@@ -6,7 +6,7 @@ Windows Registry Editor Version 5.00
 "Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\OpenWithOpenCode\command]
-@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%1\" -- pwsh -NoLogo -NoProfile -Command \"opencode '%1'\""
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --always-new-process --no-auto-connect --cwd \"%1\" -- pwsh -NoLogo -Command \"opencode '%1'\""
 
 ; También funciona para carpetas en el escritorio (Directory\Background)
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OpenWithOpenCode]
@@ -14,4 +14,4 @@ Windows Registry Editor Version 5.00
 "Icon"="C:\\Program Files\\WezTerm\\wezterm-gui.exe"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OpenWithOpenCode\command]
-@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --no-auto-connect --cwd \"%V\" -- pwsh -NoLogo -NoProfile -Command \"opencode '%V'\""
+@="\"C:\\Program Files\\WezTerm\\wezterm-gui.exe\" start --always-new-process --no-auto-connect --cwd \"%V\" -- pwsh -NoLogo -Command \"opencode '%V'\""
