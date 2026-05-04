@@ -86,13 +86,12 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
-# cdx - CD Vitaminado (zoxide jump + ripgrep+fzf search)
+# cdx - CD Interactivo Unificado
+# Jump:    cdx <name>       → cd directo → zoxide → TUI con query
+# Browse:  cdx              → TUI fd/rg (Ctrl+R toggle)
+# Search:  cdx -g <query>   → ripgrep búsqueda de contenido
 $cdxScript = Join-Path $PSScriptRoot 'Cdx.ps1'
 if (Test-Path $cdxScript) { . $cdxScript }
-
-# cdx2 - CD Interactivo (fd + lazy zoxide directory browser)
-$cdx2Script = Join-Path $PSScriptRoot 'Cdx2.ps1'
-if (Test-Path $cdx2Script) { . $cdx2Script }
 
 # fzf fuzzy finder (module must be installed first)
 # Install-Module PSFzf -Scope CurrentUser
