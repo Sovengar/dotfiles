@@ -12,6 +12,7 @@ Cada herramienta resuelve un problema concreto. Combinadas, multiplican.
 | **[mise](https://mise.jdx.dev)** | Gestor de versiones de runtimes. Reemplaza nvm, pyenv, rbenv, etc. | Un solo archivo (`~/.config/mise/config.toml`) define node, go, rust, python, java, etc. por proyecto. `mise install` y listo. |
 | **[chezmoi](https://chezmoi.io)** | Gestor de dotfiles. Sincroniza configuracion entre maquinas. | Formateas la maquina, `chezmoi init && chezmoi apply`, y en 5 minutos tienes tu entorno exacto. Templates, scripts de instalacion, todo versionado. |
 | **[snip](https://github.com/anomalyco/snip)** | Sintetiza salida de comandos verbosos. | `npm install | snip` te da solo lo relevante. Ahorra tokens y ruido mental en sesiones de opencode. |
+| **[bottom](https://github.com/ClementTsang/bottom)** | Monitor de sistema y procesos. Graficos TUI de CPU, RAM, disco, red, temps. | `btm` te da una visualizacion en tiempo real de que consume recursos. Mas ligero e informativo que el Task Manager. Ideal para debuggear cuellos de botella mientras corres builds o tests. |
 
 ### Navegacion y Busqueda
 
@@ -27,6 +28,7 @@ Cada herramienta resuelve un problema concreto. Combinadas, multiplican.
 | Herramienta | Que hace | Por que importa |
 |---|---|---|
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | TUI para git. Navega stage, diff, commits, branches, rebase con teclas. | Mas rapido que escribir `git add -p` o `git rebase -i`. Preview de diff en tiempo real. |
+| **[gh dash](https://github.com/dlvhdr/gh-dash)** | Dashboard TUI para GitHub. PRs, issues, CI checks, notificaciones en una sola vista. | `gh dash` te muestra todo lo que tienes pendiente en GitHub sin abrir el navegador. Cambia entre tus PRs, los del equipo, necesitan review, CI fallido — con preview del diff. |
 
 ### Terminal y Shell
 
@@ -188,6 +190,34 @@ $ gh pr merge --squash
 
 De idea a main sin que escribas una linea. Tu rol es revisar decisiones y aprobar.
 
+### 11. Dashboard de PRs: triage y accion en segundos
+
+```
+$ gh dash                        # ves todos los PRs pendientes: tuyos, del equipo, para revisar
+                                 # preview inline del diff en cada PR
+                                 # Enter sobre un PR → abres en el navegador
+$ cdx repo-del-PR                # o saltas directo al repo con cdx para trabajar en local
+$ lazygit                        # ves branches, diffs, haces checkout del branch del PR
+$ opencode "analiza el PR #53"   # opencode revisa el PR con mas profundidad
+```
+
+**Combo:** `gh dash` + `cdx` + `lazygit` + `opencode`
+
+El dashboard te da visibilidad global (¿que PRs me toca revisar? ¿cual fallo CI?). De ahi saltas a accion en 2 segundos.
+
+### 12. Perfilado de recursos durante builds
+
+```
+$ bottom                         # dejas btm corriendo en un split/pestaña de wezterm
+$ opencode /test                 # corres los tests
+                                 # bottom te muestra si el build saturo CPU, si se fue la RAM,
+                                 # si el disco es el cuello de botella
+```
+
+**Combo:** `bottom` + `wezterm` (splits) + `opencode`
+
+Ejecutas tareas pesadas mientras monitoreas en tiempo real. Si algo se arrastra, bottom te dice que recurso esta al limite sin conjeturas.
+
 ---
 
 ## Jerarquia de Herramientas
@@ -199,13 +229,13 @@ De idea a main sin que escribas una linea. Tu rol es revisar decisiones y aproba
         |                |                |
     lazygit (git)   cdx (nav)     mise (runtimes)
         |                |                |
-      gh CLI         zoxide+rg+fzf    node/go/rust/...
-                         |
-                     nvim (edicion)
-                         |
-              wezterm + starship (shell)
-                         |
-                    chezmoi (todo esto versionado)
+  gh + gh dash    zoxide+rg+fzf   node/go/rust/...
+        |                |                |
+      bottom          nvim (edicion)
+        |                |
+    wezterm + starship (shell)
+        |
+  chezmoi (todo esto versionado)
 ```
 
 Cada capa se apoya en la inferior. `chezmoi` es la base: sin el, cada maquina nueva es empezar de cero.
