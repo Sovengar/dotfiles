@@ -155,12 +155,32 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview: use eza if available, else dir
-        if ($hasEza) {
-            $preview = "eza --icons --group-directories-first --color=always `"$currentPath\{}`""
-        } else {
-            $preview = "Get-ChildItem `"$currentPath\{}`" | Format-Table Name,Mode,LastWriteTime"
-        }
+        # Preview script: resolves relative path using env var (avoids fzf {} quoting issues)
+        $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
+        @"
+param([string]`$Path)
+`$Path = `$Path.Trim('"', "'")
+`$Path = `$Path -replace '^\[Z\] ', ''
+`$basePath = `$env:CDX2_PREVIEW_BASE
+if (-not `$basePath) { `$basePath = Get-Location }
+`$fullPath = Join-Path `$basePath `$Path
+if (Test-Path `$fullPath -PathType Container) {
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza --icons --group-directories-first --color=always `$fullPath
+    } else {
+        Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime
+    }
+} elseif (Test-Path `$fullPath) {
+    if (Get-Command bat -ErrorAction SilentlyContinue) {
+        bat --color=always --line-range :50 `$fullPath
+    } else {
+        Get-Content `$fullPath -TotalCount 50
+    }
+}
+"@ | Set-Content -Path $previewScript -Force
+        
+        $env:CDX2_PREVIEW_BASE = $currentPath
+        $preview = "pwsh -NoProfile -File `"$previewScript`" {}"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
