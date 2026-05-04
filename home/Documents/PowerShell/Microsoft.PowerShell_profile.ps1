@@ -47,6 +47,14 @@ function prompt {
 $linuxAliases = Join-Path $PSScriptRoot 'LinuxAliases.ps1'
 if (Test-Path $linuxAliases) { . $linuxAliases }
 
+# cdx - CD Vitaminado (zoxide jump + ripgrep+fzf search)
+$cdxScript = Join-Path $PSScriptRoot 'Cdx.ps1'
+if (Test-Path $cdxScript) { . $cdxScript }
+
+# cdx2 - CD Interactivo (fzf directory browser)
+$cdx2Script = Join-Path $PSScriptRoot 'Cdx2.ps1'
+if (Test-Path $cdx2Script) { . $cdx2Script }
+
 #[[
 #============================
 #CLI Completions & Tools
