@@ -155,15 +155,12 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview script
-        $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
-        @"
-param([string]`$Path, [string]`$BasePath)
-`$cleanPath = `$Path -replace '^\[Z\] ', ''
-`$fullPath = if (`$BasePath) { Join-Path `$BasePath `$cleanPath } else { `$cleanPath }
-if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
-"@ | Set-Content -Path $previewScript -Force
-        $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
+        # Preview: use eza if available, else dir
+        if ($hasEza) {
+            $preview = "eza --icons --group-directories-first --color=always `"$currentPath\{}`""
+        } else {
+            $preview = "Get-ChildItem `"$currentPath\{}`" | Format-Table Name,Mode,LastWriteTime"
+        }
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
