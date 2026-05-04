@@ -132,9 +132,10 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             }
         }
 
-        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones
-        $dirs = @($zoxideDirs)
-        foreach ($d in $fdDirs) {
+        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones — both sorted
+        $dirs = @($zoxideDirs | Sort-Object)
+        $fdSorted = $fdDirs | Sort-Object
+        foreach ($d in $fdSorted) {
             if (-not $zoxideMap.ContainsKey($d)) {
                 $dirs += $d
             }
