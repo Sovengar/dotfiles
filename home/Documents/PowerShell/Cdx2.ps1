@@ -57,6 +57,7 @@ function cdx2 {
 
     $escFile = Join-Path $env:TEMP 'cdx2_esc.txt'
     Set-Content -Path $escFile -Value '0' -Force -NoNewline
+    $lastEscPathFile = Join-Path $env:TEMP 'cdx2_esc_path.txt'
     $doubleEscMs = 500
 
     function Get-Labels {
@@ -200,15 +201,22 @@ if (Test-Path `$fullPath -PathType Container) {
 
         # Esc or empty
         if (-not $selected) {
-            $lastEsc = [long](Get-Content $escFile -Raw).Trim()
+            $lastEsc = [long]((Get-Content $escFile -Raw).Trim())
             $now = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
             $elapsed = $now - $lastEsc
 
-            # Always refresh current path before acting
+            # Refresh path before acting
             $currentPath = (Get-Location).Path
             $displayPath = Format-DisplayPath -Path $currentPath
 
             if ($lastEsc -ne 0 -and $elapsed -lt $doubleEscMs) {
+                # DOUBLE ESC: restore to original path and exit
+                $restorePath = if (Test-Path $lastEscPathFile) { (Get-Content $lastEscPathFile -Raw).Trim() } else { '' }
+                if ($restorePath -and (Test-Path $restorePath)) {
+                    Set-Location $restorePath
+                    $currentPath = $restorePath
+                    $displayPath = Format-DisplayPath -Path $currentPath
+                }
                 if ($hasEza) {
                     Write-Host "`n$displayPath" -ForegroundColor Cyan
                     eza --icons --group-directories-first
@@ -219,7 +227,9 @@ if (Test-Path `$fullPath -PathType Container) {
                 return
             }
 
+            # SINGLE ESC: save current path, go up
             Set-Content -Path $escFile -Value $now -Force -NoNewline
+            Set-Content -Path $lastEscPathFile -Value $currentPath -Force -NoNewline
             $parent = Split-Path $currentPath -Parent
             if ($parent -and $parent -ne $currentPath) {
                 Set-Location $parent
