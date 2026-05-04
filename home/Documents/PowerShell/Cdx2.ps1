@@ -204,6 +204,10 @@ if (Test-Path `$fullPath -PathType Container) {
             $now = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
             $elapsed = $now - $lastEsc
 
+            # Always refresh current path before acting
+            $currentPath = (Get-Location).Path
+            $displayPath = Format-DisplayPath -Path $currentPath
+
             if ($lastEsc -ne 0 -and $elapsed -lt $doubleEscMs) {
                 if ($hasEza) {
                     Write-Host "`n$displayPath" -ForegroundColor Cyan
