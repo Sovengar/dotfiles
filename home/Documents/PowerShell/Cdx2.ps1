@@ -1,9 +1,8 @@
 function cdx2 {
-    [CmdletBinding(DefaultParameterSetName = 'Browse')]
+    [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
         [string[]]$QueryParts,
-        [Parameter(ParameterSetName = 'Search')]
         [Alias('s')]
         [switch]$Search
     )
@@ -41,7 +40,6 @@ function cdx2 {
     while ($depth -lt $maxDepth) {
         $currentPath = (Get-Location).Path
         $hasBat = Get-Command bat -ErrorAction SilentlyContinue
-        $hasEza = Get-Command eza -ErrorAction SilentlyContinue
 
         $dirs = Get-ChildItem -Directory | Sort-Object Name
         $files = Get-ChildItem -File | Sort-Object Name
@@ -55,7 +53,7 @@ function cdx2 {
         }
 
         if ($dirs.Count -gt 0 -or $files.Count -gt 0) {
-            $lines.Add("`e[90m─`e[0m`t---")
+            $lines.Add("`e[90m─`e[0m`t")
         }
 
         $showCount = 4
@@ -69,19 +67,18 @@ function cdx2 {
 
         $remaining = $files.Count - $shown
         if ($remaining -gt 0) {
-            $lines.Add("`e[90m⋯ ($remaining more)`e[0m`t__MORE__")
+            $lines.Add("`e[90m⋯ ($remaining more)`e[0m`t")
         }
 
         $source = $lines -join "`n"
         $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info --ansi"
 
-        $previewTmpl = 'if "{2}" == "---" (dir /b "__CDX_PATH__" 2>nul) else if "{2}" == "__MORE__" (dir /b "__CDX_PATH__" 2>nul) else if exist "__CDX_PATH__\{2}\" (dir /b "__CDX_PATH__\{2}" 2>nul) else (bat --color=always --line-range :50 "__CDX_PATH__\{2}" 2>nul)'
-        $preview = $previewTmpl.Replace('__CDX_PATH__', $currentPath)
-
-        if (-not $hasBat) {
-            $previewTmpl = 'if "{2}" == "---" (dir /b "__CDX_PATH__" 2>nul) else if "{2}" == "__MORE__" (dir /b "__CDX_PATH__" 2>nul) else if exist "__CDX_PATH__\{2}\" (dir /b "__CDX_PATH__\{2}" 2>nul) else (type "__CDX_PATH__\{2}" 2>nul)'
-            $preview = $previewTmpl.Replace('__CDX_PATH__', $currentPath)
+        if ($hasBat) {
+            $preview = 'bat --color=always --line-range :50 "__CDX_PATH__\{2}" 2>nul || dir /b "__CDX_PATH__\{2}" 2>nul'
+        } else {
+            $preview = 'type "__CDX_PATH__\{2}" 2>nul || dir /b "__CDX_PATH__\{2}" 2>nul'
         }
+        $preview = $preview.Replace('__CDX_PATH__', $currentPath)
 
         $selected = $source | fzf `
             --delimiter "`t" `
@@ -101,12 +98,12 @@ function cdx2 {
         $parts = $selected -split "`t"
         $value = $parts[-1]
 
+        if (-not $value) { continue }
+
         switch ($value) {
             '__HOME__' { Set-Location $HOME; continue }
             '__UP__'   { Set-Location ..; continue }
             '..'       { Set-Location ..; $depth++; continue }
-            '---'      { continue }
-            '__MORE__' { continue }
             default {
                 $target = Join-Path $currentPath $value
                 if (Test-Path -PathType Container $target) {
