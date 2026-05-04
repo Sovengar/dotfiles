@@ -108,12 +108,12 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '--exclude', 'dist'
         $fdArgs += '.'
 
-        # Get directories via fd (relative to current dir)
+        # Get directories via fd (relative to current dir), normalize trailing slashes
         $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { 
-            $_.Replace('\', '/') 
-        }
+            $_.Replace('\', '/').TrimEnd('/') 
+        } | Select-Object -Unique
 
-        # Get zoxide-ranked dirs under current path, mark with color
+        # Get zoxide-ranked dirs under current path, mark with ★ prefix
         $zoxideMap = @{}
         $zoxideDirs = @()
         $hasZoxideInteractive = Get-Command zoxide -ErrorAction SilentlyContinue
@@ -123,16 +123,16 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             }
             foreach ($z in $zoxideRaw) {
                 $rel = if ($z -eq $currentPath) { '.' } else { 
-                    $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/') 
+                    $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/') 
                 }
                 if ($rel -and $rel -ne '.' -and -not $zoxideMap.ContainsKey($rel)) {
                     $zoxideMap[$rel] = $true
-                    $zoxideDirs += "`e[33m$rel`e[0m"  # yellow for zoxide favorites
+                    $zoxideDirs += "★ $rel"
                 }
             }
         }
 
-        # Merge: zoxide first, then fd excluding zoxide ones
+        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones
         $dirs = @($zoxideDirs)
         foreach ($d in $fdDirs) {
             if (-not $zoxideMap.ContainsKey($d)) {
@@ -227,8 +227,8 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
             continue
         }
 
-        # Strip ANSI color codes from selected
-        $cleanSelected = $selected -replace '\x1b\[[0-9;]*m', ''
+        # Strip ★ prefix from zoxide entries
+        $cleanSelected = $selected -replace '^★ ', ''
 
         # cd into selected directory (paths are relative to current dir)
         $targetPath = Join-Path $currentPath $cleanSelected
