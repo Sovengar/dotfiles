@@ -127,10 +127,10 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             }
         }
 
-        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones
+        # Merge: zoxide first ([Z] prefix), then fd excluding zoxide ones
         $dirs = @()
         foreach ($z in $zoxideDirs) {
-            $dirs += "★ $z"
+            $dirs += "[Z] $z"
         }
         foreach ($d in $fdDirs) {
             if (-not $zoxideMap.ContainsKey($d)) {
@@ -155,18 +155,15 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview script that strips ★ prefix
-        <#
+        # Preview script
         $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
         @"
 param([string]`$Path, [string]`$BasePath)
-`$cleanPath = `$Path -replace '^★ ', ''
+`$cleanPath = `$Path -replace '^\[Z\] ', ''
 `$fullPath = if (`$BasePath) { Join-Path `$BasePath `$cleanPath } else { `$cleanPath }
 if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
 "@ | Set-Content -Path $previewScript -Force
         $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
-        #>
-        $preview = "echo hello world {}"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
@@ -225,8 +222,8 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
             continue
         }
 
-        # Strip ★ prefix
-        $cleanSelected = $selected -replace '^★ ', ''
+        # Strip [Z] prefix
+        $cleanSelected = $selected -replace '^\[Z\] ', ''
 
         # cd into selected
         $targetPath = Join-Path $currentPath $cleanSelected
