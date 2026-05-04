@@ -4,7 +4,7 @@
 # Enter = cd, Esc = up, Doble Esc = exit, Ctrl+H = home
 # ============================
 
-function cdx3 {
+function cdx2 {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
