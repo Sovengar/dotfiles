@@ -1,6 +1,6 @@
 # ============================
-# cdx2 - CD Interactivo (fzf directory browser)
-# Browse:   cdx2              - Navegación fzf del directorio actual
+# cdx2 - CD Interactivo (fzf directory/file browser)
+# Browse:   cdx2              - Navegación + búsqueda recursiva
 # Browse:   cdx2 <path>       - cd al path + navegación interactiva
 # Search:   cdx2 -s <query>   - Búsqueda rg+fzf (reusa cdx)
 # ============================
@@ -18,12 +18,10 @@ function cdx2 {
 
     $Query = $QueryParts -join ' '
 
-    # 1. Direct path: cd there first, then browse
     if ($Query -and (Test-Path $Query) -and -not $Search) {
         Set-Location $Query
     }
 
-    # 2. Search mode: delegate to cdx search engine
     if ($Search) {
         if (-not (Get-Command Invoke-CdxSearch -ErrorAction SilentlyContinue)) {
             Write-Host "[!] Invoke-CdxSearch not found. Is Cdx.ps1 loaded?" -ForegroundColor Red
@@ -33,7 +31,6 @@ function cdx2 {
         return
     }
 
-    # 3. Query that is not a path: try zoxide, then browse
     if ($Query -and -not (Test-Path $Query)) {
         $hasZoxide = Get-Command zoxide -ErrorAction SilentlyContinue
         if ($hasZoxide) {
@@ -41,56 +38,63 @@ function cdx2 {
             if ($result) {
                 Set-Location $result
             } else {
-                Write-Host "[i] zoxide no match for '$Query'. Entering browse mode..." -ForegroundColor Cyan
+                Write-Host "[i] no zoxide match for '$Query'. Starting browser..." -ForegroundColor Cyan
             }
         }
     }
-
-    # --- Browse mode: fzf interactive directory navigation ---
-    $hasBat = Get-Command bat -ErrorAction SilentlyContinue
-    if ($hasBat) {
-        $previewCmd = 'bat --color=always --line-range :50 "{}" 2>nul || dir /b "{}" 2>nul'
-    } else {
-        $previewCmd = 'if exist "{}\." (dir /b "{}" 2>nul) else (type "{}" 2>nul)'
-    }
-
-    $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info"
 
     $maxDepth = 100
     $depth = 0
 
     while ($depth -lt $maxDepth) {
         $currentPath = (Get-Location).Path
-        $items = @(Get-ChildItem -Force -ErrorAction SilentlyContinue)
+        $hasFd = Get-Command fd -ErrorAction SilentlyContinue
+        $hasRg = Get-Command rg -ErrorAction SilentlyContinue
+        $hasBat = Get-Command bat -ErrorAction SilentlyContinue
 
-        $fzfInput = [System.Collections.Generic.List[string]]::new()
-        $fzfInput.Add('..')
-        foreach ($item in $items) {
-            $fzfInput.Add($item.Name)
+        # Preview: full path, bat for files, dir for directories
+        if ($hasBat) {
+            $preview = "cmd /c bat --color=always --line-range :50 `"$currentPath\{}`" 2>nul || dir /b `"$currentPath\{}`" 2>nul"
+        } else {
+            $preview = "cmd /c type `"$currentPath\{}`" 2>nul || dir /b `"$currentPath\{}`" 2>nul"
         }
 
-        $selected = $fzfInput | fzf `
-            --header="cdx2: $currentPath | Enter=cd, Esc=exit" `
-            --preview $previewCmd `
-            --preview-window='right:60%,border-rounded' `
+        # Recursive file/dir listing using best available tool
+        $source = & {
+            Write-Output '..'
+            if ($hasFd) { fd --type f --type d --color never }
+            elseif ($hasRg) { rg --files --color never }
+            else { Get-ChildItem -Recurse -Name -ErrorAction SilentlyContinue }
+        }
+
+        $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info"
+
+        $selected = $source | fzf `
+            --header "cdx2: $currentPath | Enter=open, Ctrl+H=~, Ctrl+U=up, Esc=exit" `
+            --preview $preview `
+            --preview-window 'right:60%,border-rounded' `
+            --bind "ctrl-h:become(echo __HOME__)" `
+            --bind "ctrl-u:become(echo __UP__)" `
             2>$null
+
+        $env:FZF_DEFAULT_OPTS = ''
 
         if (-not $selected) { break }
 
-        if ($selected -eq '..') {
-            Set-Location ..
-            $depth++
-            continue
-        }
-
-        $target = Join-Path $currentPath $selected
-        if (Test-Path -PathType Container $target) {
-            Set-Location $target
-            $depth++
-        } else {
-            break
+        switch ($selected) {
+            '__HOME__' { Set-Location $HOME; continue }
+            '__UP__'   { Set-Location ..; continue }
+            '..'       { Set-Location ..; $depth++; continue }
+            default {
+                $target = Join-Path $currentPath $selected
+                if (Test-Path -PathType Container $target) {
+                    Set-Location $target
+                } else {
+                    Set-Location (Get-Item $target).DirectoryName
+                }
+                $depth++
+                continue
+            }
         }
     }
-
-    $env:FZF_DEFAULT_OPTS = ''
 }
