@@ -109,8 +109,35 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '.'
 
         # Get directories via fd (relative to current dir)
-        $dirs = & fd @fdArgs 2>$null | ForEach-Object { 
+        $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { 
             $_.Replace('\', '/') 
+        }
+
+        # Get zoxide-ranked dirs under current path, mark with color
+        $zoxideMap = @{}
+        $zoxideDirs = @()
+        $hasZoxideInteractive = Get-Command zoxide -ErrorAction SilentlyContinue
+        if ($hasZoxideInteractive) {
+            $zoxideRaw = zoxide query --list 2>$null | Where-Object { 
+                $_.StartsWith($currentPath + '\') -or $_ -eq $currentPath 
+            }
+            foreach ($z in $zoxideRaw) {
+                $rel = if ($z -eq $currentPath) { '.' } else { 
+                    $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/') 
+                }
+                if ($rel -and $rel -ne '.' -and -not $zoxideMap.ContainsKey($rel)) {
+                    $zoxideMap[$rel] = $true
+                    $zoxideDirs += "`e[33m$rel`e[0m"  # yellow for zoxide favorites
+                }
+            }
+        }
+
+        # Merge: zoxide first, then fd excluding zoxide ones
+        $dirs = @($zoxideDirs)
+        foreach ($d in $fdDirs) {
+            if (-not $zoxideMap.ContainsKey($d)) {
+                $dirs += $d
+            }
         }
 
         if (-not $dirs) {
@@ -140,7 +167,7 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
         
         $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
 
-        $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
+        $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border --ansi'
 
         # Run fzf with toggle bindings
         try {
@@ -200,8 +227,11 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
             continue
         }
 
+        # Strip ANSI color codes from selected
+        $cleanSelected = $selected -replace '\x1b\[[0-9;]*m', ''
+
         # cd into selected directory (paths are relative to current dir)
-        $targetPath = Join-Path $currentPath $selected
+        $targetPath = Join-Path $currentPath $cleanSelected
         Set-Location $targetPath
         # Reset esc timer when navigating into folder
         Set-Content -Path $escFile -Value '0' -Force -NoNewline
