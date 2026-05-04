@@ -1,3 +1,9 @@
+$cdx2PreviewBat = Join-Path $env:TEMP 'cdx2_p.bat'
+@'
+@echo off
+if exist "%~1\" (dir /b "%~1") else (bat --color=always --line-range :50 "%~1")
+'@ | Set-Content -Path $cdx2PreviewBat -Force
+
 function cdx2 {
     [CmdletBinding()]
     param(
@@ -39,7 +45,6 @@ function cdx2 {
 
     while ($depth -lt $maxDepth) {
         $currentPath = (Get-Location).Path
-        $hasBat = Get-Command bat -ErrorAction SilentlyContinue
 
         $dirs = Get-ChildItem -Directory | Sort-Object Name
         $files = Get-ChildItem -File | Sort-Object Name
@@ -65,16 +70,9 @@ function cdx2 {
         $source = $lines -join "`n"
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border --no-info'
 
-        if ($hasBat) {
-            $preview = 'bat --color=always --line-range :50 "__CDX_PATH__\{}" 2>nul || dir /b "__CDX_PATH__\{}" 2>nul'
-        } else {
-            $preview = 'type "__CDX_PATH__\{}" 2>nul || dir /b "__CDX_PATH__\{}" 2>nul'
-        }
-        $preview = $preview.Replace('__CDX_PATH__', $currentPath)
-
         $selected = $source | fzf `
             --header "cdx2: $currentPath | Enter=open, Ctrl+H=~, Ctrl+U=up, Esc=exit" `
-            --preview $preview `
+            --preview "`"$cdx2PreviewBat`" `"$currentPath\{}`"" `
             --preview-window 'right:60%,border-rounded' `
             --bind "ctrl-h:become(echo __HOME__)" `
             --bind "ctrl-u:become(echo __UP__)" `
