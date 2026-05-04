@@ -103,10 +103,17 @@ function Invoke-CdxTui {
     @"
 param([int]`$ToggleBit = 1)
 
+`$debugFile = "`$env:TEMP\cdx_reload_debug.txt"
+Add-Content -Path `$debugFile -Value "[$(Get-Date -Format HH:mm:ss)] ToggleBit=`$ToggleBit START" -Force
+Add-Content -Path `$debugFile -Value "  CDX_CURRENT_PATH=`$env:CDX_CURRENT_PATH"
+
 `$sFile = "`$env:TEMP\cdx_state.txt"
 `$s = [int](Get-Content `$sFile -Raw).Trim()
+Add-Content -Path `$debugFile -Value "  oldState=`$s"
+
 `$s = `$s -bxor `$ToggleBit
 Set-Content -Path `$sFile -Value `$s -Force -NoNewline
+Add-Content -Path `$debugFile -Value "  newState=`$s"
 
 `$rgMode = (`$s -band 1) -ne 0
 `$showHidden = (`$s -band 2) -ne 0
@@ -119,13 +126,19 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
 
 `$rgLabel = if (`$rgMode) { '[✓] files (rg)' } else { '[x] dirs (fd)' }
 `$hiddenLabel = if (`$showHidden) { 'show hidden' } else { 'hide hidden' }
+Add-Content -Path `$debugFile -Value "  rgMode=`$rgMode showHidden=`$showHidden"
+
+# Must output mode line first (consumed by --header-lines=1)
 "`$displayPath | `$rgLabel | `$hiddenLabel"
 
 if (`$rgMode) {
     `$cmd = @('rg', '--files', `$currentPath, '--smart-case')
     if (`$showHidden) { `$cmd += '--hidden' }
     foreach (`$g in @('!node_modules','!.git','!.cache','!vendor','!target','!build','!dist')) { `$cmd += '--glob'; `$cmd += `$g }
-    & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
+    `$out = & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
+    Add-Content -Path `$debugFile -Value "  rg: count=`$(`$out.Count)"
+    if (-not `$out) { Add-Content -Path `$debugFile -Value "  rg: NO OUTPUT" }
+    `$out
 } else {
     `$cmd = @('fd', '--base-directory', `$currentPath, '--type', 'd')
     if (`$showHidden) { `$cmd += '--hidden' }
