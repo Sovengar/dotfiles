@@ -247,7 +247,9 @@ $tools = @(
     @{ Name = "rg"; WingetId = "BurntSushi.ripgrep.MSVC"; Description = "Fast text search (grep alternative)" },
     @{ Name = "fd"; WingetId = "sharkdp.fd"; Description = "File finder (find alternative)" },
     @{ Name = "fzf"; WingetId = "Junegunn.fzf"; Description = "Fuzzy finder" },
-    @{ Name = "zoxide"; WingetId = "ajeetdsouza.zoxide"; Description = "Smart cd (frecency jump)" }
+    @{ Name = "zoxide"; WingetId = "ajeetdsouza.zoxide"; Description = "Smart cd (frecency jump)" },
+    @{ Name = "bat"; WingetId = "sharkdp.bat"; Description = "Cat with syntax highlighting" },
+    @{ Name = "eza"; WingetId = "eza-community.eza"; Description = "Modern ls replacement (exa fork)" }
 )
 
 foreach ($tool in $tools) {

@@ -12,7 +12,8 @@ $script:HasBtm = [bool](Get-Command btm -ErrorAction SilentlyContinue)
 # ============================================
 Remove-Item alias:ls -ErrorAction SilentlyContinue
 
-function ls {
+function ls { eza --icons --group-directories-first @args }
+function ls-linux {
     param(
         [switch]$a,
         [switch]$l,
