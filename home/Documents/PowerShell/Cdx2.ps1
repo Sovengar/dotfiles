@@ -155,11 +155,12 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview
+        # Preview script that strips ★ prefix
         $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
         @"
 param([string]`$Path, [string]`$BasePath)
-`$fullPath = if (`$BasePath) { Join-Path `$BasePath `$Path } else { `$Path }
+`$cleanPath = `$Path -replace '^★ ', ''
+`$fullPath = if (`$BasePath) { Join-Path `$BasePath `$cleanPath } else { `$cleanPath }
 if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
 "@ | Set-Content -Path $previewScript -Force
         $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
