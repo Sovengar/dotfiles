@@ -38,6 +38,13 @@ Cada herramienta resuelve un problema concreto. Combinadas, multiplican.
 | **[starship](https://starship.rs)** | Prompt cross-shell. Minimal, rapido, informativo. | Muestra git branch, runtime version (via mise), estado de archivos modificados, duracion del ultimo comando. Una sola config para PowerShell, bash, zsh. |
 | **[Neovim](https://neovim.io) + LazyVim** | Editor modal moderno. | No sales jamas de la terminal. LSP, Tree-sitter, fuzzy finder, todo integrado. Config en `~/.config/nvim/`. |
 
+### PowerShell Utilities
+
+| Herramienta | Que hace | Por que importa |
+|---|---|---|
+| **[LinuxAliases.ps1](https://github.com/Sovengar/dotfiles/blob/master/home/Documents/PowerShell/LinuxAliases.ps1)** | Aliases Linux para PowerShell. ls -la, touch, grep, head, tail, which, df -h, du -sh, uptime, ps aux, wc -l, find, rm -rf. | Musculo mental de Linux funciona en Windows sin friccion. `ls -la` hace lo que esperas, `grep` usa ripgrep si esta instalado, `ps aux` lanza bottom si existe, `find` usa fd. Auto-detection de herramientas nativas. |
+| **[DatreeCompletion.ps1](https://github.com/Sovengar/dotfiles/blob/master/home/Documents/PowerShell/DatreeCompletion.ps1)** | Autocompletado de argumentos para `datree` CLI. | `datree test <Tab>` lista subcomandos y flags con descripciones. Creado via Cobra/Go auto-completion generator para PowerShell. |
+
 ---
 
 ## Casos de Uso: Como Sacar el 300%
@@ -218,6 +225,27 @@ $ opencode /test                 # corres los tests
 
 Ejecutas tareas pesadas mientras monitoreas en tiempo real. Si algo se arrastra, bottom te dice que recurso esta al limite sin conjeturas.
 
+### 13. Musculo mental Linux en PowerShell: zero friction
+
+```powershell
+$ cd ~/dev/proyecto
+$ ls -lah                   # modo largo + ocultos + tamanos legibles. No Get-ChildItem.
+$ grep -r "TODO" .          # busca en archivos con ripgrep bajo el capo (auto-detect)
+$ touch new-file.ts         # crear archivo vacio o actualizar timestamp
+$ head server.log -n 20     # primeras 20 lineas
+$ tail -f server.log        # follow en tiempo real
+$ df -h                     # espacio en disco con colores (rojo > 90%, amarillo > 70%)
+$ du -sh node_modules       # cuanto pesa esa carpeta
+$ ps aux                    # lanza bottom directamente si esta instalado
+$ which rg                  # donde esta ripgrep?
+$ uptime                    # cuanto lleva encendida la maquina
+$ rm -rf temp/              # borrar sin confirmacion, como en Linux
+```
+
+**Combo:** `LinuxAliases.ps1` + `rg` + `fd` + `bottom`
+
+El script hace auto-detection: si `rg` existe, `grep` lo usa; si `fd` existe, `find` lo usa; si `btm` existe, `ps aux` lo lanza. Escribes comandos Linux y ejecutan la herramienta mas rapida disponible.
+
 ---
 
 ## Jerarquia de Herramientas
@@ -234,6 +262,8 @@ Ejecutas tareas pesadas mientras monitoreas en tiempo real. Si algo se arrastra,
       bottom          nvim (edicion)
         |                |
     wezterm + starship (shell)
+        |
+  LinuxAliases + DatreeCompletion (puente Linux->PS)
         |
   chezmoi (todo esto versionado)
 ```
