@@ -45,45 +45,34 @@ function cdx2 {
         $files = Get-ChildItem -File | Sort-Object Name
 
         $lines = [System.Collections.Generic.List[string]]::new()
-        $lines.Add("..`t..")
+        $lines.Add('..')
+        foreach ($d in $dirs) { $lines.Add($d.Name) }
+        if ($dirs.Count -gt 0 -or $files.Count -gt 0) { $lines.Add('───') }
 
-        foreach ($d in $dirs) {
-            $n = $d.Name
-            $lines.Add("`e[34m$n`e[0m`t$n")
-        }
-
-        if ($dirs.Count -gt 0 -or $files.Count -gt 0) {
-            $lines.Add("`e[90m─`e[0m`t")
-        }
-
-        $showCount = 4
-        $shown = 0
+        $maxFiles = 4
+        $count = 0
         foreach ($f in $files) {
-            if ($shown -ge $showCount) { break }
-            $n = $f.Name
-            $lines.Add("$n`t$n")
-            $shown++
+            if ($count -ge $maxFiles) { break }
+            $lines.Add($f.Name)
+            $count++
         }
 
-        $remaining = $files.Count - $shown
-        if ($remaining -gt 0) {
-            $lines.Add("`e[90m⋯ ($remaining more)`e[0m`t")
+        if ($files.Count -gt $maxFiles) {
+            $more = $files.Count - $maxFiles
+            $lines.Add("··· ($more more)")
         }
 
         $source = $lines -join "`n"
-        $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info --ansi"
+        $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border --no-info'
 
         if ($hasBat) {
-            $preview = 'bat --color=always --line-range :50 "__CDX_PATH__\{2}" 2>nul || dir /b "__CDX_PATH__\{2}" 2>nul'
+            $preview = 'bat --color=always --line-range :50 "__CDX_PATH__\{}" 2>nul || dir /b "__CDX_PATH__\{}" 2>nul'
         } else {
-            $preview = 'type "__CDX_PATH__\{2}" 2>nul || dir /b "__CDX_PATH__\{2}" 2>nul'
+            $preview = 'type "__CDX_PATH__\{}" 2>nul || dir /b "__CDX_PATH__\{}" 2>nul'
         }
         $preview = $preview.Replace('__CDX_PATH__', $currentPath)
 
         $selected = $source | fzf `
-            --delimiter "`t" `
-            --with-nth 1 `
-            --nth 2 `
             --header "cdx2: $currentPath | Enter=open, Ctrl+H=~, Ctrl+U=up, Esc=exit" `
             --preview $preview `
             --preview-window 'right:60%,border-rounded' `
@@ -95,17 +84,14 @@ function cdx2 {
 
         if (-not $selected) { break }
 
-        $parts = $selected -split "`t"
-        $value = $parts[-1]
-
-        if (-not $value) { continue }
-
-        switch ($value) {
+        switch -Wildcard ($selected) {
             '__HOME__' { Set-Location $HOME; continue }
             '__UP__'   { Set-Location ..; continue }
             '..'       { Set-Location ..; $depth++; continue }
+            '───'      { continue }
+            '···*'     { continue }
             default {
-                $target = Join-Path $currentPath $value
+                $target = Join-Path $currentPath $selected
                 if (Test-Path -PathType Container $target) {
                     Set-Location $target
                 } else {
