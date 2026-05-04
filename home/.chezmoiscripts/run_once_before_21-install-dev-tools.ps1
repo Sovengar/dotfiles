@@ -76,6 +76,21 @@ go install github.com/sorenisanerd/gotty@latest
 npx -y firecrawl-cli@latest init --all
 
 # ============================================
+# 3b. GH EXTENSIONS (gh-dash dashboard)
+# ============================================
+Write-Host "[INFO] Installing gh extensions..." -ForegroundColor Cyan
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    gh extension install dlvhdr/gh-dash --force 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[OK] gh-dash installed" -ForegroundColor Green
+    } else {
+        Write-Host "[WARN] gh-dash installation failed" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[WARN] gh not found, skipping gh-dash" -ForegroundColor Yellow
+}
+
+# ============================================
 # 4. MANUAL DOWNLOADS (fallbacks and non-winget tools)
 # ============================================
 $toolingPath = "$env:USERPROFILE\dev\tooling"
@@ -187,6 +202,25 @@ try {
     Write-Host "  [FAIL] JD-GUI download/install failed" -ForegroundColor Red
 }
 
+# Datree (K8s policy validator)
+$datreeExe = "$env:USERPROFILE\.local\bin\datree.exe"
+if (-not (Test-Path $datreeExe)) {
+    try {
+        Write-Host "Installing Datree (K8s policy validator)..." -ForegroundColor Cyan
+        $datreeZip = "$env:TEMP\datree.zip"
+        Invoke-WebRequest -Uri "https://github.com/datreeio/datree/releases/download/1.9.19/datree-cli_1.9.19_windows_x86_64.zip" -OutFile $datreeZip -UseBasicParsing
+        Expand-Archive -Path $datreeZip -DestinationPath "$env:TEMP\datree-temp" -Force
+        Copy-Item "$env:TEMP\datree-temp\datree.exe" "$datreeExe" -Force
+        Remove-Item "$env:TEMP\datree.zip" -Force -ErrorAction SilentlyContinue
+        Remove-Item "$env:TEMP\datree-temp" -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "  [OK] Datree installed to $datreeExe" -ForegroundColor Green
+    } catch {
+        Write-Host "  [FAIL] Datree install failed: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "  [OK] Datree already installed" -ForegroundColor Green
+}
+
 # ============================================
 # 5. LAZYVIM SETUP
 # ============================================
@@ -229,6 +263,28 @@ foreach ($tool in $tools) {
         } catch {
             Write-Host "  [FAIL] Installation error: $($_.Exception.Message)" -ForegroundColor Red
         }
+    }
+}
+
+# ============================================
+# 6a. GH COPILOT (built-in, download CLI si no está)
+# ============================================
+Write-Host ""
+Write-Host "[gh-copilot] GitHub Copilot CLI (AI-powered terminal assistant)" -ForegroundColor Yellow
+$copilotPath = "$env:USERPROFILE\.local\share\gh\copilot\copilot.exe"
+if (Test-Path $copilotPath) {
+    Write-Host "  Already installed" -ForegroundColor Green
+} else {
+    Write-Host "  Downloading Copilot CLI..." -ForegroundColor DarkYellow
+    try {
+        echo "Y" | gh copilot 2>$null
+        if (Test-Path $copilotPath) {
+            Write-Host "  [OK] gh-copilot installed" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] gh-copilot download failed" -ForegroundColor Red
+        }
+    } catch {
+        Write-Host "  [FAIL] gh-copilot error: $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 

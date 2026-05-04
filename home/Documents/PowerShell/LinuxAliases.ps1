@@ -75,14 +75,28 @@ function ls {
                 }
             }
         } else {
-            $maxPerLine = 7
-            $names = $items | Select-Object -ExpandProperty Name
-            $i = 0
-            foreach ($name in $names) {
-                if (++$i -gt $maxPerLine) { Write-Host; $i = 1 }
-                if ($i -eq 1) { Write-Host -NoNewline $name } else { Write-Host -NoNewline " $name" }
+            $items = $items | Sort-Object Name
+            $consoleWidth = $Host.UI.RawUI.WindowSize.Width
+            $maxLen = ($items | ForEach-Object { $_.Name.Length } | Measure-Object -Maximum).Maximum
+            $padding = 3
+            $colWidth = $maxLen + $padding
+            $cols = [math]::Max(1, [math]::Floor($consoleWidth / $colWidth))
+            $rows = [math]::Ceiling($items.Count / $cols)
+            for ($row = 0; $row -lt $rows; $row++) {
+                for ($col = 0; $col -lt $cols; $col++) {
+                    $idx = $row + ($col * $rows)
+                    if ($idx -lt $items.Count) {
+                        $item = $items[$idx]
+                        $name = $item.Name.PadRight($colWidth)
+                        if ($item.PSIsContainer) {
+                            Write-Host $name -NoNewline -ForegroundColor Blue
+                        } else {
+                            Write-Host $name -NoNewline
+                        }
+                    }
+                }
+                Write-Host
             }
-            if ($i -gt 0) { Write-Host }
         }
     }
 }

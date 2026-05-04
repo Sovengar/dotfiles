@@ -1,16 +1,6 @@
-New-Alias g goto
 New-Alias op opencode
 New-Alias lgit lazygit
 New-Alias vim nvim
-
-function goto {
-    param ($location)
-
-    Switch ($location) {
-        "pr" { Set-Location -Path "$HOME/OneDrive/DEV/Projects" }
-        default { echo "Invalid location" }
-    }
-}
 
 # Configura EDITOR para que abra VS Code: con --wait
 $env:EDITOR = "nvim"
@@ -62,40 +52,6 @@ if (Test-Path $linuxAliases) { . $linuxAliases }
 #CLI Completions & Tools
 #============================
 ##]]
-
-# kubectl completion (for 'k' alias already defined above)
-if (Get-Command kubectl -ErrorAction SilentlyContinue) {
-    kubectl completion powershell | Out-String | Invoke-Expression
-}
-
-# GitHub CLI completion
-if (Get-Command gh -ErrorAction SilentlyContinue) {
-    Invoke-Expression -Command $(gh completion -s powershell | Out-String)
-}
-
-# Docker completion (module must be installed first)
-# Install-Module DockerCompletion -Scope CurrentUser
-if (Get-Module -ListAvailable -Name DockerCompletion) {
-    Import-Module DockerCompletion
-}
-
-# Zoxide (smart cd, learns your most-used directories)
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-}
-
-# fzf fuzzy finder (module must be installed first)
-# Install-Module PSFzf -Scope CurrentUser
-if (Get-Module -ListAvailable -Name PSFzf) {
-    Import-Module PSFzf
-    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+T' `
-                    -PSReadlineChordReverseHistory 'Ctrl+R' `
-                    -EnableAliasFuzzyGitStatus
-}
-
-# Cargar completion de Datree
-$datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
-if (Test-Path $datreeCompletion) { . $datreeCompletion }
 
 #[[
 #============================
