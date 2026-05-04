@@ -108,10 +108,10 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '--exclude', 'dist'
         $fdArgs += '.'
 
-        # Get directories via fd (relative to current dir), normalize trailing slashes
+        # Get directories via fd (relative to current dir)
         $dirs = & fd @fdArgs 2>$null | ForEach-Object { 
-            $_.Replace('\', '/').TrimEnd('/') 
-        } | Select-Object -Unique | Sort-Object
+            $_.Replace('\', '/') 
+        }
 
         if (-not $dirs) {
             if ($hasEza) {
