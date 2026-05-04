@@ -127,10 +127,10 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             }
         }
 
-        # Merge: zoxide first ([Z] prefix), then fd excluding zoxide ones
+        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones
         $dirs = @()
         foreach ($z in $zoxideDirs) {
-            $dirs += "[Z] $z"
+            $dirs += "★ $z"
         }
         foreach ($d in $fdDirs) {
             if (-not $zoxideMap.ContainsKey($d)) {
@@ -160,7 +160,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         @"
 param([string]`$Path)
 `$Path = `$Path.Trim('"', "'")
-`$Path = `$Path -replace '^\[Z\] ', ''
+`$Path = `$Path -replace '^★ ', ''
 `$basePath = `$env:CDX2_PREVIEW_BASE
 if (-not `$basePath) { `$basePath = Get-Location }
 `$fullPath = Join-Path `$basePath `$Path
@@ -239,8 +239,8 @@ if (Test-Path `$fullPath -PathType Container) {
             continue
         }
 
-        # Strip [Z] prefix
-        $cleanSelected = $selected -replace '^\[Z\] ', ''
+        # Strip ★ prefix
+        $cleanSelected = $selected -replace '^★ ', ''
 
         # cd into selected
         $targetPath = Join-Path $currentPath $cleanSelected
