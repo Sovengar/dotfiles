@@ -111,7 +111,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '.'
 
         # Get fd dirs (relative, fast — no Sort, no Unique)
-        $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/') }
+        $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/').TrimEnd('/') }
 
         # Filter zoxide cache for dirs under current path (in-memory, fast)
         $zoxideMap = @{}
@@ -119,7 +119,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         foreach ($z in $script:zoxideCache) {
             if ($z -eq $currentPath) { continue }
             if ($z.StartsWith($currentPath + '\')) {
-                $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/')
+                $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
                 if ($rel -and -not $zoxideMap.ContainsKey($rel)) {
                     $zoxideMap[$rel] = $true
                     $zoxideDirs += $rel
