@@ -47,23 +47,65 @@ function prompt {
 $linuxAliases = Join-Path $PSScriptRoot 'LinuxAliases.ps1'
 if (Test-Path $linuxAliases) { . $linuxAliases }
 
-# cdx - CD Vitaminado (zoxide jump + ripgrep+fzf search)
-$cdxScript = Join-Path $PSScriptRoot 'Cdx.ps1'
-if (Test-Path $cdxScript) { . $cdxScript }
-
-# cdx2 - CD Interactivo (fzf directory browser)
-$cdx2Script = Join-Path $PSScriptRoot 'Cdx2.ps1'
-if (Test-Path $cdx2Script) { . $cdx2Script }
-
-# cdx3 - CD Interactivo v3 (fd + lazy zoxide)
-$cdx3Script = Join-Path $PSScriptRoot 'Cdx3.ps1'
-if (Test-Path $cdx3Script) { . $cdx3Script }
-
 #[[
 #============================
 #CLI Completions & Tools
 #============================
 ##]]
+
+# PSReadLine: Tab acepta predicción, si no hay hace Tab normal
+Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
+    $line = $null; $cursor = $null
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+    $before = $cursor
+    [Microsoft.PowerShell.PSConsoleReadLine]::ForwardChar()
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+    if ($cursor -eq $before) {
+        [Microsoft.PowerShell.PSConsoleReadLine]::TabCompleteNext()
+    }
+}
+
+# kubectl completion (for 'k' alias already defined above)
+if (Get-Command kubectl -ErrorAction SilentlyContinue) {
+    kubectl completion powershell | Out-String | Invoke-Expression
+}
+
+# GitHub CLI completion
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    Invoke-Expression -Command $(gh completion -s powershell | Out-String)
+}
+
+# Docker completion (module must be installed first)
+# Install-Module DockerCompletion -Scope CurrentUser
+if (Get-Module -ListAvailable -Name DockerCompletion) {
+    Import-Module DockerCompletion
+}
+
+# Zoxide (smart cd, learns your most-used directories)
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
+# cdx - CD Vitaminado (zoxide jump + ripgrep+fzf search)
+$cdxScript = Join-Path $PSScriptRoot 'Cdx.ps1'
+if (Test-Path $cdxScript) { . $cdxScript }
+
+# cdx2 - CD Interactivo (fd + lazy zoxide directory browser)
+$cdx2Script = Join-Path $PSScriptRoot 'Cdx2.ps1'
+if (Test-Path $cdx2Script) { . $cdx2Script }
+
+# fzf fuzzy finder (module must be installed first)
+# Install-Module PSFzf -Scope CurrentUser
+if (Get-Module -ListAvailable -Name PSFzf) {
+    Import-Module PSFzf
+    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+T' `
+                    -PSReadlineChordReverseHistory 'Ctrl+R' `
+                    -EnableAliasFuzzyGitStatus
+}
+
+# Cargar completion de Datree
+$datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
+if (Test-Path $datreeCompletion) { . $datreeCompletion }
 
 #[[
 #============================

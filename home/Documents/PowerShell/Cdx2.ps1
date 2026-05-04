@@ -1,13 +1,10 @@
 # ============================
-# cdx2 - CD Interactivo
-# Directory finder with fd + fzf
-# Finds directories recursively from current path
-# Enter = cd into selection, Esc = cd.., Doble Esc = exit
-# Ctrl+R: toggle [x]/[✓] search inside files
-# Ctrl+A: toggle show/hide hidden folders
+# cdx3 - CD Interactivo v3
+# Lazy zoxide: zoxide dirs cached once, shown with ★ prefix when relevant
+# Enter = cd, Esc = up, Doble Esc = exit, Ctrl+H = home
 # ============================
 
-function cdx2 {
+function cdx3 {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
@@ -32,7 +29,7 @@ function cdx2 {
         Invoke-CdxSearch -Query $Query; return
     }
 
-    # 3) Zoxide fallback
+    # 3) Zoxide fallback for direct query
     if ($Query -and -not (Test-Path $Query)) {
         $hasZoxide = Get-Command zoxide -ErrorAction SilentlyContinue
         if ($hasZoxide) {
@@ -46,13 +43,18 @@ function cdx2 {
         Write-Host '[!] fd not found. Install: winget install sharkdp.fd' -ForegroundColor Red; return
     }
 
-    # 4) Interactive browser with fd
-    $hasBat = Get-Command bat -ErrorAction SilentlyContinue
+    # 4) Cache zoxide list ONCE at startup
+    $script:zoxideCache = @()
+    $hasZoxide = Get-Command zoxide -ErrorAction SilentlyContinue
+    if ($hasZoxide) {
+        $script:zoxideCache = zoxide query --list 2>$null
+    }
+
+    # 5) Interactive browser
     $hasEza = Get-Command eza -ErrorAction SilentlyContinue
     $stateFile = Join-Path $env:TEMP 'cdx2_state.txt'
     Set-Content -Path $stateFile -Value '0' -Force -NoNewline
 
-    # Track double-esc timing
     $escFile = Join-Path $env:TEMP 'cdx2_esc.txt'
     Set-Content -Path $escFile -Value '0' -Force -NoNewline
     $doubleEscMs = 500
@@ -96,7 +98,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $state = [int]((Get-Content $stateFile -Raw).Trim())
         $showHidden = ($state -band 2) -ne 0
 
-        # Build fd args — results relative to current dir
+        # Build fd args
         $fdArgs = @('--base-directory', $currentPath, '--type', 'd')
         if ($showHidden) { $fdArgs += '--hidden' }
         $fdArgs += '--exclude', 'node_modules'
@@ -108,9 +110,32 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '--exclude', 'dist'
         $fdArgs += '.'
 
-        # Get directories via fd (relative to current dir)
-        $dirs = & fd @fdArgs 2>$null | ForEach-Object { 
-            $_.Replace('\', '/') 
+        # Get fd dirs (relative, fast — no Sort, no Unique)
+        $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/').TrimEnd('/') }
+
+        # Filter zoxide cache for dirs under current path (in-memory, fast)
+        $zoxideMap = @{}
+        $zoxideDirs = @()
+        foreach ($z in $script:zoxideCache) {
+            if ($z -eq $currentPath) { continue }
+            if ($z.StartsWith($currentPath + '\')) {
+                $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
+                if ($rel -and -not $zoxideMap.ContainsKey($rel)) {
+                    $zoxideMap[$rel] = $true
+                    $zoxideDirs += $rel
+                }
+            }
+        }
+
+        # Merge: zoxide first (★ prefix), then fd excluding zoxide ones
+        $dirs = @()
+        foreach ($z in $zoxideDirs) {
+            $dirs += "★ $z"
+        }
+        foreach ($d in $fdDirs) {
+            if (-not $zoxideMap.ContainsKey($d)) {
+                $dirs += $d
+            }
         }
 
         if (-not $dirs) {
@@ -124,25 +149,24 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             return
         }
 
-        # Header with labels and legend
+        # Header
         $rgLabel, $hiddenLabel = Get-Labels -State $state
         $headerLine1 = "$displayPath | $rgLabel | $hiddenLabel"
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview script that resolves relative paths
+        # Preview
         $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
         @"
 param([string]`$Path, [string]`$BasePath)
 `$fullPath = if (`$BasePath) { Join-Path `$BasePath `$Path } else { `$Path }
 if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
 "@ | Set-Content -Path $previewScript -Force
-        
         $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
-        # Run fzf with toggle bindings
+        # Run fzf
         try {
             $selected = @($dirs) | fzf `
                 --header="$header" `
@@ -156,14 +180,13 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
             $env:FZF_DEFAULT_OPTS = ''
         }
 
-        # Esc or empty = cd.. (go up) or exit on double-esc
+        # Esc or empty
         if (-not $selected) {
             $lastEsc = [long](Get-Content $escFile -Raw).Trim()
             $now = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
             $elapsed = $now - $lastEsc
 
             if ($lastEsc -ne 0 -and $elapsed -lt $doubleEscMs) {
-                # Double Esc detected - exit
                 if ($hasEza) {
                     Write-Host "`n$displayPath" -ForegroundColor Cyan
                     eza --icons --group-directories-first
@@ -174,14 +197,12 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
                 return
             }
 
-            # Single Esc - go up and record time
             Set-Content -Path $escFile -Value $now -Force -NoNewline
             $parent = Split-Path $currentPath -Parent
             if ($parent -and $parent -ne $currentPath) {
                 Set-Location $parent
                 continue
             } else {
-                # At root - exit
                 if ($hasEza) {
                     Write-Host "`n$displayPath" -ForegroundColor Cyan
                     eza --icons --group-directories-first
@@ -193,17 +214,19 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
             }
         }
 
-        # Handle special fzf become outputs
+        # Handle become outputs
         if ($selected -eq '__GOTO_HOME__') {
             Set-Location $env:USERPROFILE
             Set-Content -Path $escFile -Value '0' -Force -NoNewline
             continue
         }
 
-        # cd into selected directory (paths are relative to current dir)
-        $targetPath = Join-Path $currentPath $selected
+        # Strip ★ prefix
+        $cleanSelected = $selected -replace '^★ ', ''
+
+        # cd into selected
+        $targetPath = Join-Path $currentPath $cleanSelected
         Set-Location $targetPath
-        # Reset esc timer when navigating into folder
         Set-Content -Path $escFile -Value '0' -Force -NoNewline
     }
 }
