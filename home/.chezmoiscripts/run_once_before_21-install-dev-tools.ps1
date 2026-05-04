@@ -212,7 +212,8 @@ $tools = @(
     @{ Name = "btm"; WingetId = "Clement.bottom"; Description = "Process monitor (htop alternative)" },
     @{ Name = "rg"; WingetId = "BurntSushi.ripgrep.MSVC"; Description = "Fast text search (grep alternative)" },
     @{ Name = "fd"; WingetId = "sharkdp.fd"; Description = "File finder (find alternative)" },
-    @{ Name = "fzf"; WingetId = "Junegunn.fzf"; Description = "Fuzzy finder" }
+    @{ Name = "fzf"; WingetId = "Junegunn.fzf"; Description = "Fuzzy finder" },
+    @{ Name = "zoxide"; WingetId = "ajeetdsouza.zoxide"; Description = "Smart cd (frecency jump)" }
 )
 
 foreach ($tool in $tools) {
@@ -230,6 +231,24 @@ foreach ($tool in $tools) {
         }
     }
 }
+
+# ============================================
+# 6b. POWERSHELL MODULES (PSFzf)
+# ============================================
+Write-Host ""
+Write-Host "[PSFzf] PowerShell fuzzy finder module (Ctrl+T, Ctrl+R)" -ForegroundColor Yellow
+if (Get-Module -ListAvailable -Name PSFzf) {
+    Write-Host "  Already installed" -ForegroundColor Green
+} else {
+    Write-Host "  Installing from PSGallery..." -ForegroundColor DarkYellow
+    try {
+        Install-Module -Name PSFzf -Scope CurrentUser -Force -SkipPublisherCheck
+        Write-Host "  [OK] PSFzf installed" -ForegroundColor Green
+    } catch {
+        Write-Host "  [FAIL] PSFzf install error: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
 # ============================================
 # 7. WSL2 TOOLS (opencode)
 # ============================================
