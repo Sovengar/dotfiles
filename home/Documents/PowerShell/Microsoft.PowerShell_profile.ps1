@@ -55,6 +55,10 @@ if (Test-Path $cdxScript) { . $cdxScript }
 $cdx2Script = Join-Path $PSScriptRoot 'Cdx2.ps1'
 if (Test-Path $cdx2Script) { . $cdx2Script }
 
+# cdx3 - CD Interactivo v3 (fd + lazy zoxide)
+$cdx3Script = Join-Path $PSScriptRoot 'Cdx3.ps1'
+if (Test-Path $cdx3Script) { . $cdx3Script }
+
 #[[
 #============================
 #CLI Completions & Tools
