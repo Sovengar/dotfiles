@@ -156,6 +156,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $header = "$headerLine1`n$headerLine2"
 
         # Preview script that strips ★ prefix
+        <#
         $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
         @"
 param([string]`$Path, [string]`$BasePath)
@@ -164,6 +165,8 @@ param([string]`$Path, [string]`$BasePath)
 if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
 "@ | Set-Content -Path $previewScript -Force
         $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
+        #>
+        $preview = "echo hello world {}"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
