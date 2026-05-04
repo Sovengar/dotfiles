@@ -127,7 +127,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         # Header with labels and legend
         $rgLabel, $hiddenLabel = Get-Labels -State $state
         $headerLine1 = "$displayPath | $rgLabel | $hiddenLabel"
-        $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
+        $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Alt+Esc=home │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
         # Preview script that resolves relative paths
@@ -150,6 +150,7 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
                 --preview-window='right:60%,border-rounded' `
                 --bind="ctrl-r:execute(pwsh -File $toggleRgPs1)" `
                 --bind="ctrl-a:execute(pwsh -File $toggleHiddenPs1)" `
+                --bind="alt-esc:become(echo __HOME__)" `
                 2>$null
         } finally {
             $env:FZF_DEFAULT_OPTS = ''
@@ -190,6 +191,13 @@ if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Forma
                 }
                 return
             }
+        }
+
+        # Handle special fzf become outputs
+        if ($selected -eq '__HOME__') {
+            Set-Location $env:USERPROFILE
+            Set-Content -Path $escFile -Value '0' -Force -NoNewline
+            continue
         }
 
         # cd into selected directory (paths are relative to current dir)
