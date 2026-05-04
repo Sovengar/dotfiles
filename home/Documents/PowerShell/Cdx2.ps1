@@ -96,8 +96,8 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $state = [int]((Get-Content $stateFile -Raw).Trim())
         $showHidden = ($state -band 2) -ne 0
 
-        # Build fd args
-        $fdArgs = @('--type', 'd')
+        # Build fd args — results relative to current dir
+        $fdArgs = @('--base-directory', $currentPath, '--type', 'd')
         if ($showHidden) { $fdArgs += '--hidden' }
         $fdArgs += '--exclude', 'node_modules'
         $fdArgs += '--exclude', '.git'
@@ -107,10 +107,11 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $fdArgs += '--exclude', 'build'
         $fdArgs += '--exclude', 'dist'
         $fdArgs += '.'
-        $fdArgs += $currentPath
 
-        # Get directories via fd (returns paths relative to $currentPath)
-        $dirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/') }
+        # Get directories via fd (relative to current dir)
+        $dirs = & fd @fdArgs 2>$null | ForEach-Object { 
+            $_.Replace('\', '/') 
+        }
 
         if (-not $dirs) {
             if ($hasEza) {
@@ -129,12 +130,15 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
         $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+R=search │ Ctrl+A=$hiddenLabel"
         $header = "$headerLine1`n$headerLine2"
 
-        # Preview - resolve relative path to absolute
-        $preview = if ($hasBat) {
-            'bat --color=always --line-range :50 "' + $currentPath + '\{}"'
-        } else {
-            'Get-Content -TotalCount 50 "' + $currentPath + '\{}"'
-        }
+        # Preview script that resolves relative paths
+        $previewScript = Join-Path $env:TEMP 'cdx2_preview.ps1'
+        @"
+param([string]`$Path, [string]`$BasePath)
+`$fullPath = if (`$BasePath) { Join-Path `$BasePath `$Path } else { `$Path }
+if (Test-Path `$fullPath -PathType Container) { Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime } else { Get-Content `$fullPath -TotalCount 50 }
+"@ | Set-Content -Path $previewScript -Force
+        
+        $preview = "pwsh -File `"$previewScript`" -Path `"{}`" -BasePath `"$currentPath`""
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
@@ -188,8 +192,7 @@ Set-Content -Path $env:TEMP\cdx2_state.txt -Value $s -Force -NoNewline
             }
         }
 
-        # cd into selected directory
-        # selected is relative path from fd (e.g., "dev/work/vSocial")
+        # cd into selected directory (paths are relative to current dir)
         $targetPath = Join-Path $currentPath $selected
         Set-Location $targetPath
         # Reset esc timer when navigating into folder
