@@ -1,16 +1,8 @@
-# ============================
-# cdx2 - CD Interactivo (fzf directory/file browser)
-# Browse:   cdx2              - Navegación + búsqueda recursiva
-# Browse:   cdx2 <path>       - cd al path + navegación interactiva
-# Search:   cdx2 -s <query>   - Búsqueda rg+fzf (reusa cdx)
-# ============================
-
 function cdx2 {
     [CmdletBinding(DefaultParameterSetName = 'Browse')]
     param(
         [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
         [string[]]$QueryParts,
-
         [Parameter(ParameterSetName = 'Search')]
         [Alias('s')]
         [switch]$Search
@@ -24,7 +16,7 @@ function cdx2 {
 
     if ($Search) {
         if (-not (Get-Command Invoke-CdxSearch -ErrorAction SilentlyContinue)) {
-            Write-Host "[!] Invoke-CdxSearch not found. Is Cdx.ps1 loaded?" -ForegroundColor Red
+            Write-Host '[!] Invoke-CdxSearch not found. Is Cdx.ps1 loaded?' -ForegroundColor Red
             return
         }
         Invoke-CdxSearch -Query $Query
@@ -48,28 +40,53 @@ function cdx2 {
 
     while ($depth -lt $maxDepth) {
         $currentPath = (Get-Location).Path
-        $hasFd = Get-Command fd -ErrorAction SilentlyContinue
-        $hasRg = Get-Command rg -ErrorAction SilentlyContinue
         $hasBat = Get-Command bat -ErrorAction SilentlyContinue
+        $hasEza = Get-Command eza -ErrorAction SilentlyContinue
 
-        # Preview: full path, bat for files, dir for directories
-        if ($hasBat) {
-            $preview = "cmd /c bat --color=always --line-range :50 `"$currentPath\{}`" 2>nul || dir /b `"$currentPath\{}`" 2>nul"
-        } else {
-            $preview = "cmd /c type `"$currentPath\{}`" 2>nul || dir /b `"$currentPath\{}`" 2>nul"
+        $dirs = Get-ChildItem -Directory | Sort-Object Name
+        $files = Get-ChildItem -File | Sort-Object Name
+
+        $lines = [System.Collections.Generic.List[string]]::new()
+        $lines.Add("..`t..")
+
+        foreach ($d in $dirs) {
+            $n = $d.Name
+            $lines.Add("`e[34m$n`e[0m`t$n")
         }
 
-        # Recursive file/dir listing using best available tool
-        $source = & {
-            Write-Output '..'
-            if ($hasFd) { fd --type f --type d --color never }
-            elseif ($hasRg) { rg --files --color never }
-            else { Get-ChildItem -Recurse -Name -ErrorAction SilentlyContinue }
+        if ($dirs.Count -gt 0 -or $files.Count -gt 0) {
+            $lines.Add("`e[90m─`e[0m`t---")
         }
 
-        $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info"
+        $showCount = 4
+        $shown = 0
+        foreach ($f in $files) {
+            if ($shown -ge $showCount) { break }
+            $n = $f.Name
+            $lines.Add("$n`t$n")
+            $shown++
+        }
+
+        $remaining = $files.Count - $shown
+        if ($remaining -gt 0) {
+            $lines.Add("`e[90m⋯ ($remaining more)`e[0m`t__MORE__")
+        }
+
+        $source = $lines -join "`n"
+        $env:FZF_DEFAULT_OPTS = "--height=80% --layout=reverse --border --no-info --ansi"
+
+        $previewTmpl = 'if "{2}" == "---" (dir /b "__CDX_PATH__" 2>nul) else if "{2}" == "__MORE__" (dir /b "__CDX_PATH__" 2>nul) else if exist "__CDX_PATH__\{2}\" (dir /b "__CDX_PATH__\{2}" 2>nul) else (bat --color=always --line-range :50 "__CDX_PATH__\{2}" 2>nul)'
+        $preview = $previewTmpl.Replace('__CDX_PATH__', $currentPath)
+
+        if (-not $hasBat) {
+            $previewTmpl = 'if "{2}" == "---" (dir /b "__CDX_PATH__" 2>nul) else if "{2}" == "__MORE__" (dir /b "__CDX_PATH__" 2>nul) else if exist "__CDX_PATH__\{2}\" (dir /b "__CDX_PATH__\{2}" 2>nul) else (type "__CDX_PATH__\{2}" 2>nul)'
+            $preview = $previewTmpl.Replace('__CDX_PATH__', $currentPath)
+        }
 
         $selected = $source | fzf `
+            --delimiter "`t" `
+            --with-nth 1 `
+            --nth 2 `
             --header "cdx2: $currentPath | Enter=open, Ctrl+H=~, Ctrl+U=up, Esc=exit" `
             --preview $preview `
             --preview-window 'right:60%,border-rounded' `
@@ -81,12 +98,17 @@ function cdx2 {
 
         if (-not $selected) { break }
 
-        switch ($selected) {
+        $parts = $selected -split "`t"
+        $value = $parts[-1]
+
+        switch ($value) {
             '__HOME__' { Set-Location $HOME; continue }
             '__UP__'   { Set-Location ..; continue }
             '..'       { Set-Location ..; $depth++; continue }
+            '---'      { continue }
+            '__MORE__' { continue }
             default {
-                $target = Join-Path $currentPath $selected
+                $target = Join-Path $currentPath $value
                 if (Test-Path -PathType Container $target) {
                     Set-Location $target
                 } else {
