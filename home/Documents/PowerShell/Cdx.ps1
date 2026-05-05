@@ -34,10 +34,17 @@ function cdx {
         return
     }
 
-    # 3) Con query → cd directo → zoxide → TUI con query pre-llenada
+    # 3) Shortcuts especiales → $HOME
+    if ($Query -in @('~', '...')) {
+        Set-Location $env:USERPROFILE
+        ShowResult
+        return
+    }
+
+    # 4) Con query → cd directo → zoxide → TUI con query pre-llenada
     if (Test-Path $Query) {
         Set-Location $Query
-        Show-CdxLocation
+        ShowResult
         return
     }
 
@@ -46,7 +53,7 @@ function cdx {
         $result = zoxide query $Query 2>$null
         if ($result) {
             Set-Location $result
-            Show-CdxLocation
+            ShowResult
             return
         }
     }
@@ -56,9 +63,9 @@ function cdx {
 }
 
 # ============================
-# Show-CdxLocation — ls tras cd
+# ShowResult — ls + git hint tras cd
 # ============================
-function Show-CdxLocation {
+function ShowResult {
     $path = (Get-Location).Path
     $display = if ($path.StartsWith($env:USERPROFILE)) {
         "~" + $path.Substring($env:USERPROFILE.Length).Replace('\', '/')
@@ -70,6 +77,12 @@ function Show-CdxLocation {
         eza --icons --group-directories-first
     } else {
         Get-ChildItem -Force | Format-Table
+    }
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        $gitRoot = git rev-parse --show-toplevel 2>$null
+        if ($gitRoot) {
+            Write-Host "  Consider using: yazi, broot, nvim, lazygit, code ." -ForegroundColor DarkGray
+        }
     }
 }
 
@@ -413,18 +426,12 @@ if (Test-Path $fullPath -PathType Container) {
 
         if ($items.Count -le 1) {
             Write-Host "[cdx] empty result, showing inline ls" -ForegroundColor DarkGray
-            if ($hasEza) {
-                Write-Host "`n$displayPath" -ForegroundColor Cyan
-                eza --icons --group-directories-first
-            } else {
-                Write-Host "`n$displayPath" -ForegroundColor Cyan
-                Get-ChildItem -Force | Format-Table
-            }
+            ShowResult
             return
         }
 
         # Header (above fzf prompt)
-        $header = "Enter ($enterLabel) | Esc (cd ..) | Ctrl+C (Exit) | Ctrl+H (cd ~)`nCtrl+G (Grep) | Ctrl+A (dotfiles) | Ctrl+W (WinHidden)"
+        $header = "Enter ($enterLabel) | Esc (cd ..) | Ctrl+C (Exit) | Ctrl+H (cd ~)`nCtrl+G (Grep) | Ctrl+A (dotfiles)`nCtrl+W (WinHidden) | Ctrl+O (yazi)"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
@@ -438,7 +445,8 @@ if (Test-Path $fullPath -PathType Container) {
             "--bind=ctrl-a:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 2)",
             "--bind=ctrl-w:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 4)",
             '--bind=ctrl-c:become(echo __EXIT_CDX__)',
-            '--bind=ctrl-h:become(echo __GOTO_HOME__)'
+            '--bind=ctrl-h:become(echo __GOTO_HOME__)',
+            '--bind=ctrl-o:become(echo __CD_YAZI__{})'
         )
         if ($InitialQuery) {
             $fzfArgs += "--query=$InitialQuery"
@@ -467,29 +475,14 @@ if (Test-Path $fullPath -PathType Container) {
                 Set-Location $parent
                 continue
             } else {
-                if ($hasEza) {
-                    Write-Host "`n$displayPath" -ForegroundColor Cyan
-                    eza --icons --group-directories-first
-                } else {
-                    Write-Host "`n$displayPath" -ForegroundColor Cyan
-                    Get-ChildItem -Force | Format-Table
-                }
+                ShowResult
                 return
             }
         }
 
         # Handle become outputs
         if ($selected -eq '__EXIT_CDX__') {
-            Write-Host "[cdx] ctrl+c, exiting" -ForegroundColor DarkGray
-            $currentPath = (Get-Location).Path
-            $displayPath = Format-DisplayPath -Path $currentPath
-            if ($hasEza) {
-                Write-Host "`n$displayPath" -ForegroundColor Cyan
-                eza --icons --group-directories-first
-            } else {
-                Write-Host "`n$displayPath" -ForegroundColor Cyan
-                Get-ChildItem -Force | Format-Table
-            }
+            ShowResult
             return
         }
 
@@ -497,6 +490,21 @@ if (Test-Path $fullPath -PathType Container) {
             Write-Host "[cdx] goto home" -ForegroundColor DarkGray
             Set-Location $env:USERPROFILE
             continue
+        }
+
+        # Ctrl+Enter → cd + yazi
+        if ($selected -like '__CD_YAZI__*') {
+            $cleanSelected = $selected -replace '^__CD_YAZI__', '' -replace '^★ ', ''
+            $fullPath = Join-Path $currentPath $cleanSelected
+            if (Test-Path $fullPath -PathType Container) {
+                Set-Location $fullPath
+            } else {
+                Set-Location (Split-Path $fullPath -Parent)
+            }
+            Write-Host "[cdx] yazi: $(Get-Location)" -ForegroundColor DarkGray
+            yazi (Get-Location).Path
+            ShowResult
+            return
         }
 
         # Strip ★ prefix

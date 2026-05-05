@@ -67,15 +67,20 @@ cdx                    # Abre TUI en el directorio actual
 cdx <ruta>             # cd directo si la ruta existe
 cdx <nombre>           # Busca con zoxide, fallback a TUI
 cdx -g <query>         # Búsqueda global por contenido
+cdx ~                  # Atajo directo a $HOME
+cdx ...                # Atajo directo a $HOME
 ```
 
 ## Modos de Uso
 
 ### Jump (cdx `<name>`)
 
-1. Si `<name>` es una ruta que existe → `cd` directo + `ls`.
-2. Si no existe pero zoxide la reconoce → `cd` al resultado de zoxide + `ls`.
-3. Si no se cumple nada → abre la TUI con el query pre-llenado.
+1. Si `<name>` es `~` o `...` → `cd` directo a `$HOME` + `ls`.
+2. Si `<name>` es una ruta que existe → `cd` directo + `ls`.
+3. Si no existe pero zoxide la reconoce → `cd` al resultado de zoxide + `ls`.
+4. Si no se cumple nada → abre la TUI con el query pre-llenado.
+
+Tras el `cd`, si el destino está dentro de un repositorio git, se muestra un mensaje en gris sugiriendo herramientas para abrir el proyecto.
 
 ### Browse (cdx sin argumentos)
 
@@ -91,11 +96,12 @@ Búsqueda global que escanea `~/dev`, `~/.config` y `~` en 3 fases: contenido, n
 |-------|--------|
 | **Enter** | En modo Find: `cd` al directorio. En modo Search: abrir archivo con `bat`. |
 | **Esc** (simple) | Subir al directorio padre (`cd ..`). |
-| **Ctrl+C** | Salir de la TUI (se queda en el directorio actual). |
+| **Ctrl+C** | Salir de la TUI (se queda en el directorio actual). Si es un repo git, sugiere herramientas. |
 | **Ctrl+G** | Alternar entre modo Find (fd) y modo Search (rg). |
 | **Ctrl+A** | Alternar visibilidad de dotfiles (.*). |
 | **Ctrl+W** | Alternar visibilidad de directorios Windows (AppData, ProgramData). |
 | **Ctrl+H** | Ir al home (`~`) inmediatamente. |
+| **Ctrl+O** | `cd` al directorio seleccionado + abrir con **yazi**. Si el item es un archivo, abre su directorio padre. Equivalente a un "open" externo. |
 
 ## Listas de Exclusión
 
@@ -111,14 +117,15 @@ Tres categorías de exclusión configurables al inicio del script:
 
 ## Arquitectura General
 
-El sistema se compone de 4 funciones que se orquestan desde un entry point único:
+El sistema se compone de 5 funciones que se orquestan desde un entry point único:
 
 ```
 Entry Point (cdx)
 ├── Search (-g) ──────> Invoke-CdxSearch ──> Resolve-CdxDestination
 ├── TUI (sin args) ───> Invoke-CdxTui (while-loop infinito)
-├── Direct Path ──────> Show-CdxLocation
-└── Zoxide ───────────> Show-CdxLocation
+├── Shortcuts (~, ...) ──> ShowResult (HOME)
+├── Direct Path ──────> ShowResult
+└── Zoxide ───────────> ShowResult
 ```
 
 La TUI mantiene un **bucle infinito** (`while ($true)`) que:
@@ -126,17 +133,18 @@ La TUI mantiene un **bucle infinito** (`while ($true)`) que:
 2. Genera items según el modo (fd o rg).
 3. Los pasa a fzf.
 4. Procesa la selección.
-5. Repite hasta que el usuario sale (doble Esc o fzf sin selección en la raíz).
+5. Repite hasta que el usuario sale (Esc en raíz o Ctrl+C).
 
-## Entry Point — Enrutamiento de 4 Vías
+## Entry Point — Enrutamiento de 5 Vías
 
 El entry point recibe argumentos posicionales y un flag `-g`. La lógica de decisión es secuencial:
 
 1. **Flag `-g` activo** → desvía a la función de búsqueda global (ripgrep sobre múltiples roots). Retorna inmediatamente.
 2. **Sin argumentos** → abre la TUI sin query inicial. Retorna inmediatamente.
-3. **Con argumentos, ruta existe** → hace `Set-Location` directo + muestra el contenido con eza/Get-ChildItem.
-4. **Con argumentos, ruta NO existe, zoxide disponible** → consulta zoxide. Si devuelve algo, navega ahí.
-5. **Fallback** → abre la TUI con el query como `-InitialQuery`, que fzf usará como texto pre-escrito.
+3. **Atajos a `$HOME`** → si el query es `~` o `...`, navega a `$HOME` + `ShowResult`.
+4. **Con argumentos, ruta existe** → hace `Set-Location` directo + `ShowResult`.
+5. **Con argumentos, ruta NO existe, zoxide disponible** → consulta zoxide. Si devuelve algo, navega ahí + `ShowResult`.
+6. **Fallback** → abre la TUI con el query como `-InitialQuery`, que fzf usará como texto pre-escrito.
 
 ## Sistema de Estado — Máscara de 3 Bits
 
@@ -343,6 +351,57 @@ Cuando se selecciona un path (desde búsqueda -g o desde preview):
 
 **Justificación del git root:** Cuando buscas un archivo específico, probablemente quieras trabajar en el contexto del repositorio completo, no en el subdirectorio profundo donde está el archivo.
 
+## ShowResult — Display Unificado Post-Navegación
+
+`ShowResult` es la función única que maneja todo el output después de que `cdx` finaliza su navegación. Consolida tres responsabilidades que antes estaban duplicadas en 4 lugares del código:
+
+1. **Mostrar el path actual** en cyan (`Write-Host "ruta" -ForegroundColor Cyan`)
+2. **Listar el contenido** con `eza` (o `Get-ChildItem` como fallback)
+3. **Detectar si es un repo git** → sugiere herramientas a usar
+
+### Salida típica en un repo git
+
+```
+~/dev/mi-proyecto
+src/  docs/  tests/  package.json  ...
+  Consider using: yazi, broot, nvim, lazygit, code .
+```
+
+### Puntos de invocación (el único punto de salida de cdx)
+
+- `cdx <ruta>` → `Set-Location` → `ShowResult`
+- `cdx <query>` (zoxide hit) → `Set-Location` → `ShowResult`
+- `cdx ~` / `cdx ...` → `Set-Location $HOME` → `ShowResult`
+- TUI: Ctrl+C → `ShowResult`
+- TUI: Esc en raíz → `ShowResult`
+- TUI: resultados vacíos → `ShowResult`
+
+### Implementación
+
+```powershell
+function ShowResult {
+    $path = (Get-Location).Path
+    $display = if ($path.StartsWith($env:USERPROFILE)) {
+        "~" + $path.Substring($env:USERPROFILE.Length).Replace('\', '/')
+    } else {
+        $path.Replace('\', '/')
+    }
+    Write-Host "`n$display" -ForegroundColor Cyan
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza --icons --group-directories-first
+    } else {
+        Get-ChildItem -Force | Format-Table
+    }
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        $gitRoot = git rev-parse --show-toplevel 2>$null
+        if ($gitRoot) {
+            Write-Host "  Consider using: yazi, broot, nvim, lazygit, code ." -ForegroundColor DarkGray
+        }
+    }
+}
+
+La detección del repo usa `git rev-parse --show-toplevel`. Si no hay git instalado, no se muestra el hint.
+
 ## Infraestructura de Archivos Temporales
 
 La TUI usa **5 archivos temporales** en `$env:TEMP` para comunicación entre procesos:
@@ -444,7 +503,7 @@ Invoke-CdxTui
     │   ├─► Sí: rg --files → items
     │   └─► No: fd --type d + merge zoxide → items
     │
-    ├─► ¿Items vacíos? → mostrar ls, return
+    ├─► ¿Items vacíos? → ShowResult, return
     │
     ├─► Construir fzfArgs
     │   ├── header (atajos)
@@ -455,14 +514,14 @@ Invoke-CdxTui
     ├─► Ejecutar fzf con items
     │
     ├─► GESTIONAR RESULTADO
-    │   ├── (empty) + último Esc reciente →
-    │   │     Doble Esc → restaurar path → return
-    │   │     Simple Esc → cd .. → continue
-    │   ├── (empty) + sin último Esc → cd .. → continue
-    │   └── (selected) →
-    │         __GOTO_HOME__ → cd ~ → continue
-    │         Modo Search → bat archivo → continue
-    │         Modo Find → cd directorio → continue
+    │   ├── (empty) →
+    │   │     con padre → cd .. → continue
+    │   │     en raíz  → ShowResult, return
+    │   ├── (selected) →
+    │   │     __GOTO_HOME__ → cd ~ → continue
+    │   │     __EXIT_CDX__ → ShowResult, return
+    │   │     Modo Search → bat archivo → continue
+    │   │     Modo Find → cd directorio → continue
     │
     └─► Repetir loop
 ```
@@ -482,7 +541,7 @@ Invoke-CdxTui
 
 - `--header-lines 1` trata la primera línea del input como header (no seleccionable, pero visible en el preview). Esto permite que la línea de estado aparezca en la preview.
 - `reload(...)` en fzf reemplaza el contenido del input. El script de reload debe imprimir los items (incluyendo la línea de header) a stdout.
-- `become(...)` reemplaza el proceso actual de fzf con otro comando. Ctrl+H usa `become(echo __GOTO_HOME__)` y Ctrl+C usa `become(echo __EXIT_CDX__)` para simular items especiales, que luego el loop padre reconoce por los strings `__GOTO_HOME__` y `__EXIT_CDX__`.
+- `become(...)` reemplaza el proceso actual de fzf con otro comando. Ctrl+H usa `become(echo __GOTO_HOME__)`, Ctrl+C usa `become(echo __EXIT_CDX__)`, y Ctrl+O usa `become(echo __CD_YAZI__{})` para simular items especiales. El loop padre reconoce estos strings y ejecuta la acción correspondiente. En el caso de `__CD_YAZI__`, el path se extrae del prefijo y se lanza `yazi` tras hacer `cd`.
 
 ### Modo Search en Root Drives
 
