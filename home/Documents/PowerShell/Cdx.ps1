@@ -124,10 +124,10 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
 "`$displayPath | `$rgLabel | `$hiddenLabel"
 
 if (`$rgMode) {
-    `$cmd = @('rg', '--files', `$currentPath, '--smart-case')
-    if (`$showHidden) { `$cmd += '--hidden' }
-    '!node_modules','!.git','!.cache','!vendor','!target','!build','!dist' | ForEach-Object { `$cmd += '--glob'; `$cmd += `$_ }
-    & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
+    `$cmdArgs = @('--files', `$currentPath, '--smart-case')
+    if (`$showHidden) { `$cmdArgs += '--hidden' }
+    '!node_modules','!.git','!.cache','!vendor','!target','!build','!dist' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += `$_ }
+    & rg @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
 } else {
     `$isRoot = (`$currentPath -eq [System.IO.Path]::GetPathRoot(`$currentPath))
     if (`$isRoot) {
@@ -137,11 +137,11 @@ if (`$rgMode) {
             Get-ChildItem -Directory -Path `$currentPath -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
         }
     } else {
-        `$cmd = @('fd', '--base-directory', `$currentPath, '--type', 'd')
-        if (`$showHidden) { `$cmd += '--hidden' }
-        'node_modules','.git','.cache','vendor','target','build','dist' | ForEach-Object { `$cmd += '--exclude'; `$cmd += `$_ }
-        `$cmd += '.'
-        `$fdDirs = & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
+        `$cmdArgs = @('--base-directory', `$currentPath, '--type', 'd')
+        if (`$showHidden) { `$cmdArgs += '--hidden' }
+        'node_modules','.git','.cache','vendor','target','build','dist' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
+        `$cmdArgs += '.'
+        `$fdDirs = & fd @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
 
         # Zoxide merge
         `$zoxPath = "`$env:TEMP\cdx_zoxide_cache.txt"
