@@ -142,18 +142,27 @@ Set-Content -Path $env:TEMP\cdx_state.txt -Value $s -Force -NoNewline
             }
         } else {
             # ===== MODO FD: listar CARPETAS =====
-            $fdArgs = @('--base-directory', $currentPath, '--type', 'd')
-            if ($showHidden) { $fdArgs += '--hidden' }
-            $fdArgs += '--exclude', 'node_modules'
-            $fdArgs += '--exclude', '.git'
-            $fdArgs += '--exclude', '.cache'
-            $fdArgs += '--exclude', 'vendor'
-            $fdArgs += '--exclude', 'target'
-            $fdArgs += '--exclude', 'build'
-            $fdArgs += '--exclude', 'dist'
-            $fdArgs += '.'
+            $isRoot = ($currentPath -eq [System.IO.Path]::GetPathRoot($currentPath))
 
-            $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/').TrimEnd('/') }
+            if ($isRoot) {
+                # At drive root (C:\): show children only (97K+ dirs via fd is slow)
+                $gciArgs = @('-Directory', $currentPath)
+                if ($showHidden) { $gciArgs += '-Force' }
+                $fdDirs = Get-ChildItem @gciArgs | Select-Object -ExpandProperty Name
+            } else {
+                # Normal dir: recursive fd
+                $fdArgs = @('--base-directory', $currentPath, '--type', 'd')
+                if ($showHidden) { $fdArgs += '--hidden' }
+                $fdArgs += '--exclude', 'node_modules'
+                $fdArgs += '--exclude', '.git'
+                $fdArgs += '--exclude', '.cache'
+                $fdArgs += '--exclude', 'vendor'
+                $fdArgs += '--exclude', 'target'
+                $fdArgs += '--exclude', 'build'
+                $fdArgs += '--exclude', 'dist'
+                $fdArgs += '.'
+                $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/').TrimEnd('/') }
+            }
 
             # Zoxide merge
             $zoxideMap = @{}
