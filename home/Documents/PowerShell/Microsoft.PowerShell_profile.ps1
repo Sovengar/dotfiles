@@ -102,6 +102,10 @@ if (Get-Module -ListAvailable -Name PSFzf) {
                     -EnableAliasFuzzyGitStatus
 }
 
+# rgx — fzf + ripgrep content search (rg vitaminado)
+$fzfRgScript = Join-Path $PSScriptRoot 'FzfRg.ps1'
+if (Test-Path $fzfRgScript) { . $fzfRgScript }
+
 # Cargar completion de Datree
 $datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
 if (Test-Path $datreeCompletion) { . $datreeCompletion }
@@ -116,3 +120,4 @@ if (Test-Path $datreeCompletion) { . $datreeCompletion }
 if (Get-Command mise -ErrorAction SilentlyContinue) {
     (&mise activate pwsh) | Out-String | Invoke-Expression
 }
+. 'C:\Users\buble\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1'
