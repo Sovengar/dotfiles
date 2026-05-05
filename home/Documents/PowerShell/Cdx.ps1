@@ -6,7 +6,7 @@
 # TUI:     fd/rg toggle Ctrl+R | dotfiles Ctrl+A | WinHidden Ctrl+W | home Ctrl+H
 # ============================
 
-$script:CdxExcludeCatA    = @('node_modules', '.git', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist')
+$script:CdxExcludeCatA    = @('node_modules', '.git', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'lib', 'platform')
 $script:CdxExcludeCatC    = @('AppData', 'ProgramData')
 $script:CdxExcludeCatAPath = @('**/go/pkg/mod')
 
@@ -143,7 +143,7 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
 if (`$rgMode) {
     `$cmdArgs = @('--files', `$currentPath, '--smart-case')
     if (`$showDotfiles -or `$showWinHidden) { `$cmdArgs += '--hidden' }
-    'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" }
+    'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" }
     '**/go/pkg/mod' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" }
     if (-not `$showDotfiles) { `$cmdArgs += '--glob'; `$cmdArgs += '!.*' }
     if (-not `$showWinHidden) { 'AppData','ProgramData' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" } }
@@ -164,7 +164,7 @@ if (`$rgMode) {
     } else {
         `$cmdArgs = @('--base-directory', `$currentPath, '--type', 'd')
         if (`$showDotfiles -or `$showWinHidden) { `$cmdArgs += '--hidden' }
-        'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
+        'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
         '**/go/pkg/mod' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
         if (-not `$showDotfiles) { `$cmdArgs += '--exclude'; `$cmdArgs += '.*' }
         if (-not `$showWinHidden) { 'AppData','ProgramData' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ } }
@@ -187,7 +187,7 @@ if (`$rgMode) {
                     `$parts = `$rel -split '/'
                     `$skip = `$false
                     foreach (`$p in `$parts) {
-                        if (`$p -in @('node_modules','.git','.cache','cache','licenses','vendor','target','build','dist')) { `$skip = `$true; break }
+                        if (`$p -in @('node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform')) { `$skip = `$true; break }
                     }
                     if (-not `$skip -and `$rel -match '(^|/)go/pkg/mod($|/)') { `$skip = `$true }
                     if (-not `$skip -and -not `$zMap.ContainsKey(`$rel)) {
@@ -528,7 +528,7 @@ function Invoke-CdxSearch {
                 Select-Object -ExpandProperty FullName
         }
     }
-    $excludeDirNames = @('node_modules', '.git', 'AppData', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist')
+    $excludeDirNames = @('node_modules', '.git', 'AppData', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'lib', 'platform')
     $dirMatches += Get-ChildItem $HOME -Directory -Recurse -Depth $maxSecondaryDepth -Force -ErrorAction SilentlyContinue |
         Where-Object { ($_.FullName -like "*$Query*") -and ($excludeDirNames -notcontains $_.Name) } |
         Select-Object -ExpandProperty FullName
