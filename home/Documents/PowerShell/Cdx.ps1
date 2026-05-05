@@ -146,9 +146,11 @@ Set-Content -Path $env:TEMP\cdx_state.txt -Value $s -Force -NoNewline
 
             if ($isRoot) {
                 # At drive root (C:\): show children only (97K+ dirs via fd is slow)
-                $gciArgs = @('-Directory', $currentPath)
-                if ($showHidden) { $gciArgs += '-Force' }
-                $fdDirs = Get-ChildItem @gciArgs | Select-Object -ExpandProperty Name
+                $fdDirs = if ($showHidden) {
+                    Get-ChildItem -Directory -Path $currentPath -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+                } else {
+                    Get-ChildItem -Directory -Path $currentPath -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+                }
             } else {
                 # Normal dir: recursive fd
                 $fdArgs = @('--base-directory', $currentPath, '--type', 'd')
