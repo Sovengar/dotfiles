@@ -37,6 +37,7 @@ function cdx {
     # 3) Con query → cd directo → zoxide → TUI con query pre-llenada
     if (Test-Path $Query) {
         Set-Location $Query
+        Show-CdxLocation
         return
     }
 
@@ -45,12 +46,31 @@ function cdx {
         $result = zoxide query $Query 2>$null
         if ($result) {
             Set-Location $result
+            Show-CdxLocation
             return
         }
     }
 
     # Fallback: TUI con query pre-llenada
     Invoke-CdxTui -InitialQuery $Query
+}
+
+# ============================
+# Show-CdxLocation — ls tras cd
+# ============================
+function Show-CdxLocation {
+    $path = (Get-Location).Path
+    $display = if ($path.StartsWith($env:USERPROFILE)) {
+        "~" + $path.Substring($env:USERPROFILE.Length).Replace('\', '/')
+    } else {
+        $path.Replace('\', '/')
+    }
+    Write-Host "`n$display" -ForegroundColor Cyan
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza --icons --group-directories-first
+    } else {
+        Get-ChildItem -Force | Format-Table
+    }
 }
 
 # ============================
