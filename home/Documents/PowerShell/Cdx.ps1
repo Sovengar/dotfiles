@@ -6,7 +6,7 @@
 # TUI:     fd/rg toggle Ctrl+R | dotfiles Ctrl+A | WinHidden Ctrl+W | home Ctrl+H
 # ============================
 
-$script:CdxExcludeCatA    = @('node_modules', '.git', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'lib', 'platform')
+$script:CdxExcludeCatA    = @('node_modules', '.git', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'modules', 'lib', 'platform')
 $script:CdxExcludeCatC    = @('AppData', 'ProgramData')
 $script:CdxExcludeCatAPath = @('**/go/pkg/mod')
 
@@ -115,6 +115,12 @@ function Invoke-CdxTui {
 
     # Reload script — toggles state bit and regenerates items in real-time
     $reloadScript = Join-Path $env:TEMP 'cdx_reload.ps1'
+
+    # Build inline arrays from script-scope variables (single source of truth)
+    $catAInline = "'" + (($script:CdxExcludeCatA | ForEach-Object { $_ }) -join "','") + "'"
+    $catCInline = "'" + (($script:CdxExcludeCatC | ForEach-Object { $_ }) -join "','") + "'"
+    $catAPathInline = "'" + (($script:CdxExcludeCatAPath | ForEach-Object { $_ }) -join "','") + "'"
+
     @"
 param([int]`$ToggleBit = 1)
 
@@ -130,6 +136,11 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
 
 [Console]::Error.WriteLine("[cdx] toggle bit=`$(`$ToggleBit): `$oldS -> `$s (rg=`$rgMode, dot=`$showDotfiles, win=`$showWinHidden)")
 
+# Injected exclude lists (single source of truth)
+`$catA = @($catAInline)
+`$catC = @($catCInline)
+`$catAPath = @($catAPathInline)
+
 # Mode line (consumed by --header-lines 1)
 `$homePath      = `$env:USERPROFILE
 `$displayPath = if (`$currentPath.StartsWith(`$homePath)) {
@@ -143,10 +154,10 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
 if (`$rgMode) {
     `$cmdArgs = @('--files', `$currentPath, '--smart-case')
     if (`$showDotfiles -or `$showWinHidden) { `$cmdArgs += '--hidden' }
-    'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" }
-    '**/go/pkg/mod' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" }
+    foreach (`$d in `$catA) { `$cmdArgs += '--glob'; `$cmdArgs += "!`$d" }
+    foreach (`$d in `$catAPath) { `$cmdArgs += '--glob'; `$cmdArgs += "!`$d" }
     if (-not `$showDotfiles) { `$cmdArgs += '--glob'; `$cmdArgs += '!.*' }
-    if (-not `$showWinHidden) { 'AppData','ProgramData' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += "!`$_" } }
+    if (-not `$showWinHidden) { foreach (`$d in `$catC) { `$cmdArgs += '--glob'; `$cmdArgs += "!`$d" } }
     [Console]::Error.WriteLine("[cdx] rg args: `$(`$cmdArgs -join ' ')")
     & rg @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
 } else {
@@ -154,7 +165,7 @@ if (`$rgMode) {
     if (`$isRoot) {
         if (`$showDotfiles -or `$showWinHidden) {
             if (-not `$showWinHidden) {
-                Get-ChildItem -Directory -Path `$currentPath -Force -ErrorAction SilentlyContinue -Exclude 'AppData','ProgramData' | Select-Object -ExpandProperty Name
+                Get-ChildItem -Directory -Path `$currentPath -Force -ErrorAction SilentlyContinue -Exclude `$catC | Select-Object -ExpandProperty Name
             } else {
                 Get-ChildItem -Directory -Path `$currentPath -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
             }
@@ -164,10 +175,10 @@ if (`$rgMode) {
     } else {
         `$cmdArgs = @('--base-directory', `$currentPath, '--type', 'd')
         if (`$showDotfiles -or `$showWinHidden) { `$cmdArgs += '--hidden' }
-        'node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
-        '**/go/pkg/mod' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
+        foreach (`$d in `$catA) { `$cmdArgs += '--exclude'; `$cmdArgs += `$d }
+        foreach (`$d in `$catAPath) { `$cmdArgs += '--exclude'; `$cmdArgs += `$d }
         if (-not `$showDotfiles) { `$cmdArgs += '--exclude'; `$cmdArgs += '.*' }
-        if (-not `$showWinHidden) { 'AppData','ProgramData' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ } }
+        if (-not `$showWinHidden) { foreach (`$d in `$catC) { `$cmdArgs += '--exclude'; `$cmdArgs += `$d } }
         `$cmdArgs += '.'
         [Console]::Error.WriteLine("[cdx] fd args: `$(`$cmdArgs -join ' ')")
         `$fdDirs = & fd @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
@@ -187,7 +198,7 @@ if (`$rgMode) {
                     `$parts = `$rel -split '/'
                     `$skip = `$false
                     foreach (`$p in `$parts) {
-                        if (`$p -in @('node_modules','.git','.cache','cache','licenses','vendor','target','build','dist','Modules','lib','platform')) { `$skip = `$true; break }
+                        if (`$p -in `$catA) { `$skip = `$true; break }
                     }
                     if (-not `$skip -and `$rel -match '(^|/)go/pkg/mod($|/)') { `$skip = `$true }
                     if (-not `$skip -and -not `$zMap.ContainsKey(`$rel)) {
@@ -312,7 +323,7 @@ if (`$rgMode) {
                 if (-not $zoxideMap.ContainsKey($d)) { $items += $d }
             }
 
-            # Preview script para dirs
+            # Preview script para dirs (dir + git status)
             $previewScript = Join-Path $env:TEMP 'cdx_preview.ps1'
             @"
 param([string]`$Path)
@@ -321,18 +332,62 @@ param([string]`$Path)
 `$basePath = `$env:CDX_PREVIEW_BASE
 if (-not `$basePath) { `$basePath = Get-Location }
 `$fullPath = Join-Path `$basePath `$Path
+
 if (Test-Path `$fullPath -PathType Container) {
     if (Get-Command eza -ErrorAction SilentlyContinue) {
-        eza --icons --group-directories-first --color=always `$fullPath
+        `$dirOut = (eza --icons --group-directories-first --color=always `$fullPath 2>`$null) -join "`n"
     } else {
-        Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime
+        `$dirOut = (Get-ChildItem `$fullPath | Format-Table Name,Mode,LastWriteTime | Out-String) -join "`n"
     }
+
+    `$gitStatus = ''
+    `$gitDir = Join-Path `$fullPath '.git'
+    if (Test-Path `$gitDir -PathType Container) {
+        Push-Location `$fullPath
+        try {
+            `$gitStatus = git status --short 2>`$null
+            if (-not `$gitStatus) { `$gitStatus = 'Clean' }
+        } catch {
+            `$gitStatus = 'Not a git repo'
+        }
+        Pop-Location
+    }
+
+    @"
+=== CONTENTS ===
+`$dirOut
+
+=== GIT STATUS ===
+`$gitStatus
+"@
 } elseif (Test-Path `$fullPath) {
+    `$gitStatus = ''
+    `$gitDir = Split-Path `$fullPath -Parent
+    `$isTracked = `$false
+    Push-Location `$gitDir
+    try {
+        `$gitRoot = git rev-parse --show-toplevel 2>`$null
+        if (`$gitRoot) {
+            `$relativePath = `$fullPath.Replace(`$gitRoot, '').Trim('\', '/')
+            `$gitStatus = git status --short `$relativePath 2>`$null
+            `$isTracked = `$true
+        }
+    } catch {}
+    Pop-Location
+
+    `$filePreview = ''
     if (Get-Command bat -ErrorAction SilentlyContinue) {
-        bat --color=always --line-range :50 `$fullPath
+        `$filePreview = bat --color=always --line-range :50 `$fullPath 2>`$null
     } else {
-        Get-Content `$fullPath -TotalCount 50
+        `$filePreview = Get-Content `$fullPath -TotalCount 50
     }
+
+    @"
+`$filePreview
+
+=== GIT STATUS ===
+`$gitStatus
+"@
 }
 "@ | Set-Content -Path $previewScript -Force
             $preview = "pwsh -NoProfile -File `"$previewScript`" {}"
@@ -360,7 +415,7 @@ if (Test-Path `$fullPath -PathType Container) {
             "--header=$header",
             '--header-lines=1',
             "--preview=$preview",
-            '--preview-window=right:60%,border-rounded',
+            '--preview-window=right:35%,border-rounded',
             "--bind=ctrl-r:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 1)",
             "--bind=ctrl-a:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 2)",
             "--bind=ctrl-w:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 4)",
@@ -480,17 +535,10 @@ function Invoke-CdxSearch {
     $maxPriorityDepth = 6
     $maxSecondaryDepth = 5
 
-    $excludeGlobs = @(
-        '--glob', '!node_modules',
-        '--glob', '!.git',
-        '--glob', '!AppData',
-        '--glob', '!.cache',
-        '--glob', '!vendor',
-        '--glob', '!target',
-        '--glob', '!build',
-        '--glob', '!dist',
-        '--glob', '!**/go/pkg/mod'
-    )
+    $excludeGlobs = @()
+    foreach ($d in $script:CdxExcludeCatA) { $excludeGlobs += '--glob'; $excludeGlobs += "!$d" }
+    foreach ($d in $script:CdxExcludeCatC) { $excludeGlobs += '--glob'; $excludeGlobs += "!$d" }
+    foreach ($p in $script:CdxExcludeCatAPath) { $excludeGlobs += '--glob'; $excludeGlobs += "!$p" }
 
     Write-Host "[i] Searching for '$Query'..." -ForegroundColor Cyan
 
@@ -528,7 +576,7 @@ function Invoke-CdxSearch {
                 Select-Object -ExpandProperty FullName
         }
     }
-    $excludeDirNames = @('node_modules', '.git', 'AppData', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'lib', 'platform')
+    $excludeDirNames = $script:CdxExcludeCatA + $script:CdxExcludeCatC
     $dirMatches += Get-ChildItem $HOME -Directory -Recurse -Depth $maxSecondaryDepth -Force -ErrorAction SilentlyContinue |
         Where-Object { ($_.FullName -like "*$Query*") -and ($excludeDirNames -notcontains $_.Name) } |
         Select-Object -ExpandProperty FullName
