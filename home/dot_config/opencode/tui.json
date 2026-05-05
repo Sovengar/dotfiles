@@ -7,7 +7,13 @@
   ],
   "theme": "ayu-dark",
   "keybinds": {
-    "leader": "ctrl+x"
+    "leader": "ctrl+x",
+    "scroll_down": "j",
+    "scroll_up": "k",
+    "scroll_half_down": "ctrl+d",
+    "scroll_half_up": "ctrl+u",
+    "scroll_top": "g",
+    "scroll_bottom": "G"
   },
   "scroll_speed": 5,
   "scroll_acceleration": {

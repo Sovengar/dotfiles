@@ -2,6 +2,17 @@ local wezterm = require "wezterm"
 
 local M = {}
 
+local _cache = {}
+local function cached(key, ttl, fn)
+  local now = os.time()
+  if _cache[key] and (now - _cache[key].time) < ttl then
+    return _cache[key].value
+  end
+  local value = fn()
+  _cache[key] = { value = value, time = now }
+  return value
+end
+
 local function is_ssh_active(pane)
   local process_name = pane:get_foreground_process_name()
   if process_name and process_name:lower():find("ssh") then
@@ -42,6 +53,31 @@ local function is_dark_mode()
   return false
 end
 
+local function get_battery()
+  local ok, stdout, _ = wezterm.run_child_process {
+    'wmic', 'path', 'Win32_Battery', 'get', 'EstimatedChargeRemaining,BatteryStatus'
+  }
+  if ok and stdout then
+    local charge, status = stdout:match('(%d+)%s+(%d+)')
+    if charge and status then
+      local icon = status == '2' and ' 󱟨 ' or ' 󰁹 '
+      return icon .. charge .. '%'
+    end
+  end
+  return nil
+end
+
+local function get_network()
+  local ok, stdout, _ = wezterm.run_child_process { 'netsh', 'wlan', 'show', 'interfaces' }
+  if ok and stdout then
+    local ssid = stdout:match('SSID%s-:%s(.+)')
+    if ssid then
+      return ' 󰤨 ' .. ssid
+    end
+  end
+  return nil
+end
+
 M.setup = function(theme)
   local styles = {
     highlight = theme.active_status.fg_color,
@@ -76,6 +112,18 @@ M.setup = function(theme)
     table.insert(cells, { Text = ' 󰻠 ' .. cpu .. '%' })
     table.insert(cells, { Foreground = { Color = styles.dim } })
     table.insert(cells, { Text = ' 󰾭 ' .. mem .. '%' })
+
+    local battery = cached('battery', 30, get_battery)
+    if battery then
+      table.insert(cells, { Foreground = { Color = styles.dim } })
+      table.insert(cells, { Text = battery })
+    end
+
+    local network = cached('network', 30, get_network)
+    if network then
+      table.insert(cells, { Foreground = { Color = styles.dim } })
+      table.insert(cells, { Text = network })
+    end
 
     local time_str = os.date('%H:%M')
     table.insert(cells, { Foreground = { Color = styles.dim } })

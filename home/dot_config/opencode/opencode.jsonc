@@ -15,7 +15,7 @@
     // DISABLED: replaced by opencode-selective-snip
     // "opencode-snip@latest",
     "opencode-selective-snip",
-    "@tarquinen/opencode-dcp@latest",
+    //Pesao de mierda me interrumpe y lo vuelve loco "@tarquinen/opencode-dcp@latest",
 
     // AGENTS
     "@gotgenes/opencode-agent-identity",

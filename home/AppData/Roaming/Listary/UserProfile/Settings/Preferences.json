@@ -33,14 +33,6 @@
           "Index": -1,
           "Info": null,
           "Item": {
-            "CustomCommandId": "da47b8cf-6125-49b0-b30e-ab63ebb43224",
-            "$customType": "CustomCommand"
-          }
-        },
-        {
-          "Index": -1,
-          "Info": null,
-          "Item": {
             "Name": "Home",
             "Path": "C:\\Users\\buble",
             "$customType": "FavoriteFolder"
@@ -52,6 +44,15 @@
           "Item": {
             "Name": "Programs",
             "Path": "C:\\Users\\buble\\Dropbox\\Programs",
+            "$customType": "FavoriteFolder"
+          }
+        },
+        {
+          "Index": -1,
+          "Info": null,
+          "Item": {
+            "Name": "Games",
+            "Path": "C:\\Users\\buble\\Dropbox\\Games",
             "$customType": "FavoriteFolder"
           }
         },
@@ -146,15 +147,6 @@
           "Info": null,
           "Item": {
             "$customType": "Separator"
-          }
-        },
-        {
-          "Index": -1,
-          "Info": null,
-          "Item": {
-            "Name": "Games",
-            "Path": "C:\\Users\\buble\\Dropbox\\Games",
-            "$customType": "FavoriteFolder"
           }
         }
       ],

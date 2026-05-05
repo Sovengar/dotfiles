@@ -11,7 +11,7 @@ M.font = wezterm.font_with_fallback({
   { family = 'Symbols Nerd Font Mono', weight = 'Regular' },
 })
 
-M.font_size = 17
+M.font_size = 16
 M.line_height = 1.2
 M.foreground_text_hsb = {
   hue = 1.0,
