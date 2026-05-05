@@ -147,8 +147,8 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
     "~" + `$currentPath.Substring(`$homePath.Length).Replace('\', '/')
 } else { `$currentPath.Replace('\', '/') }
 `$modeLabel = if (`$rgMode) { 'Grep mode' } else { 'Find mode' }
-`$dotLabel = if (`$showDotfiles) { 'dotfiles: visible' } else { 'dotfiles: hidden' }
-`$winLabel = if (`$showWinHidden) { 'WinHidden: visible' } else { 'WinHidden: hidden' }
+`$dotLabel = if (`$showDotfiles) { 'dotfiles: ✓' } else { 'dotfiles: ✗' }
+`$winLabel = if (`$showWinHidden) { 'WinHidden: ✓' } else { 'WinHidden: ✗' }
 "`$displayPath | `$modeLabel | `$dotLabel | `$winLabel"
 
 if (`$rgMode) {
@@ -230,8 +230,8 @@ if (`$rgMode) {
         # Mode & state labels for header
         $enterLabel = if ($rgMode) { 'open' } else { 'cd' }
         $modeLabel  = if ($rgMode) { 'Grep mode' } else { 'Find mode' }
-        $dotLabel   = if ($showDotfiles)  { 'dotfiles: visible' } else { 'dotfiles: hidden' }
-        $winLabel   = if ($showWinHidden) { 'WinHidden: visible' } else { 'WinHidden: hidden' }
+        $dotLabel   = if ($showDotfiles)  { 'dotfiles: ✓' } else { 'dotfiles: ✗' }
+        $winLabel   = if ($showWinHidden) { 'WinHidden: ✓' } else { 'WinHidden: ✗' }
 
         Write-Host "[cdx] loop: $displayPath | state=$state | $modeLabel | $dotLabel | $winLabel" -ForegroundColor DarkGray
 
