@@ -19,28 +19,19 @@ local function check_vpn_status()
   return false
 end
 
-local function get_cpu_usage()
-  local ok, stdout, _ = wezterm.run_child_process { 'wmic', 'cpu', 'get', 'loadpercentage' }
-  if ok and stdout then
-    local cpu = stdout:match('(%d+)')
-    if cpu then
-      return cpu
-    end
+local function get_system_stats()
+  local ok, stdout, _ = wezterm.run_child_process {
+    'cmd', '/c', 'wmic cpu get loadpercentage /value & wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /value'
+  }
+  if not ok or not stdout then return 'N/A', 'N/A' end
+  local cpu = stdout:match('LoadPercentage=(%d+)')
+  local free, total = stdout:match('FreePhysicalMemory=(%d+).-TotalVisibleMemorySize=(%d+)')
+  if cpu and free and total then
+    local used = tonumber(total) - tonumber(free)
+    local mem = math.floor((used / tonumber(total)) * 100)
+    return cpu, tostring(mem)
   end
-  return 'N/A'
-end
-
-local function get_mem_usage()
-  local ok, stdout, _ = wezterm.run_child_process { 'wmic', 'OS', 'get', 'FreePhysicalMemory,TotalVisibleMemorySize' }
-  if ok and stdout then
-    local free, total = stdout:match('(%d+)%s+(%d+)')
-    if free and total then
-      local used = tonumber(total) - tonumber(free)
-      local percent = math.floor((used / tonumber(total)) * 100)
-      return tostring(percent)
-    end
-  end
-  return 'N/A'
+  return 'N/A', 'N/A'
 end
 
 local function is_dark_mode()
@@ -80,13 +71,15 @@ M.setup = function(theme)
     table.insert(cells, { Foreground = { Color = mode_color } })
     table.insert(cells, { Text = ' 󰔎 ' })
 
-    local cpu = get_cpu_usage()
+    local cpu, mem = get_system_stats()
     table.insert(cells, { Foreground = { Color = styles.dim } })
     table.insert(cells, { Text = ' 󰻠 ' .. cpu .. '%' })
-
-    local mem = get_mem_usage()
     table.insert(cells, { Foreground = { Color = styles.dim } })
     table.insert(cells, { Text = ' 󰾭 ' .. mem .. '%' })
+
+    local time_str = os.date('%H:%M')
+    table.insert(cells, { Foreground = { Color = styles.dim } })
+    table.insert(cells, { Text = '  ' .. time_str })
 
     window:set_right_status(wezterm.format(cells))
   end)
