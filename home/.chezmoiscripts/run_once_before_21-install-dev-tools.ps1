@@ -33,7 +33,12 @@ $wingetApps = @(
     "WinSCP.WinSCP",
     "JesseDuffield.lazygit",
     "OpenAI.Codex",
-    "GitKraken.cli"
+    "GitKraken.cli",
+    "sharkdp.hyperfine",
+    "sharkdp.pastel",
+    "jj-vcs.jj",
+    "sxyazi.yazi",
+    "Dystroy.broot"
 )
 
 foreach ($app in $wingetApps) {
@@ -69,7 +74,7 @@ if (Test-Path "$miseBinDir\mise.exe") {
 # ============================================
 # 3. GLOBAL PACKAGE MANAGERS (npm, bun, go)
 # ============================================
-npm install -g @openai/codex backlog.md @devcontainers/cli tree-sitter-cli
+npm install -g @openai/codex backlog.md @devcontainers/cli tree-sitter-cli kill-port @usebruno/cli http-server pm2 snyk portless
 bun install -g opencode-ai
 go install github.com/edouard-claude/snip/cmd/snip@latest
 go install github.com/sorenisanerd/gotty@latest
