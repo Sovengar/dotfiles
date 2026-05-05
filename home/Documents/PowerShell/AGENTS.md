@@ -8,6 +8,7 @@ Perfil de PowerShell con herramientas de navegación TUI, aliases tipo Unix, y c
 
 - `Microsoft.PowerShell_profile.ps1` — Entry point. Carga todo lo demás.
 - `Cdx.ps1` — `cdx`: Navegador interactivo de directorios con fzf+fd+rg. Toggle Ctrl+R (fd↔rg), Ctrl+A (dotfiles), Ctrl+W (WinHidden), DobleEsc (exit).
+- `CDX_DOCUMENTATION.md` — Documentación técnica (usuario + IA) de cdx. Debe reflejar siempre el estado actual de Cdx.ps1.
 - `LinuxAliases.ps1` — Comandos tipo Unix: `ls` (eza), `grep` (rg), `find` (fd), `touch`, `head`, `tail`, `which`, `df`, `du`, `uptime`, `ps`, `wc`, `rm -rf`, `btm`.
 
 ## Dependencias Externas
@@ -33,6 +34,7 @@ Perfil de PowerShell con herramientas de navegación TUI, aliases tipo Unix, y c
 - NO modificar `Cdx.ps1` sin verificar que `cdx` function siga funcionando
 - NO eliminar/excluir paths sin revisar `$script:CdxExcludeCatA` y `$script:CdxExcludeCatC`
 - NO agregar dotfiles al profile sin preguntar
+- NO modificar `Cdx.ps1` sin actualizar `CDX_DOCUMENTATION.md` para reflejar los cambios (comportamiento, nuevos flags, cambios en atajos, etc.)
 
 ## Versionado con Chezmoi
 

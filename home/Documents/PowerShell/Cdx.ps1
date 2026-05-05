@@ -100,11 +100,6 @@ function Invoke-CdxTui {
     Set-Content -Path $stateFile -Value '2' -Force -NoNewline
     Write-Host "[cdx] state init: 2 (dotfiles=ON, WinHidden=OFF)" -ForegroundColor DarkGray
 
-    $escFile = Join-Path $env:TEMP 'cdx_esc.txt'
-    Set-Content -Path $escFile -Value '0' -Force -NoNewline
-    $lastEscPathFile = Join-Path $env:TEMP 'cdx_esc_path.txt'
-    $doubleEscMs = 1500
-
     function Format-DisplayPath {
         param([string]$Path)
         if ($Path.StartsWith($env:USERPROFILE)) {
@@ -429,7 +424,7 @@ if (Test-Path $fullPath -PathType Container) {
         }
 
         # Header (above fzf prompt)
-        $header = "Enter ($enterLabel) | Esc (cd ..) | DobleEsc (Exit) | Ctrl+H (cd ~)`nCtrl+G (Grep) | Ctrl+A (dotfiles) | Ctrl+W (WinHidden)"
+        $header = "Enter ($enterLabel) | Esc (cd ..) | Ctrl+C (Exit) | Ctrl+H (cd ~)`nCtrl+G (Grep) | Ctrl+A (dotfiles) | Ctrl+W (WinHidden)"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
@@ -442,6 +437,7 @@ if (Test-Path $fullPath -PathType Container) {
             "--bind=ctrl-g:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 1)",
             "--bind=ctrl-a:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 2)",
             "--bind=ctrl-w:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 4)",
+            '--bind=ctrl-c:become(echo __EXIT_CDX__)',
             '--bind=ctrl-h:become(echo __GOTO_HOME__)'
         )
         if ($InitialQuery) {
@@ -461,36 +457,11 @@ if (Test-Path $fullPath -PathType Container) {
             $env:FZF_DEFAULT_OPTS = ''
         }
 
-        # Esc or empty
+        # Esc or empty → cd ..
         if (-not $selected) {
-            $lastEsc = [long]((Get-Content $escFile -Raw).Trim())
-            $now = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
-            $elapsed = $now - $lastEsc
-
             $currentPath = (Get-Location).Path
             $displayPath = Format-DisplayPath -Path $currentPath
-
-            if ($lastEsc -ne 0 -and $elapsed -lt $doubleEscMs) {
-                Write-Host "[cdx] double-esc detected ($elapsed ms), exiting" -ForegroundColor DarkGray
-                $restorePath = if (Test-Path $lastEscPathFile) { (Get-Content $lastEscPathFile -Raw).Trim() } else { '' }
-                if ($restorePath -and (Test-Path $restorePath)) {
-                    Set-Location $restorePath
-                    $currentPath = $restorePath
-                    $displayPath = Format-DisplayPath -Path $currentPath
-                }
-                if ($hasEza) {
-                    Write-Host "`n$displayPath" -ForegroundColor Cyan
-                    eza --icons --group-directories-first
-                } else {
-                    Write-Host "`n$displayPath" -ForegroundColor Cyan
-                    Get-ChildItem -Force | Format-Table
-                }
-                return
-            }
-
-            Write-Host "[cdx] single esc, going up" -ForegroundColor DarkGray
-            Set-Content -Path $escFile -Value $now -Force -NoNewline
-            Set-Content -Path $lastEscPathFile -Value $currentPath -Force -NoNewline
+            Write-Host "[cdx] esc, going up" -ForegroundColor DarkGray
             $parent = Split-Path $currentPath -Parent
             if ($parent -and $parent -ne $currentPath) {
                 Set-Location $parent
@@ -508,10 +479,23 @@ if (Test-Path $fullPath -PathType Container) {
         }
 
         # Handle become outputs
+        if ($selected -eq '__EXIT_CDX__') {
+            Write-Host "[cdx] ctrl+c, exiting" -ForegroundColor DarkGray
+            $currentPath = (Get-Location).Path
+            $displayPath = Format-DisplayPath -Path $currentPath
+            if ($hasEza) {
+                Write-Host "`n$displayPath" -ForegroundColor Cyan
+                eza --icons --group-directories-first
+            } else {
+                Write-Host "`n$displayPath" -ForegroundColor Cyan
+                Get-ChildItem -Force | Format-Table
+            }
+            return
+        }
+
         if ($selected -eq '__GOTO_HOME__') {
             Write-Host "[cdx] goto home" -ForegroundColor DarkGray
             Set-Location $env:USERPROFILE
-            Set-Content -Path $escFile -Value '0' -Force -NoNewline
             continue
         }
 
@@ -526,12 +510,10 @@ if (Test-Path $fullPath -PathType Container) {
             } else {
                 Get-Content $fullPath -TotalCount 50
             }
-            Set-Content -Path $escFile -Value '0' -Force -NoNewline
         } else {
             $targetPath = Join-Path $currentPath $cleanSelected
             Write-Host "[cdx] cd: $targetPath" -ForegroundColor DarkGray
             Set-Location $targetPath
-            Set-Content -Path $escFile -Value '0' -Force -NoNewline
         }
     }
 }

@@ -19,7 +19,6 @@
   - [Sistema de Preview](#sistema-de-preview)
   - [Búsqueda Global (-g): 3 Fases](#búsqueda-global--g-3-fases)
   - [Resolución de Destino](#resolución-de-destino)
-  - [Mecanismo de Doble Esc](#mecanismo-de-doble-esc)
   - [Infraestructura de Archivos Temporales](#infraestructura-de-archivos-temporales)
   - [Script de Reload — Generación Dinámica de Código](#script-de-reload--generación-dinámica-de-código)
   - [Sistema de Exclusión (3 Categorías)](#sistema-de-exclusión-3-categorías)
@@ -92,12 +91,11 @@ Búsqueda global que escanea `~/dev`, `~/.config` y `~` en 3 fases: contenido, n
 |-------|--------|
 | **Enter** | En modo Find: `cd` al directorio. En modo Search: abrir archivo con `bat`. |
 | **Esc** (simple) | Subir al directorio padre (`cd ..`). |
-| **Esc** (doble, <1.5s) | Salir de la TUI y restaurar ubicación anterior. |
+| **Ctrl+C** | Salir de la TUI (se queda en el directorio actual). |
 | **Ctrl+G** | Alternar entre modo Find (fd) y modo Search (rg). |
 | **Ctrl+A** | Alternar visibilidad de dotfiles (.*). |
 | **Ctrl+W** | Alternar visibilidad de directorios Windows (AppData, ProgramData). |
 | **Ctrl+H** | Ir al home (`~`) inmediatamente. |
-| **Escape** (sin selección, arriba del todo) | Salir de la TUI. |
 
 ## Listas de Exclusión
 
@@ -345,36 +343,6 @@ Cuando se selecciona un path (desde búsqueda -g o desde preview):
 
 **Justificación del git root:** Cuando buscas un archivo específico, probablemente quieras trabajar en el contexto del repositorio completo, no en el subdirectorio profundo donde está el archivo.
 
-## Mecanismo de Doble Esc
-
-El doble Esc es el mecanismo para **salir limpiamente** de la TUI y restaurar el contexto.
-
-### Cómo Funciona
-
-1. Se mantienen **dos archivos temporales**:
-   - `cdx_esc.txt`: Timestamp Unix del último Esc.
-   - `cdx_esc_path.txt`: Path donde estaba el usuario cuando presionó Esc.
-
-2. **Primer Esc**: El usuario presiona Esc y fzf devuelve vacío.
-   - Se lee el timestamp actual.
-   - Se escribe el timestamp en `cdx_esc.txt`.
-   - Se guarda el path actual en `cdx_esc_path.txt`.
-   - La TUI sube al directorio padre (`Split-Path`) y continúa el loop.
-
-3. **Segundo Esc dentro de 1.5 segundos**: El usuario vuelve a presionar Esc.
-   - Se lee el timestamp anterior de `cdx_esc.txt`.
-   - Si `ahora - anterior < 1500ms`, se detecta como doble Esc.
-   - Se lee el path guardado de `cdx_esc_path.txt` y se restaura.
-   - Se muestra el contenido del path restaurado.
-   - La TUI **retorna** (sale del bucle infinito).
-
-4. **Si no hay directorio padre**: En la raíz (e.g., `C:\`), un solo Esc también sale de la TUI (no se puede subir más).
-
-### Edge Cases
-
-- Si el usuario presiona Esc dentro del límite pero el path guardado ya no existe, la TUI sale sin restaurar (se queda donde está).
-- El contador se resetea a 0 después de una selección exitosa (Enter).
-
 ## Infraestructura de Archivos Temporales
 
 La TUI usa **5 archivos temporales** en `$env:TEMP` para comunicación entre procesos:
@@ -382,8 +350,6 @@ La TUI usa **5 archivos temporales** en `$env:TEMP` para comunicación entre pro
 | Archivo | Propósito | Contenido |
 |---------|-----------|-----------|
 | `cdx_state.txt` | Estado de 3 bits | Entero (0-7) |
-| `cdx_esc.txt` | Timestamp último Esc | Unix timestamp ms |
-| `cdx_esc_path.txt` | Path para restaurar al salir | Path absoluto |
 | `cdx_reload.ps1` | Script de reload (alternar modos) | Código PowerShell generado |
 | `cdx_preview.ps1` | Script de preview (modo Find) | Código PowerShell fijo |
 | `cdx_zoxide_cache.txt` | Cache de zoxide para procesos hijos | Lista de paths absolutos |
@@ -393,7 +359,6 @@ La TUI usa **5 archivos temporales** en `$env:TEMP` para comunicación entre pro
 - Todos los archivos se crean al inicio de la TUI.
 - `cdx_state.txt` y `cdx_zoxide_cache.txt` se escriben una vez al inicio.
 - `cdx_state.txt` se modifica desde el reload script y se lee en cada iteración del loop.
-- `cdx_esc.txt` y `cdx_esc_path.txt` se escriben en cada Esc y se leen en el siguiente.
 - `cdx_reload.ps1` se genera al inicio y se ejecuta como proceso hijo desde fzf.
 - `cdx_preview.ps1` se genera al inicio y se ejecuta como preview de fzf.
 
@@ -512,13 +477,12 @@ Invoke-CdxTui
 ### Race Conditions
 
 - **Estado del archivo:** El archivo de estado se lee y escribe desde dos procesos (loop padre y reload hijo). En teoría podría haber una race condition si el usuario presiona Ctrl+G/Ctrl+A/CtrlW extremadamente rápido. En la práctica, el tiempo de respuesta de fzf + PowerShell hace que sea improbable.
-- **Restauración de path:** Si entre el doble Esc y la restauración el path original se borra o se vuelve inaccesible, la TUI sale sin restaurar.
 
 ### Comportamiento de fzf
 
 - `--header-lines 1` trata la primera línea del input como header (no seleccionable, pero visible en el preview). Esto permite que la línea de estado aparezca en la preview.
 - `reload(...)` en fzf reemplaza el contenido del input. El script de reload debe imprimir los items (incluyendo la línea de header) a stdout.
-- `become(...)` reemplaza el proceso actual de fzf con otro comando. Ctrl+H usa `become(echo __GOTO_HOME__)` para simular la selección de un item especial, que luego el loop padre reconoce por el string `__GOTO_HOME__`.
+- `become(...)` reemplaza el proceso actual de fzf con otro comando. Ctrl+H usa `become(echo __GOTO_HOME__)` y Ctrl+C usa `become(echo __EXIT_CDX__)` para simular items especiales, que luego el loop padre reconoce por los strings `__GOTO_HOME__` y `__EXIT_CDX__`.
 
 ### Modo Search en Root Drives
 
