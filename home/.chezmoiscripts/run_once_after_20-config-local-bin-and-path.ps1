@@ -458,14 +458,11 @@ if ($machineRemoved.Count -gt 0) {
 }
 
 # ============================================
-# 18. WSL-OPENCODE WRAPPER
+# 18. WSL-OPENCODE WRAPPER (created by script, not tracked by chezmoi)
 # ============================================
-# Managed by chezmoi: home/.local/bin/wsl-opencode.ps1
 $wslOpencodePath = Join-Path $localBin "wsl-opencode.ps1"
-if (-not (Test-Path $wslOpencodePath)) {
-    # Fallback if chezmoi didn't place it (should not happen)
-    $opencodePath = "/home/jon/.opencode/bin/opencode"
-    $wslOpencodeContent = @"
+$opencodePath = "/home/jon/.opencode/bin/opencode"
+$wslOpencodeContent = @"
 #!/usr/bin/env pwsh
 param(
     [Parameter(ValueFromRemainingArguments = `$true)]
@@ -475,11 +472,8 @@ param(
 `$command = "`$opencodePath `$Args"
 wsl bash -lc "`$command"
 "@
-    Set-Content -Path $wslOpencodePath -Value $wslOpencodeContent -Encoding UTF8 -Force
-    Write-Host "[OK] Created wsl-opencode.ps1 wrapper (fallback)" -ForegroundColor Yellow
-} else {
-    Write-Host "[OK] wsl-opencode.ps1 already in place (chezmoi-managed)" -ForegroundColor Green
-}
+Set-Content -Path $wslOpencodePath -Value $wslOpencodeContent -Encoding UTF8 -Force
+Write-Host "[OK] Created wsl-opencode.ps1 wrapper" -ForegroundColor Green
 # ============================================
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
