@@ -81,15 +81,6 @@ function Invoke-CdxTui {
     $lastEscPathFile = Join-Path $env:TEMP 'cdx_esc_path.txt'
     $doubleEscMs = 500
 
-    function Get-Labels {
-        param([int]$State)
-        $rgOn = ($State -band 1) -ne 0
-        $hiddenOn = ($State -band 2) -ne 0
-        $rgLabel = if ($rgOn) { '[✓] files (rg)' } else { '[x] dirs (fd)' }
-        $hiddenLabel = if ($hiddenOn) { 'show hidden' } else { 'hide hidden' }
-        return $rgLabel, $hiddenLabel
-    }
-
     function Format-DisplayPath {
         param([string]$Path)
         if ($Path.StartsWith($env:USERPROFILE)) {
@@ -117,16 +108,16 @@ Set-Content -Path `$sFile -Value `$s -Force -NoNewline
     "~" + `$currentPath.Substring(`$homePath.Length).Replace('\', '/')
 } else { `$currentPath.Replace('\', '/') }
 
-`$rgLabel = if (`$rgMode) { '[✓] files (rg)' } else { '[x] dirs (fd)' }
-`$hiddenLabel = if (`$showHidden) { 'show hidden' } else { 'hide hidden' }
+`$modeLabel = if (`$rgMode) { 'Grep mode' } else { 'Find mode' }
+`$searchLabel = if (`$showHidden) { 'Searching hidden files' } else { 'Hidden files skipped' }
 
 # Mode line (consumed by --header-lines 1)
-"`$displayPath | `$rgLabel | `$hiddenLabel"
+"`$displayPath | `$modeLabel | `$searchLabel"
 
 if (`$rgMode) {
     `$cmdArgs = @('--files', `$currentPath, '--smart-case')
     if (`$showHidden) { `$cmdArgs += '--hidden' }
-    '!node_modules','!.git','!.cache','!vendor','!target','!build','!dist' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += `$_ }
+    '!node_modules','!.git','!.cache','!vendor','!target','!build','!dist','!go/pkg/mod' | ForEach-Object { `$cmdArgs += '--glob'; `$cmdArgs += `$_ }
     & rg @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
 } else {
     `$isRoot = (`$currentPath -eq [System.IO.Path]::GetPathRoot(`$currentPath))
@@ -139,7 +130,7 @@ if (`$rgMode) {
     } else {
         `$cmdArgs = @('--base-directory', `$currentPath, '--type', 'd')
         if (`$showHidden) { `$cmdArgs += '--hidden' }
-        'node_modules','.git','.cache','vendor','target','build','dist' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
+        'node_modules','.git','.cache','vendor','target','build','dist','go/pkg/mod' | ForEach-Object { `$cmdArgs += '--exclude'; `$cmdArgs += `$_ }
         `$cmdArgs += '.'
         `$fdDirs = & fd @cmdArgs 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
 
@@ -153,16 +144,9 @@ if (`$rgMode) {
             `$prefix = `$currentPath.TrimEnd('\') + '\'
             if (`$z.StartsWith(`$prefix)) {
                 `$rel = `$z.Substring(`$currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
-                if (`$rel) {
-                    `$parts = `$rel -split '/'
-                    `$skip = `$false
-                    foreach (`$p in `$parts) {
-                        if (`$p -in @('node_modules','.git','AppData','.cache','vendor','target','build','dist','go')) { `$skip = `$true; break }
-                    }
-                    if (-not `$skip -and -not `$zMap.ContainsKey(`$rel)) {
-                        `$zMap[`$rel] = `$true
-                        `$zDirs += `$rel
-                    }
+                if (`$rel -and -not `$zMap.ContainsKey(`$rel)) {
+                    `$zMap[`$rel] = `$true
+                    `$zDirs += `$rel
                 }
             }
         }
@@ -181,8 +165,6 @@ if (`$rgMode) {
         $rgMode = ($state -band 1) -ne 0
         $showHidden = ($state -band 2) -ne 0
         $env:CDX_CURRENT_PATH = $currentPath
-        $rgLabel, $hiddenLabel = Get-Labels -State $state
-        $excludeDirNames = @('node_modules', '.git', 'AppData', '.cache', 'vendor', 'target', 'build', 'dist', 'go')
 
         # Brief loading indicator (cleared by fzf's alternate screen buffer)
         Write-Host "⏳" -NoNewline
@@ -198,10 +180,11 @@ if (`$rgMode) {
             $rgArgs += '--glob', '!target'
             $rgArgs += '--glob', '!build'
             $rgArgs += '--glob', '!dist'
+            $rgArgs += '--glob', '!go/pkg/mod'
             $rgArgs += $currentPath
 
             $rgOut = & rg @rgArgs 2>$null | ForEach-Object { $_.Replace('\', '/') }
-            $items = @("$displayPath | $rgLabel | $hiddenLabel") + $rgOut
+            $items = @($header3) + $rgOut
 
             # Preview: bat con highlight del query de fzf
             if ($hasBat) {
@@ -231,6 +214,7 @@ if (`$rgMode) {
                 $fdArgs += '--exclude', 'target'
                 $fdArgs += '--exclude', 'build'
                 $fdArgs += '--exclude', 'dist'
+                $fdArgs += '--exclude', 'go/pkg/mod'
                 $fdArgs += '.'
                 $fdDirs = & fd @fdArgs 2>$null | ForEach-Object { $_.Replace('\', '/').TrimEnd('/') }
             }
@@ -243,22 +227,14 @@ if (`$rgMode) {
                 $prefix = $currentPath.TrimEnd('\') + '\'
                 if ($z.StartsWith($prefix)) {
                     $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
-                    if ($rel) {
-                        # Skip excluded dirs (node_modules, .git, AppData, cache, etc.)
-                        $parts = $rel -split '/'
-                        $skip = $false
-                        foreach ($p in $parts) {
-                            if ($p -in $excludeDirNames) { $skip = $true; break }
-                        }
-                        if (-not $skip -and -not $zoxideMap.ContainsKey($rel)) {
-                            $zoxideMap[$rel] = $true
-                            $zoxideDirs += $rel
-                        }
+                    if ($rel -and -not $zoxideMap.ContainsKey($rel)) {
+                        $zoxideMap[$rel] = $true
+                        $zoxideDirs += $rel
                     }
                 }
             }
 
-            $items = @("$displayPath | $rgLabel | $hiddenLabel")
+            $items = @($header3)
             foreach ($z in $zoxideDirs) { $items += "★ $z" }
             foreach ($d in $fdDirs) {
                 if (-not $zoxideMap.ContainsKey($d)) { $items += $d }
@@ -302,12 +278,14 @@ if (Test-Path `$fullPath -PathType Container) {
             return
         }
 
-        # Header (legend only; mode line is --header-lines 1)
-        if ($rgMode) {
-            $header = "Enter=open │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=dirs │ Ctrl+A=$hiddenLabel"
-        } else {
-            $header = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=files │ Ctrl+A=$hiddenLabel"
-        }
+        # Header lines 1-2 (static, above prompt via --header)
+        $enterLabel = if ($rgMode) { 'open' } else { 'cd' }
+        $header = "Enter ($enterLabel) | Esc (cd ..) | DobleEsc (Exit) | Ctrl+H (cd ~)`nCtrl+R (Toggle Search mode) | Ctrl+A (Toggle File visibility)"
+
+        # Line 3 (dynamic, below prompt via --header-lines 1)
+        $modeLabel = if ($rgMode) { 'Grep mode' } else { 'Find mode' }
+        $searchLabel = if ($showHidden) { 'Searching hidden files' } else { 'Hidden files skipped' }
+        $header3 = "$displayPath | $modeLabel | $searchLabel"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
