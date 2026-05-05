@@ -67,6 +67,7 @@ cdx                    # Abre TUI en el directorio actual
 cdx <ruta>             # cd directo si la ruta existe
 cdx <nombre>           # Busca con zoxide, fallback a TUI
 cdx -g <query>         # Búsqueda global por contenido
+cdx -h                 # Muestra la ayuda
 cdx ~                  # Atajo directo a $HOME
 cdx ...                # Atajo directo a $HOME
 ```
@@ -137,10 +138,11 @@ La TUI mantiene un **bucle infinito** (`while ($true)`) que:
 
 ## Entry Point — Enrutamiento de 5 Vías
 
-El entry point recibe argumentos posicionales y un flag `-g`. La lógica de decisión es secuencial:
+El entry point recibe argumentos posicionales y un flag `-g` (y `-h` para ayuda). La lógica de decisión es secuencial:
 
 1. **Flag `-g` activo** → desvía a la función de búsqueda global (ripgrep sobre múltiples roots). Retorna inmediatamente.
-2. **Sin argumentos** → abre la TUI sin query inicial. Retorna inmediatamente.
+2. **Flag `-h` activo, o query es `--help`/`-help`/`/?`** → muestra la ayuda con `Show-CdxHelp`. Retorna inmediatamente.
+3. **Sin argumentos** → abre la TUI sin query inicial. Retorna inmediatamente.
 3. **Atajos a `$HOME`** → si el query es `~` o `...`, navega a `$HOME` + `ShowResult`.
 4. **Con argumentos, ruta existe** → hace `Set-Location` directo + `ShowResult`.
 5. **Con argumentos, ruta NO existe, zoxide disponible** → consulta zoxide. Si devuelve algo, navega ahí + `ShowResult`.

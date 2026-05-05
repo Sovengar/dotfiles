@@ -3,6 +3,7 @@
 # Jump:    cdx <name>       → cd directo → zoxide → TUI con query
 # Browse:  cdx              → TUI fd (carpetas)
 # Search:  cdx -g <query>   → ripgrep búsqueda de contenido
+# Help:    cdx -h            → muestra ayuda
 # TUI:     fd/rg toggle Ctrl+G | dotfiles Ctrl+A | WinHidden Ctrl+W | home Ctrl+H
 # ============================
 
@@ -16,7 +17,9 @@ function cdx {
         [Parameter(Position=0, ValueFromRemainingArguments=$true)]
         [string[]]$QueryParts,
         [Alias('g')]
-        [switch]$Grep
+        [switch]$Grep,
+        [Alias('h')]
+        [switch]$Help
     )
 
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -28,7 +31,13 @@ function cdx {
         return
     }
 
-    # 2) Sin args → TUI de navegación
+    # 2) -h / --help → mostrar ayuda
+    if ($Help -or ($Query -in @('--help', '-help', '/?'))) {
+        Show-CdxHelp
+        return
+    }
+
+    # 3) Sin args → TUI de navegación
     if (-not $Query) {
         Invoke-CdxTui
         return
@@ -84,6 +93,43 @@ function ShowResult {
             Write-Host "  Consider using: yazi, broot, nvim, lazygit, code ." -ForegroundColor DarkGray
         }
     }
+}
+
+# ============================
+# Show-CdxHelp — Pantalla de ayuda
+# ============================
+function Show-CdxHelp {
+    $homeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { '~' }
+
+@"
+╔══════════════════════════════════════════╗
+║         cdx — CD Interactivo Unificado   ║
+╚══════════════════════════════════════════╝
+
+USO:
+  cdx                    TUI — navegar carpetas (fd)
+  cdx <ruta>             cd directo si la ruta existe
+  cdx <nombre>           zoxide → fallback a TUI
+  cdx -g <query>         búsqueda global por contenido
+  cdx -h                 esta ayuda
+  cdx ~                  ir a $homeDir
+  cdx ...                ir a $homeDir
+
+ATAJOS TUI:
+  Enter       cd al directorio / abrir archivo
+  Esc         subir al padre (cd ..)
+  Ctrl+C      salir (se queda donde está)
+  Ctrl+G      alternar fd (carpetas) ↔ rg (archivos)
+  Ctrl+A      alternar dotfiles (.*)
+  Ctrl+W      alternar WinHidden (AppData, ProgramData)
+  Ctrl+H      ir a $homeDir
+
+DEPENDENCIAS:
+  fd, fzf     obligatorias
+  rg          obligatoria (TUI modo Search + -g)
+  zoxide      opcional (merge de directorios frecuentes)
+  eza, bat    opcionales (preview mejorado)
+"@
 }
 
 # ============================
