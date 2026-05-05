@@ -276,6 +276,23 @@ foreach ($name in $weztermTools) {
 }
 
 # ============================================
+# 11. CREAR SYMLINK para IntelliJ IDEA
+# ============================================
+$ideaSource = "$env:USERPROFILE\dev\tooling\IntelliJ IDEA\bin\idea64.exe"
+$ideaLink = Join-Path $localBin "idea.exe"
+if (Test-Path $ideaSource) {
+    if (Test-Path $ideaLink) { Remove-Item -Path $ideaLink -Force }
+    try {
+        New-Item -ItemType SymbolicLink -Path $ideaLink -Target $ideaSource -Force | Out-Null
+        $createdLinks += "idea.exe"
+    } catch {
+        $warnings += "Failed to create symlink for idea.exe: $_"
+    }
+} else {
+    $warnings += "IntelliJ IDEA not found at $ideaSource"
+}
+
+# ============================================
 # 14. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
