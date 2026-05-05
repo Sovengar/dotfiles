@@ -67,8 +67,6 @@ function Invoke-CdxTui {
     if ($hasZoxide) {
         $script:zoxideCache = zoxide query --list 2>$null
     }
-    $zoxideCacheFile = Join-Path $env:TEMP 'cdx_zoxide_cache.txt'
-    $script:zoxideCache | Set-Content -Path $zoxideCacheFile -Force -NoNewline
 
     # 2) State init
     $hasEza = Get-Command eza -ErrorAction SilentlyContinue
@@ -98,74 +96,21 @@ function Invoke-CdxTui {
         return $Path.Replace('\', '/')
     }
 
-    # Reload script — toggles state bit and regenerates items (for Ctrl+R, Ctrl+A)
-    $reloadScript = Join-Path $env:TEMP 'cdx_reload.ps1'
-    @"
-param([int]`$ToggleBit = 1)
+    # Toggle scripts
+    $toggleRgPs1 = Join-Path $env:TEMP 'cdx_toggle_rg.ps1'
+    $toggleHiddenPs1 = Join-Path $env:TEMP 'cdx_toggle_hidden.ps1'
 
-`$debugFile = "`$env:TEMP\cdx_reload_debug.txt"
-Add-Content -Path `$debugFile -Value "[$(Get-Date -Format HH:mm:ss)] ToggleBit=`$ToggleBit START" -Force
-Add-Content -Path `$debugFile -Value "  CDX_CURRENT_PATH=`$env:CDX_CURRENT_PATH"
+    @'
+$s = [int](Get-Content $env:TEMP\cdx_state.txt -Raw).Trim()
+$s = $s -bxor 1
+Set-Content -Path $env:TEMP\cdx_state.txt -Value $s -Force -NoNewline
+'@ | Set-Content -Path $toggleRgPs1 -Force
 
-`$sFile = "`$env:TEMP\cdx_state.txt"
-`$s = [int](Get-Content `$sFile -Raw).Trim()
-Add-Content -Path `$debugFile -Value "  oldState=`$s"
-
-`$s = `$s -bxor `$ToggleBit
-Set-Content -Path `$sFile -Value `$s -Force -NoNewline
-Add-Content -Path `$debugFile -Value "  newState=`$s"
-
-`$rgMode = (`$s -band 1) -ne 0
-`$showHidden = (`$s -band 2) -ne 0
-`$currentPath = `$env:CDX_CURRENT_PATH
-`$homePath = `$env:USERPROFILE
-
-`$displayPath = if (`$currentPath.StartsWith(`$homePath)) {
-    "~" + `$currentPath.Substring(`$homePath.Length).Replace('\', '/')
-} else { `$currentPath.Replace('\', '/') }
-
-`$rgLabel = if (`$rgMode) { '[✓] files (rg)' } else { '[x] dirs (fd)' }
-`$hiddenLabel = if (`$showHidden) { 'show hidden' } else { 'hide hidden' }
-Add-Content -Path `$debugFile -Value "  rgMode=`$rgMode showHidden=`$showHidden"
-
-# Must output mode line first (consumed by --header-lines=1)
-"`$displayPath | `$rgLabel | `$hiddenLabel"
-
-if (`$rgMode) {
-    `$cmd = @('rg', '--files', `$currentPath, '--smart-case')
-    if (`$showHidden) { `$cmd += '--hidden' }
-    foreach (`$g in @('!node_modules','!.git','!.cache','!vendor','!target','!build','!dist')) { `$cmd += '--glob'; `$cmd += `$g }
-    `$out = & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/') }
-    Add-Content -Path `$debugFile -Value "  rg: count=`$(`$out.Count)"
-    if (-not `$out) { Add-Content -Path `$debugFile -Value "  rg: NO OUTPUT" }
-    `$out
-} else {
-    `$cmd = @('fd', '--base-directory', `$currentPath, '--type', 'd')
-    if (`$showHidden) { `$cmd += '--hidden' }
-    foreach (`$e in @('node_modules','.git','.cache','vendor','target','build','dist')) { `$cmd += '--exclude'; `$cmd += `$e }
-    `$cmd += '.'
-    `$fdDirs = & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
-
-    `$zoxPath = "`$env:TEMP\cdx_zoxide_cache.txt"
-    `$zoxideCacheRel = Get-Content `$zoxPath 2>`$null
-    `$zMap = @{}
-    `$zDirs = @()
-    foreach (`$z in `$zoxideCacheRel) {
-        if (`$z -eq `$currentPath) { continue }
-        if (`$z.StartsWith(`$currentPath + '\')) {
-            `$rel = `$z.Substring(`$currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
-            if (`$rel -and -not `$zMap.ContainsKey(`$rel)) {
-                `$zMap[`$rel] = `$true
-                `$zDirs += `$rel
-            }
-        }
-    }
-    foreach (`$z in `$zDirs) { "★ `$z" }
-    foreach (`$d in `$fdDirs) {
-        if (-not `$zMap.ContainsKey(`$d)) { `$d }
-    }
-}
-"@ | Set-Content -Path $reloadScript -Force
+    @'
+$s = [int](Get-Content $env:TEMP\cdx_state.txt -Raw).Trim()
+$s = $s -bxor 2
+Set-Content -Path $env:TEMP\cdx_state.txt -Value $s -Force -NoNewline
+'@ | Set-Content -Path $toggleHiddenPs1 -Force
 
     while ($true) {
         $currentPath = (Get-Location).Path
@@ -187,10 +132,7 @@ if (`$rgMode) {
             $rgArgs += '--glob', '!dist'
             $rgArgs += $currentPath
 
-            $rgItems = & rg @rgArgs 2>$null | ForEach-Object { $_.Replace('\', '/') }
-            $rgLabel, $hiddenLabel = Get-Labels -State $state
-            $modeLine = "$displayPath | $rgLabel | $hiddenLabel"
-            $items = @($modeLine) + $rgItems
+            $items = & rg @rgArgs 2>$null | ForEach-Object { $_.Replace('\', '/') }
 
             # Preview: bat con highlight del query de fzf
             if ($hasBat) {
@@ -218,7 +160,8 @@ if (`$rgMode) {
             $zoxideDirs = @()
             foreach ($z in $script:zoxideCache) {
                 if ($z -eq $currentPath) { continue }
-                if ($z.StartsWith($currentPath + '\')) {
+                $prefix = $currentPath.TrimEnd('\') + '\'
+                if ($z.StartsWith($prefix)) {
                     $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
                     if ($rel -and -not $zoxideMap.ContainsKey($rel)) {
                         $zoxideMap[$rel] = $true
@@ -227,9 +170,7 @@ if (`$rgMode) {
                 }
             }
 
-            $rgLabel, $hiddenLabel = Get-Labels -State $state
-            $modeLine = "$displayPath | $rgLabel | $hiddenLabel"
-            $items = @($modeLine)
+            $items = @()
             foreach ($z in $zoxideDirs) { $items += "★ $z" }
             foreach ($d in $fdDirs) {
                 if (-not $zoxideMap.ContainsKey($d)) { $items += $d }
@@ -273,25 +214,25 @@ if (Test-Path `$fullPath -PathType Container) {
             return
         }
 
-        # Header (legend only; mode line is dynamic via --header-lines 1)
+        # Header
         $rgLabel, $hiddenLabel = Get-Labels -State $state
+        $headerLine1 = "$displayPath | $rgLabel | $hiddenLabel"
         if ($rgMode) {
-            $header = "Enter=open │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=dirs │ Ctrl+A=$hiddenLabel"
+            $headerLine2 = "Enter=open │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=dirs │ Ctrl+A=$hiddenLabel"
         } else {
-            $header = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=files │ Ctrl+A=$hiddenLabel"
+            $headerLine2 = "Enter=cd │ Esc=up │ DobleEsc=exit │ Ctrl+H=home │ Ctrl+R=files │ Ctrl+A=$hiddenLabel"
         }
+        $header = "$headerLine1`n$headerLine2"
 
-        $env:CDX_CURRENT_PATH = $currentPath
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
         # Build fzf args array
         $fzfArgs = @(
             "--header=$header",
-            '--header-lines=1',
             "--preview=$preview",
             '--preview-window=right:60%,border-rounded',
-            "--bind=ctrl-r:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 1)",
-            "--bind=ctrl-a:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 2)",
+            "--bind=ctrl-r:execute(pwsh -File `"$toggleRgPs1`")",
+            "--bind=ctrl-a:execute(pwsh -File `"$toggleHiddenPs1`")",
             '--bind=ctrl-h:become(echo __GOTO_HOME__)'
         )
         if ($InitialQuery) {
