@@ -293,6 +293,22 @@ if (Test-Path $ideaSource) {
 }
 
 # ============================================
+# 12. CREAR WRAPPER para Antigravity IDE (fork de Windsurf/VS Code)
+# ============================================
+$antigravityDir = "$env:USERPROFILE\dev\tooling\Antigravity"
+$antigravityExe = Join-Path $antigravityDir "Antigravity.exe"
+$antigravityCli = Join-Path $antigravityDir "resources\app\out\cli.js"
+if (Test-Path $antigravityExe) {
+    $wrapper = Join-Path $localBin "antigravity.cmd"
+    $content = "@echo off`nset ELECTRON_RUN_AS_NODE=1`n`"$antigravityExe`" `"$antigravityCli`" %*"
+    Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+    $createdLinks += "antigravity.cmd (wrapper)"
+    Write-Host "[OK] Created antigravity.cmd wrapper" -ForegroundColor Green
+} else {
+    $warnings += "Antigravity IDE not found at $antigravityExe"
+}
+
+# ============================================
 # 14. CREAR SYMLINKS para Git
 # ============================================
 $gitCmd = "C:\Program Files\Git\cmd"
