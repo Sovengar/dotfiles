@@ -3,7 +3,7 @@
 # Jump:    cdx <name>       → cd directo → zoxide → TUI con query
 # Browse:  cdx              → TUI fd (carpetas)
 # Search:  cdx -g <query>   → ripgrep búsqueda de contenido
-# TUI:     fd/rg toggle Ctrl+R | dotfiles Ctrl+A | WinHidden Ctrl+W | home Ctrl+H
+# TUI:     fd/rg toggle Ctrl+G | dotfiles Ctrl+A | WinHidden Ctrl+W | home Ctrl+H
 # ============================
 
 $script:ExcludeDirs       = @('node_modules', '.git', '.cache', 'cache', 'licenses', 'vendor', 'target', 'build', 'dist', 'Modules', 'modules', 'lib', 'platform')
@@ -429,7 +429,7 @@ if (Test-Path $fullPath -PathType Container) {
         }
 
         # Header (above fzf prompt)
-        $header = "Enter ($enterLabel) | Esc (cd ..) | DobleEsc (Exit) | Ctrl+H (cd ~)`nCtrl+R (Search) | Ctrl+A (dotfiles) | Ctrl+W (WinHidden)"
+        $header = "Enter ($enterLabel) | Esc (cd ..) | DobleEsc (Exit) | Ctrl+H (cd ~)`nCtrl+G (Grep) | Ctrl+A (dotfiles) | Ctrl+W (WinHidden)"
 
         $env:FZF_DEFAULT_OPTS = '--height=80% --layout=reverse --border'
 
@@ -439,7 +439,7 @@ if (Test-Path $fullPath -PathType Container) {
             '--header-lines=1',
             "--preview=$preview",
             '--preview-window=right:35%,border-rounded',
-            "--bind=ctrl-r:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 1)",
+            "--bind=ctrl-g:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 1)",
             "--bind=ctrl-a:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 2)",
             "--bind=ctrl-w:reload(pwsh -NoProfile -File `"$reloadScript`" -ToggleBit 4)",
             '--bind=ctrl-h:become(echo __GOTO_HOME__)'
