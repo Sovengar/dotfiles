@@ -103,7 +103,7 @@ function Invoke-CdxTui {
     @"
 param([int]`$ToggleBit = 1)
 
-`$sFile = "$`env:TEMP\cdx_state.txt"
+`$sFile = "`$env:TEMP\cdx_state.txt"
 `$s = [int](Get-Content `$sFile -Raw).Trim()
 `$s = `$s -bxor `$ToggleBit
 Set-Content -Path `$sFile -Value `$s -Force -NoNewline
@@ -144,7 +144,7 @@ if (`$rgMode) {
         `$fdDirs = & `$cmd 2>`$null | ForEach-Object { `$_.Replace('\', '/').TrimEnd('/') }
 
         # Zoxide merge
-        `$zoxPath = "$`env:TEMP\cdx_zoxide_cache.txt"
+        `$zoxPath = "`$env:TEMP\cdx_zoxide_cache.txt"
         `$zoxideCacheRel = Get-Content `$zoxPath 2>`$null
         `$zMap = @{}
         `$zDirs = @()
@@ -174,6 +174,7 @@ if (`$rgMode) {
         $rgMode = ($state -band 1) -ne 0
         $showHidden = ($state -band 2) -ne 0
         $env:CDX_CURRENT_PATH = $currentPath
+        $rgLabel, $hiddenLabel = Get-Labels -State $state
 
         if ($rgMode) {
             # ===== MODO RG: listar ARCHIVOS =====
