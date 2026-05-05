@@ -153,9 +153,16 @@ if (`$rgMode) {
             `$prefix = `$currentPath.TrimEnd('\') + '\'
             if (`$z.StartsWith(`$prefix)) {
                 `$rel = `$z.Substring(`$currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
-                if (`$rel -and -not `$zMap.ContainsKey(`$rel)) {
-                    `$zMap[`$rel] = `$true
-                    `$zDirs += `$rel
+                if (`$rel) {
+                    `$parts = `$rel -split '/'
+                    `$skip = `$false
+                    foreach (`$p in `$parts) {
+                        if (`$p -in @('node_modules','.git','AppData','.cache','vendor','target','build','dist','go')) { `$skip = `$true; break }
+                    }
+                    if (-not `$skip -and -not `$zMap.ContainsKey(`$rel)) {
+                        `$zMap[`$rel] = `$true
+                        `$zDirs += `$rel
+                    }
                 }
             }
         }
@@ -175,6 +182,10 @@ if (`$rgMode) {
         $showHidden = ($state -band 2) -ne 0
         $env:CDX_CURRENT_PATH = $currentPath
         $rgLabel, $hiddenLabel = Get-Labels -State $state
+        $excludeDirNames = @('node_modules', '.git', 'AppData', '.cache', 'vendor', 'target', 'build', 'dist', 'go')
+
+        # Brief loading indicator (cleared by fzf's alternate screen buffer)
+        Write-Host "⏳" -NoNewline
 
         if ($rgMode) {
             # ===== MODO RG: listar ARCHIVOS =====
@@ -232,9 +243,17 @@ if (`$rgMode) {
                 $prefix = $currentPath.TrimEnd('\') + '\'
                 if ($z.StartsWith($prefix)) {
                     $rel = $z.Substring($currentPath.Length).TrimStart('\').Replace('\', '/').TrimEnd('/')
-                    if ($rel -and -not $zoxideMap.ContainsKey($rel)) {
-                        $zoxideMap[$rel] = $true
-                        $zoxideDirs += $rel
+                    if ($rel) {
+                        # Skip excluded dirs (node_modules, .git, AppData, cache, etc.)
+                        $parts = $rel -split '/'
+                        $skip = $false
+                        foreach ($p in $parts) {
+                            if ($p -in $excludeDirNames) { $skip = $true; break }
+                        }
+                        if (-not $skip -and -not $zoxideMap.ContainsKey($rel)) {
+                            $zoxideMap[$rel] = $true
+                            $zoxideDirs += $rel
+                        }
                     }
                 }
             }
@@ -306,6 +325,9 @@ if (Test-Path `$fullPath -PathType Container) {
             $fzfArgs += "--query=$InitialQuery"
             $InitialQuery = ''  # Solo usar en primera iteración
         }
+
+        # Clear loading indicator before fzf
+        Write-Host "`r  " -NoNewline
 
         # Run fzf
         try {
