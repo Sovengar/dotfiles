@@ -34,16 +34,3 @@ Documents/PowerToys/Backup/*.ptb
 
 # LazyVim lockfile - regenerated on install
 dot_config/nvim/lazy-lock.json
-
-# Old chezmoi scripts replaced by windows/setup/ standalone scripts
-.chezmoiscripts/run_once_after_20-config-local-bin-and-path.ps1
-.chezmoiscripts/run_once_before_10-prerequisites.ps1
-.chezmoiscripts/run_once_before_11-env-vars.ps1
-.chezmoiscripts/run_once_before_20-install-core.ps1
-.chezmoiscripts/run_once_before_21-install-dev-tools.ps1
-.chezmoiscripts/run_once_before_22-install-user-apps.ps1
-.chezmoiscripts/run_once_before_23-install-gaming-apps.ps1
-.chezmoiscripts/run_once_before_24-install-security.ps1
-.chezmoiscripts/run_once_before_31-create-dev-shortcuts.ps1
-.chezmoiscripts/run_once_before_32-startup-shortcuts.ps1
-.chezmoiscripts/run_once_before_40-ssh-setup.ps1.tmpl
