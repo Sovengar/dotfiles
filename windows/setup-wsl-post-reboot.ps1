@@ -27,3 +27,5 @@ try {
 Write-Host ""
 Write-Host "WSL2 setup complete. You can now run: chezmoi apply" -ForegroundColor Green
 Write-Host "===============================================" -ForegroundColor Cyan
+Write-Host ""
+Read-Host "Press Enter to close this window" | Out-Null

@@ -29,18 +29,22 @@ SecciOnado en tres fases: antes de chezmoi → chezmoi apply → después de che
 
 ```powershell
 # 0. Sincronizar OneDrive (necesario para env.toml)
-# 1. Instalar chezmoi
-winget install --id twpayne.chezmoi -e --silent
+# 1. En una terminal de PowerShell como Administrador, permitir scripts locales
+Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
-# 2. Clonar configuración
+# 2. Instalar Git y chezmoi
+winget install --id Git.Git -e --source winget --silent
+winget install --id twpayne.chezmoi -e --source winget --silent
+
+# 3. Clonar configuración
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 3. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
+# 4. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
 # Ejecutar como Administrador:
 .\windows\setup-wsl-pre-reboot.ps1
 # ... reiniciar ...
 
-# 4. WSL2: instalar Ubuntu (después del reinicio)
+# 5. WSL2: instalar Ubuntu (después del reinicio)
 .\windows\setup-wsl-post-reboot.ps1
 ```
 
@@ -51,13 +55,17 @@ chezmoi init https://github.com/Sovengar/dotfiles
 ```powershell
 # 5. Previsualizar cambios (OBLIGATORIO)
 chezmoi diff
-chezmoi apply --dry-run
+chezmoi apply --dry-run --verbose
+
+# Si necesitas más detalle para diagnosticar algo:
+# chezmoi apply --dry-run --verbose --debug
 
 # 6. Aplicar solo si la previsualización es correcta
-chezmoi apply
+chezmoi apply --verbose
 ```
 
 > ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
+> Para troubleshooting, agrega `--debug`.
 
 ### Fase C: Post-apply (pasos manuales)
 

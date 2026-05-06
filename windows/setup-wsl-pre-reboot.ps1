@@ -4,6 +4,7 @@
 # After this script completes, reboot the computer, then run setup-wsl-post-reboot.ps1.
 
 $ErrorActionPreference = "Stop"
+$exitCode = 0
 
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  WSL2 Pre-Reboot Setup" -ForegroundColor Cyan
@@ -20,5 +21,10 @@ try {
     Write-Host "===============================================" -ForegroundColor Cyan
 } catch {
     Write-Host "[FAIL] Could not enable virtualization features. Run as Administrator." -ForegroundColor Red
-    exit 1
+    $exitCode = 1
+} finally {
+    Write-Host ""
+    Read-Host "Press Enter to close this window" | Out-Null
 }
+
+exit $exitCode
