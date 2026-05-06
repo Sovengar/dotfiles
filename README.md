@@ -51,13 +51,17 @@ chezmoi init https://github.com/Sovengar/dotfiles
 ```powershell
 # 5. Previsualizar cambios (OBLIGATORIO)
 chezmoi diff
-chezmoi apply --dry-run
+chezmoi apply --dry-run --verbose
+
+# Si necesitas más detalle para diagnosticar algo:
+# chezmoi apply --dry-run --verbose --debug
 
 # 6. Aplicar solo si la previsualización es correcta
-chezmoi apply
+chezmoi apply --verbose
 ```
 
 > ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
+> Para troubleshooting, agrega `--debug`.
 
 ### Fase C: Post-apply (pasos manuales)
 

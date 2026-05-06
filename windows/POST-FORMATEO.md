@@ -38,7 +38,10 @@ chezmoi init https://github.com/Sovengar/dotfiles
 chezmoi diff
 
 # Simular aplicación completa (incluyendo scripts run_once_)
-chezmoi apply --dry-run
+chezmoi apply --dry-run --verbose
+
+# Para más detalle al diagnosticar problemas:
+# chezmoi apply --dry-run --verbose --debug
 ```
 
 Revisa la salida. Si ves algo inesperado, corrígelo antes de continuar.
@@ -46,7 +49,7 @@ Revisa la salida. Si ves algo inesperado, corrígelo antes de continuar.
 ## Paso 5: Aplicar configuración
 ```powershell
 # Solo si el --dry-run fue correcto
-chezmoi apply
+chezmoi apply --verbose
 ```
 
 ## Paso 6: Restaurar known_hosts para SSH (si aplica)
