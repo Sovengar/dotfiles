@@ -74,10 +74,6 @@ packages:
     ps_modules:
       - PSFzf
     manual_downloads:
-      - name: "Maven"
-        url: "https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip"
-        archive: true
-        dest: "dev\\tooling\\maven"
       - name: "JMeter"
         url: "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.zip"
         archive: true

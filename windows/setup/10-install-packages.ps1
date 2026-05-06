@@ -115,6 +115,7 @@ if (-not (Test-Path "$miseBinDir\mise.exe")) {
     } else {
         Write-Host "[INFO] Installing mise tools from $miseConfig..." -ForegroundColor Cyan
         mise install 2>&1 | ForEach-Object { Write-Host "  $_" }
+        mise reshim 2>&1 | ForEach-Object { Write-Host "  $_" }
         Write-Host "[OK] mise tools installed" -ForegroundColor Green
     }
     $miseShimsDir = "$env:USERPROFILE\.local\share\mise\shims"
