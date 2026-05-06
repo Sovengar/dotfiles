@@ -132,7 +132,7 @@ if (-not (Test-Path "$miseBinDir\mise.exe")) {
         Write-Host "[SKIP] No mise config found (define tools in ~/.config/mise/config.toml first)" -ForegroundColor Yellow
     } else {
         Write-Host "[INFO] Installing mise tools from $miseConfig..." -ForegroundColor Cyan
-        mise install --force 2>&1 | ForEach-Object { Write-Host "  $_" }
+        mise install 2>&1 | ForEach-Object { Write-Host "  $_" }
         Write-Host "[OK] mise tools installed" -ForegroundColor Green
     }
     $miseShimsDir = "$env:USERPROFILE\.local\share\mise\shims"
