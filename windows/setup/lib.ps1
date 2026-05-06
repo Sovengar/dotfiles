@@ -18,13 +18,13 @@
 
 function Install-WingetApp {
     param([string]$AppId)
-    Write-Host "  Installing: $AppId" -ForegroundColor Cyan
-    $proc = Start-Process "winget.exe" -ArgumentList "install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements" -NoNewWindow -PassThru -Wait
-    if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq -1978335189) {
+    Write-Host "    $AppId" -ForegroundColor Cyan
+    "y" | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
     } else {
-        Write-Host "    [FAIL] $AppId (ExitCode: $($proc.ExitCode))" -ForegroundColor Red
+        Write-Host "    [FAIL] $AppId (ExitCode: $LASTEXITCODE)" -ForegroundColor Red
         return $false
     }
 }
