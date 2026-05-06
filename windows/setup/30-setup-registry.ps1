@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $regDir = "$PSScriptRoot\registry\context-menus"
 $categories = @("Wezterm", "System")

@@ -1,4 +1,4 @@
-# setup-ssh-server.ps1
+﻿# setup-ssh-server.ps1
 # Configures this Windows machine as an OpenSSH SSH server.
 # Run on the REMOTE machine that will accept SSH connections (e.g., VPS, work PC).
 

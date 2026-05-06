@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $response = Read-Host "Install startup shortcuts (Mechvibes, TaskbarX)? (y/n)"
 if ($response -notmatch '^[yY]') {

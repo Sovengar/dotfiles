@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  WSL2 SETUP" -ForegroundColor Cyan

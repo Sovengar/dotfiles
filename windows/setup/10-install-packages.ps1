@@ -1,4 +1,4 @@
-. "$PSScriptRoot\lib.ps1"
+﻿. "$PSScriptRoot\lib.ps1"
 $ErrorActionPreference = "Continue"
 
 $allPackages = Read-Packages

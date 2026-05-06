@@ -1,4 +1,4 @@
-# setup-docker-post-apply.ps1
+﻿# setup-docker-post-apply.ps1
 # Configures Docker Desktop to use WSL2 with Ubuntu.
 # Run AFTER chezmoi apply.
 # Idempotent: skips if Docker WSL integration already configured.

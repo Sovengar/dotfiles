@@ -1,4 +1,4 @@
-$homeDir = $env:USERPROFILE
+﻿$homeDir = $env:USERPROFILE
 $vars = @{
     "XDG_CONFIG_HOME"  = "$homeDir\.config"
     "XDG_CACHE_HOME"   = "$homeDir\.cache"

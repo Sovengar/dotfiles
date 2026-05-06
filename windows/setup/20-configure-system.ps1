@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 $localBin = "$env:USERPROFILE\.local\bin"
 $toolingPath = "$env:USERPROFILE\dev\tooling"
 $createdLinks = @()

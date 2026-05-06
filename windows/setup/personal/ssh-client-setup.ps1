@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $response = Read-Host "Run SSH setup (personal machine only)? [y/N]"
 if ($response -ne 'y' -and $response -ne 'Y') {

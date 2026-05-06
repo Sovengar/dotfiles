@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  PREREQUISITES COMPLIANCE — WSL/Virtualization" -ForegroundColor Cyan

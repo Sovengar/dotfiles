@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $response = Read-Host "Restore Listary Preferences.json? (y/n)"
 if ($response -notmatch '^[yY]') {

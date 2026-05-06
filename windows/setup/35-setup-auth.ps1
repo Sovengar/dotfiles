@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $response = Read-Host "Authenticate GitHub CLI (gh auth login)? (y/n)"
 if ($response -match '^[yY]') {

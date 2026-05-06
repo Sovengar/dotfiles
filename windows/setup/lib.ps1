@@ -1,4 +1,4 @@
-function Read-Packages {
+﻿function Read-Packages {
     $json = chezmoi execute-template "{{ toJson .packages }}" 2>$null
     if (-not $json) {
         $yamlPath = Join-Path $PSScriptRoot "..\..\home\.chezmoidata\packages.yaml"
