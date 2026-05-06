@@ -29,8 +29,9 @@ SecciOnado en tres fases: antes de chezmoi → chezmoi apply → después de che
 
 ```powershell
 # 0. Sincronizar OneDrive (necesario para env.toml)
-# 1. Instalar chezmoi
-winget install --id twpayne.chezmoi -e --silent
+# 1. Instalar Git y chezmoi
+winget install --id Git.Git -e --source winget --silent
+winget install --id twpayne.chezmoi -e --source winget --silent
 
 # 2. Clonar configuración
 chezmoi init https://github.com/Sovengar/dotfiles

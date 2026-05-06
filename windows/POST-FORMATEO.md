@@ -20,9 +20,10 @@ if (Test-Path $envFile) {
 }
 ```
 
-## Paso 2: Instalar chezmoi
+## Paso 2: Instalar Git y chezmoi
 ```powershell
-winget install --id twpayne.chezmoi -e --silent
+winget install --id Git.Git -e --source winget --silent
+winget install --id twpayne.chezmoi -e --source winget --silent
 ```
 
 ## Paso 3: Clonar configuración (sin aplicar aún)
