@@ -106,7 +106,8 @@ En sesiones de debug, snip reduce el ruido y opencode procesa solo la señal.
 # Dia 0: formateas la maquina
 $ winget install Git.Git twpayne.chezmoi
 $ chezmoi init https://github.com/Sovengar/dotfiles
-$ .\windows\setup\run-all.ps1        # instala ~70+ apps + WSL + Docker + SSH + registry + ...
+$ .\windows\setup\01-wsl-setup.ps1   # WSL + Ubuntu + crear usuario Linux
+$ .\windows\setup\run-all.ps1        # instala ~70+ apps + Docker + SSH + registry + ...
 $ chezmoi apply                      # dotfiles + scripts ligeros
 
 # → firecrawl key se configura automáticamente desde OneDrive (chezmoi script)

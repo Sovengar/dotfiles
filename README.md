@@ -48,9 +48,9 @@ chezmoi init https://github.com/Sovengar/dotfiles
 # 3 (Windows). Allow script execution 
 Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
-# 4. Verificar prerequisitos (virtualización WSL)
-.\windows\setup\prerequisites-compliance.ps1
-# Reiniciar si el script lo indica
+# 4. WSL + prerequisitos (virtualización, Ubuntu, crear usuario Linux)
+.\windows\setup\01-wsl-setup.ps1
+# Reiniciar si el script lo indica; crear usuario Ubuntu la primera vez
 
 # 5. Setup all (instala o actualiza)
 .\windows\setup\run-all.ps1
@@ -58,7 +58,6 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
 `run-all.ps1` corre en orden:
 - `00-env-vars.ps1` — variables XDG
-- `05-wsl.ps1` — WSL2 + Ubuntu
 - `10-install-packages.ps1` — ~70+ apps via winget + manual
 - `20-configure-system.ps1` — PATH, symlinks
 - `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
@@ -85,8 +84,7 @@ dotfiles/
 ├── windows/
 │   ├── setup/                    ← TODO: scripts standalone, NO chezmoi
 │   │   ├── 00-env-vars.ps1
-│   │   ├── prerequisites-compliance.ps1
-│   │   ├── 05-wsl.ps1
+│   │   ├── 01-wsl-setup.ps1
 │   │   ├── 10-install-packages.ps1
 │   │   ├── 20-configure-system.ps1
 │   │   ├── lib.ps1
