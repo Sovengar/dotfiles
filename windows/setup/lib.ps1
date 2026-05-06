@@ -18,8 +18,8 @@
 
 function Install-WingetApp {
     param([string]$AppId)
-    Write-Host "    $AppId" -ForegroundColor Cyan
-    "y" | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+    Write-Host "  Installing: $AppId" -ForegroundColor Cyan
+    cmd /c "echo y | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements"
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
