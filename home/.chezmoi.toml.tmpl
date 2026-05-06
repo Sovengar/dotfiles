@@ -1,5 +1,5 @@
 {{- /* Load env.toml from OneDrive if it exists */ -}}
-{{- $envFile := "C:/Users/buble/OneDrive/Formateo/env.toml" -}}
+{{- $envFile := (joinPath (env "USERPROFILE") "OneDrive" "secrets" "env.toml") -}}
 {{- $email := "bubles_2009@hotmail.com" -}}
 {{- $sshHost := "" -}}
 {{- $sshUsername := "" -}}

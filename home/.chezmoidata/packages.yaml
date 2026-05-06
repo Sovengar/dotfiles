@@ -1,0 +1,147 @@
+packages:
+  # Use string for silent install (default):
+  #   - winget.id
+  # Use object with interactive: true to prompt before installing:
+  #   - id: winget.id
+  #     interactive: true
+  core:
+    winget:
+      - Microsoft.WindowsTerminal
+      - RARLab.WinRAR
+      - id: Dropbox.Dropbox
+        interactive: true
+      - id: Google.GoogleDrive
+        interactive: true
+      - Microsoft.OneDrive
+      - PuTTY.PuTTY
+
+  dev:
+    winget:
+      - Microsoft.PowerShell
+      - Git.Git
+      - GitHub.GitHubDesktop
+      - GitHub.cli
+      - Microsoft.VisualStudioCode
+      - Neovim.Neovim
+      - wez.wezterm.nightly
+      - Starship.Starship
+      - jdx.mise
+      - DEVCOM.JetBrainsMonoNerdFont
+      - JetBrains.IntelliJIDEA
+      - Bruno.Bruno
+      - DBeaver.DBeaver.Community
+      - beekeeper-studio.beekeeper-studio
+      - RedHat.Podman
+      - Docker.DockerDesktop
+      - DEVCOM.JMeter
+      - SmartBear.SoapUI
+      - WinSCP.WinSCP
+      - JesseDuffield.lazygit
+      - OpenAI.Codex
+      - GitKraken.cli
+      - sharkdp.hyperfine
+      - sharkdp.pastel
+      - jj-vcs.jj
+      - sxyazi.yazi
+      - Dystroy.broot
+      - Google.Antigravity
+      - Clement.bottom
+      - BurntSushi.ripgrep.MSVC
+      - sharkdp.fd
+      - Junegunn.fzf
+      - ajeetdsouza.zoxide
+      - sharkdp.bat
+      - eza-community.eza
+    npm_global:
+      - "@openai/codex"
+      - backlog.md
+      - "@devcontainers/cli"
+      - tree-sitter-cli
+      - kill-port
+      - "@usebruno/cli"
+      - http-server
+      - pm2
+      - snyk
+      - portless
+    bun_global:
+      - opencode-ai
+    go_install:
+      - "github.com/edouard-claude/snip/cmd/snip@latest"
+      - "github.com/sorenisanerd/gotty@latest"
+    gh_extensions:
+      - dlvhdr/gh-dash
+
+    ps_modules:
+      - PSFzf
+    manual_downloads:
+      - name: "JMeter"
+        url: "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.zip"
+        archive: true
+        dest: "dev\\tooling\\jmeter"
+      - name: "JD-GUI"
+        url: "https://github.com/java-decompiler/jd-gui/releases/download/v1.6.6/jd-gui-1.6.6.jar"
+        archive: false
+        dest: "dev\\tooling\\jd-gui"
+      - name: "Datree"
+        url: "https://github.com/datreeio/datree/releases/download/1.9.19/datree-cli_1.9.19_windows_x86_64.zip"
+        archive: true
+        dest: ".local\\bin\\datree.exe"
+      - name: "VisualVM"
+        url: "https://github.com/oracle/visualvm/releases/download/2.1.10/visualvm_2110.zip"
+        archive: true
+        dest: "dev\\tooling\\visualvm"
+
+  user:
+    winget:
+      - Bopsoft.Listary
+      - Microsoft.PowerToys
+      - Skillbrains.Lightshot
+      - id: Discord.Discord
+        interactive: true
+      - id: VideoLAN.VLC
+        interactive: true
+      - id: AIMP.AIMP
+        interactive: true
+      - id: Plex.Plex
+        interactive: true
+      - id: BitSum.ProcessLasso
+        interactive: true
+      - id: AutoHotkey.AutoHotkey
+        interactive: true
+      - id: BartelsMedia.MacroRecorder
+        interactive: true
+      - cjpais.Handy
+      - id: flux.flux
+        interactive: true
+
+  gaming:
+    winget:
+      - id: Valve.Steam
+        interactive: true
+      - id: Valve.SteamLink
+        interactive: true
+      - id: Guru3D.Afterburner
+        interactive: true
+      - id: Guru3D.RTSS
+        interactive: true
+      - id: Reshade.Setup.AddonsSupport
+        interactive: true
+
+  security:
+    winget:
+      - id: Malwarebytes.Malwarebytes
+        interactive: true
+
+scripts:
+  prerequisites:
+    - "Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force"
+  ssh_template:
+    enabled: true
+  lazyvim:
+    repo: "https://github.com/LazyVim/starter"
+    dest: "~/.config/nvim"
+  wsl_opencode:
+    command: "curl -fsSL https://opencode.ai/install | bash"
+  startup_shortcuts:
+    - source: "$HOME\\Dropbox\\Programs\\Mechvibes.lnk"
+    - source: "$HOME\\Dropbox\\Programs\\z Boilerplate\\TaskbarX.lnk"

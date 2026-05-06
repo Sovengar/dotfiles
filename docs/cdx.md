@@ -1,112 +1,82 @@
-# cdx - CD Vitaminado
+# cdx — CD Interactivo Unificado
 
-Jump to directories by name or search files/text with fzf navigation.
+Navegador de directorios TUI con fzf+fd+rg. Combina cd directo, zoxide, y un explorador interactivo.
 
 ## Syntax
 
 ```
-cdx [name]       Jump mode: frecency jump (zoxide) or search fallback
-cdx <path>       Go directly if the path exists
-cdx -s <query>   Force search mode with ripgrep + fzf
+cdx              TUI — navegar carpetas con fd
+cdx <path>       cd directo si la ruta existe
+cdx <name>       zoxide → fallback a TUI con query
+cdx -g <query>   búsqueda global por contenido (rg)
+cdx -h           ayuda
+cdx ~            ir a $HOME
+cdx ...          ir a $HOME
 ```
 
-## Modes
+## Modos
 
-### Jump Mode (default, no flag)
+### TUI Mode (sin args o como fallback)
 
-1. If the argument is an **existing path** → `Set-Location` immediately.
-2. If **zoxide is installed** → calls `zoxide query` for a frecency-based jump.
-3. If zoxide **not installed** or no match → falls back to **search mode** automatically.
+Explorador interactivo con fzf y preview. Navega por el sistema de archivos en tiempo real.
 
-### Search Mode (`-s` flag or auto-fallback)
+**Dependencias obligatorias**: `fd`, `fzf`, `rg`
 
-Launches a 3-phase ripgrep search across `$HOME`, prioritizes results from `$HOME/dev` and `$HOME/.config`, and presents matches via fzf for interactive selection.
+**Atajos TUI**:
+
+| Tecla | Acción |
+|-------|--------|
+| Enter | cd al directorio / open archivo |
+| Esc | Subir al padre (`cd ..`) |
+| Ctrl+C | Salir (mantiene posición) |
+| Ctrl+G | Alternar fd (carpetas) ↔ rg (archivos) |
+| Ctrl+A | Mostrar/ocultar dotfiles (.*) |
+| Ctrl+W | Mostrar/ocultar WinHidden (AppData, ProgramData) |
+| Ctrl+H | Ir a $HOME |
+
+### Jump Mode (con argumento)
+
+1. `cdx <path>` → `Set-Location` directo si la ruta existe
+2. Si no existe → `zoxide query` (frecency, si está instalado)
+3. Si no hay match → abre TUI con query pre-llenada
+
+### Search Mode (`-g`)
+
+`cdx -g <query>` lanza ripgrep en `$HOME` buscando contenido. Los resultados se muestran en fzf con preview.
+
+### Preview
+
+fzf muestra preview en panel derecho/top según el modo actual:
+
+| Modo | Preview |
+|------|---------|
+| Find (fd) | Contenido del directorio con eza (si existe) |
+| Search (rg) | 3 líneas alrededor del match con bat (si existe) |
 
 ## Dependencies
 
-| Tool       | Role                         | Install                                       |
-|------------|------------------------------|-----------------------------------------------|
-| **zoxide** | Frecency jumps (optional)    | `winget install ajeetdsouza.zoxide`           |
-| **rg**     | Content/file name search     | `winget install BurntSushi.ripgrep.MSVC`      |
-| **fzf**    | Interactive result selection | `winget install junegunn.fzf`                 |
-| **PSFzf**  | PowerShell fzf integration   | `Install-Module -Name PSFzf -Scope CurrentUser` |
+| Tool    | Required | Install |
+|---------|----------|---------|
+| **fd**  | Sí       | `winget install sharkdp.fd` |
+| **fzf** | Sí       | `winget install junegunn.fzf` |
+| **rg**  | Sí       | `winget install BurntSushi.ripgrep.MSVC` |
+| **zoxide** | No    | `winget install ajeetdsouza.zoxide` |
+| **eza** | No       | `winget install eza-community.eza` |
+| **bat** | No       | `winget install sharkdp.bat` |
 
-> cdx works without zoxide — it auto-falls back to rg+fzf search.
+## Excluded directories
 
-## Search Details
-
-### Scope
-
-- **Priority roots**: `$HOME/dev` and `$HOME/.config` — depth 6
-- **Secondary scope**: entire `$HOME` — depth 5
-
-### Excluded directories
-
-`node_modules`, `.git`, `AppData`, `.cache`, `vendor`, `target`, `build`, `dist`
-
-### Search phases (executed in parallel)
-
-| # | Type                 | Method                                               |
-|---|----------------------|------------------------------------------------------|
-| 1 | **Content matches**  | `rg --files-with-matches --smart-case $Query`        |
-| 2 | **File name matches**| `rg --files | rg $Query`                             |
-| 3 | **Directory matches**| `Get-ChildItem -Directory -Recurse` filtered by name |
-
-Results from all 3 phases are deduplicated and presented in a single fzf list.
-
-### fzf interface
-
-- **Preview pane** (top 50%): shows ripgrep context (3 lines around match) with syntax highlighting
-- **Enter**: navigates to the selected path
-- **Esc**: cancels
-
-## Navigation Behavior
-
-When a result is selected in fzf:
-
-| Selection type | Navigation target                                            |
-|----------------|--------------------------------------------------------------|
-| **Directory**  | `Set-Location` to that directory                             |
-| **File**       | Git repo root (if inside a git repo), otherwise parent dir   |
-
-## Usage Examples
-
-```powershell
-# Jump to a frequently visited directory by name
-cdx dev
-
-# Jump to a directory containing "agent" in the name
-cdx agent
-
-# Force search mode even if zoxide is installed
-cdx -s dotfiles
-
-# Direct path (works as regular cd)
-cdx C:\Users\buble\Documents
-
-# Search for files containing "function cdx"
-cdx -s "function cdx"
-```
+`node_modules`, `.git`, `.cache`, `vendor`, `target`, `build`, `dist`, `AppData`, `ProgramData`, `go/pkg/mod`
 
 ## Architecture
 
-The command lives in `C:\Users\buble\Documents\PowerShell\Cdx.ps1` and is loaded by `$PROFILE`:
-
-```powershell
-. (Join-Path $PSScriptRoot 'Cdx.ps1')
-```
-
-Three functions compose the command:
+Script: `$HOME\Documents\PowerShell\Cdx.ps1` (cargado por `$PROFILE`)
 
 ```
-cdx                        -- dispatch: path → jump → search
-  ├─ Invoke-CdxSearch     -- rg + fzf pipeline
-  └─ Resolve-CdxDestination -- navigate to directory or git root
+cdx                    dispatch: path → jump → search → TUI
+ ├─ Invoke-CdxTui      TUI loop: fd/rg + fzf + preview + toggles
+ └─ Invoke-CdxSearch   ripgrep global search (-g)
 ```
 
-## Why
-
-- `cd` requires typing full paths or multiple `..\..\` chains
-- `zoxide` is great for frecency but only works with previously visited dirs
-- `cdx` combines frecency jumps with content-aware search for the best of both worlds
-- The fzf preview gives context before you navigate, reducing wrong moves
+El estado de toggles (rg, dotfiles, WinHidden) se persiste en `$env:TEMP\cdx_state.txt`
+como bits en un entero: bit0=rg, bit1=dotfiles, bit2=WinHidden.

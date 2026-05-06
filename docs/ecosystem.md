@@ -43,7 +43,6 @@ Cada herramienta resuelve un problema concreto. Combinadas, multiplican.
 | Herramienta | Que hace | Por que importa |
 |---|---|---|
 | **[LinuxAliases.ps1](https://github.com/Sovengar/dotfiles/blob/master/home/Documents/PowerShell/LinuxAliases.ps1)** | Aliases Linux para PowerShell. ls -la, touch, grep, head, tail, which, df -h, du -sh, uptime, ps aux, wc -l, find, rm -rf. | Musculo mental de Linux funciona en Windows sin friccion. `ls -la` hace lo que esperas, `grep` usa ripgrep si esta instalado, `ps aux` lanza bottom si existe, `find` usa fd. Auto-detection de herramientas nativas. |
-| **[DatreeCompletion.ps1](https://github.com/Sovengar/dotfiles/blob/master/home/Documents/PowerShell/DatreeCompletion.ps1)** | Autocompletado de argumentos para `datree` CLI. | `datree test <Tab>` lista subcomandos y flags con descripciones. Creado via Cobra/Go auto-completion generator para PowerShell. |
 
 ---
 
@@ -105,22 +104,23 @@ En sesiones de debug, snip reduce el ruido y opencode procesa solo la señal.
 
 ```
 # Dia 0: formateas la maquina
-$ winget install twpayne.chezmoi
+$ winget install Git.Git twpayne.chezmoi
 $ chezmoi init https://github.com/Sovengar/dotfiles
-$ chezmoi apply
-# → winget instala zoxide, rg, fzf, lazygit, wezterm, etc.
-# → mise install (node, go, rust, java, python, etc.)
-# → starship configurado, nvim con LazyVim, alias cargados
-# → opencode configurado con agentes, skills y plugins
+$ .\windows\setup\run-all.ps1        # instala ~70+ apps + WSL + Docker + SSH + registry + ...
+$ chezmoi apply                      # dotfiles + scripts ligeros
+
+# → firecrawl key se configura automáticamente desde OneDrive (chezmoi script)
+# → mise install (node, go, rust, python, etc.)
+# → starship, nvim, opencode, alias cargados
 
 # Dia 0 + 10 minutos: estas programando
 $ cdx proyecto
 $ opencode "lee AGENTS.md y continua donde lo dejamos"
 ```
 
-**Combo:** `chezmoi` + `winget` + `mise` + `opencode` + `starship`
+**Combo:** `run-all.ps1` + `chezmoi` + `mise` + `opencode` + `starship`
 
-Tu dotfiles repo es tu "maquina en una caja". Cada tool, cada config, cada preferencia — versionada y reproducible.
+Tu dotfiles repo es tu "maquina en una caja". Cada tool, cada config — versionada y reproducible.
 
 ### 6. Code review adversarial con dos jueces ciegos
 
@@ -263,7 +263,7 @@ El script hace auto-detection: si `rg` existe, `grep` lo usa; si `fd` existe, `f
         |                |
     wezterm + starship (shell)
         |
-  LinuxAliases + DatreeCompletion (puente Linux->PS)
+  LinuxAliases (puente Linux->PS)
         |
   chezmoi (todo esto versionado)
 ```

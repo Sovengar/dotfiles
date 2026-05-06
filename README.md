@@ -6,8 +6,8 @@ Dos flujos independientes:
 
 | Flujo | ¿Cuándo? | ¿Cómo? |
 |-------|----------|--------|
-| **Dotfiles** `(1)` | Cualquier máquina | `chezmoi apply` |
-| **Formateo** `(2)` | Solo máquina nueva tras formateo | Scripts manuales en `windows/` |
+| **Dotfiles** `(1)` | Cualquier máquina (diario) | `chezmoi apply` |
+| **Formateo** `(2)` | Máquina nueva o actualizar paquetes | `.\windows\setup\run-all.ps1` |
 
 ---
 
@@ -17,92 +17,132 @@ Dos flujos independientes:
 chezmoi apply
 ```
 
-Aplica dotfiles, instala herramientas vía winget, configura PATH y menús contextuales.
+Aplica **solo dotfiles** (configs de shell, wezterm, lazygit, opencode, starship, git, etc.) y scripts ligeros. 
+Rápido, predecible, sin instalación de apps.
+
+### Para mantener actualizado
+
+```powershell
+chezmoi update
+# = git pull + chezmoi apply
+```
 
 ---
 
-## (2) Flujo Formateo — máquina nueva
+## (2) Flujo Formateo — máquina nueva (o actualización)
 
-SecciOnado en tres fases: antes de chezmoi → chezmoi apply → después de chezmoi.
-
-### Fase A: Pre-chezmoi
+`run-all.ps1` es **idempotente**: puedes ejecutarlo en máquina nueva (instala todo)
+o en máquina ya configurada (actualiza lo que falte). Cada sub-script verifica
+estado antes de actuar.
 
 ```powershell
-# 0. Sincronizar OneDrive (necesario para env.toml)
-# 1. En una terminal de PowerShell como Administrador, permitir scripts locales
-Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+# 0. Sincronizar OneDrive y crear Secret Vault (ver 🔐 Secret Vault abajo)
 
-# 2. Instalar Git y chezmoi
+# 1. Download dependencies
 winget install --id Git.Git -e --source winget --silent
 winget install --id twpayne.chezmoi -e --source winget --silent
 
-# 3. Clonar configuración
+# 2. Clone config
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 4. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
-# Ejecutar como Administrador:
-.\windows\setup-wsl-pre-reboot.ps1
-# ... reiniciar ...
+# 3 (Windows). Allow script execution 
+Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
-# 5. WSL2: instalar Ubuntu (después del reinicio)
-.\windows\setup-wsl-post-reboot.ps1
+# 4. Verificar prerequisitos (virtualización WSL)
+.\windows\setup\prerequisites-compliance.ps1
+# Reiniciar si el script lo indica
+
+# 5. Setup all (instala o actualiza)
+.\windows\setup\run-all.ps1
 ```
 
-> **Nota:** Si WSL2 ya está instalado en esta máquina, saltar pasos 3-4.
+`run-all.ps1` corre en orden:
+- `00-env-vars.ps1` — variables XDG
+- `05-wsl.ps1` — WSL2 + Ubuntu
+- `10-install-packages.ps1` — ~70+ apps via winget + manual
+- `20-configure-system.ps1` — PATH, symlinks
+- `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
+- `personal/startup-shortcuts.ps1`, `setup-listary.ps1` — personales (con prompt)
+- `25-setup-docker-post-apply.ps1` — Docker WSL2 integration
+- `30-setup-registry.ps1` — context menus
+- `35-setup-auth.ps1` — gh + opencode login (con prompt)
 
-### Fase B: chezmoi apply
-
-```powershell
-# 5. Previsualizar cambios (OBLIGATORIO)
-chezmoi diff
-chezmoi apply --dry-run --verbose
-
-# Si necesitas más detalle para diagnosticar algo:
-# chezmoi apply --dry-run --verbose --debug
-
-# 6. Aplicar solo si la previsualización es correcta
-chezmoi apply --verbose
-```
-
-> ⚠️ **NUNCA ejecutes `chezmoi apply` sin `--dry-run` primero.**
-> Para troubleshooting, agrega `--debug`.
-
-### Fase C: Post-apply (pasos manuales)
-
-Ejecutar en orden:
-
-```powershell
-# 7. Autenticación en herramientas CLI
-gh auth login
-opencode login
-
-# 8. Docker Desktop — configurar integración WSL2
-.\windows\setup-docker-post-apply.ps1
-
-# 9. PowerToys — restaurar configuración desde GUI
-# Abrir PowerToys Settings → General → Backup & Restore → RESTORE
-
-# 10. Listary — re-introducir licencia (opcional)
-```
-
-> Para un checklist más detallado, ver: `windows/POST-FORMATEO.md`
+Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde env.toml).
 
 ---
 
 ## Estructura del repositorio
 
-- `.chezmoiscripts/` — Scripts **automáticos** del flujo dotfiles (instalan apps, configuran PATH, etc.)
-- `home/` — Dotfiles gestionados por chezmoi (se sincronizan a `~`)
-  - `dot_*/` — Dotfiles raíz (`~/.bashrc`, `~/.gitconfig`, etc.)
-  - `dot_config/` — Configuraciones en `~/.config`
-- `windows/` — Scripts **manuales** del flujo formateo (NO ejecutados por chezmoi)
-  - `setup-wsl-pre-reboot.ps1` — Activa virtualización para WSL2
-  - `setup-wsl-post-reboot.ps1` — Instala WSL2 + Ubuntu
-  - `setup-docker-post-apply.ps1` — Configura Docker Desktop + WSL2
-  - `registry/` — Menús contextuales (aplicados automáticamente por `before_30-registry.ps1`)
+```
+dotfiles/
+├── home/                         ← Source state de chezmoi (se sincroniza a ~/)
+│   ├── .chezmoiscripts/          ← Scripts LIGEROS auto-sync (registry, shortcuts)
+│   ├── .chezmoidata/             ← Datos declarativos (packages.yaml)
+│   ├── dot_*                     ← Dotfiles raíz (~/.gitconfig, etc.)
+│   ├── dot_config/               ← Configs en ~/.config (wezterm, lazygit, etc.)
+│   └── Documents/                ← PowerShell profile, PowerToys backup
+│
+├── windows/
+│   ├── setup/                    ← TODO: scripts standalone, NO chezmoi
+│   │   ├── 00-env-vars.ps1
+│   │   ├── prerequisites-compliance.ps1
+│   │   ├── 05-wsl.ps1
+│   │   ├── 10-install-packages.ps1
+│   │   ├── 20-configure-system.ps1
+│   │   ├── lib.ps1
+│   │   ├── setup-docker-post-apply.ps1
+│   │   ├── setup-registry.ps1
+│   │   ├── registry/             ← .reg files
+│   │   │   ├── Wezterm/
+│   │   │   ├── System/
+│   │   │   ├── WindowsTerminal/
+│   │   │   └── Removers/
+│   │   ├── personal/             ← Scripts de máquina personal (con prompt)
+│   │   │   └── ...
+│   │   └── run-all.ps1           ← Orquestador
+│
+├── docs/                         ← Documentación adicional
+├── README.md
+└── .chezmoiroot                  ← root = home/
+```
+
+## Arquitectura: separación de concerns
+
+| Capa | Mecanismo | Frecuencia | Qué hace |
+|------|-----------|-----------|----------|
+| **Dotfiles** | `chezmoi apply` | Diario | PowerShell profile, WezTerm, Lazygit, OpenCode, Starship, Git config |
+| **Scripts ligeros** | `run_onchange_` via chezmoi | Cuando cambian | Registry context menus, dev shortcuts, startup |
+| **App installation** | `windows/setup/*.ps1` manual | Solo post-formateo | winget, mise, npm/bun/go globals, manual downloads |
+| **System config** | `windows/setup/*.ps1` manual | Solo post-formateo | PATH, symlinks, env vars, SSH |
+
+## Paquetes declarativos
+
+La lista completa de paquetes está en `home/.chezmoidata/packages.yaml`.
+Los scripts standalone la leen via `chezmoi execute-template "{{ toJson .packages }}"`.
+
+Para modificar qué se instala, editar SOLO ese archivo — no los scripts.
+
+## 🔐 Secret Vault
+
+Secretos (API keys, tokens, email) via `OneDrive\secrets\env.toml`. **Nunca se suben a Git.**
+
+```powershell
+# Solo primera vez:
+New-Item -ItemType Directory -Path "$env:USERPROFILE\OneDrive\secrets" -Force
+notepad "$env:USERPROFILE\OneDrive\secrets\env.toml"
+```
+
+Formato: usa `home/OneDrive/secrets/env.toml.tmpl` como referencia.
+`[opencode].config` = contenido completo de `~/.local/share/opencode/auth.json`.
+
+| Quién | Lee | Genera |
+|-------|-----|--------|
+| `.chezmoi.toml.tmpl` | `[git]`, `[ssh]` | `dot_gitconfig.tmpl` |
+| `35-firecrawl-key.ps1` | `[api_keys].firecrawl` | `FIRECRAWL_API_KEY` env |
+| `auth.json.tmpl` | `[opencode].config` | `~/.local/share/opencode/auth.json` |
+
+Tras refrescar OAuth (`opencode login`), copia los nuevos tokens a `env.toml`.
 
 ## Requisitos
 
-- OneDrive sincronizado (para `env.toml` con API keys)
-- PowerShell 7
-- GitHub CLI (`gh auth login` si el repo es privado)
+- OneDrive sincronizado (para env.toml)

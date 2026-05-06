@@ -1,0 +1,51 @@
+$ErrorActionPreference = "Continue"
+
+$existingKey = [System.Environment]::GetEnvironmentVariable("FIRECRAWL_API_KEY", "User")
+if ($existingKey) {
+    Write-Host "[SKIP] FIRECRAWL_API_KEY already configured" -ForegroundColor Green
+    exit 0
+}
+
+$envToml = "$env:USERPROFILE\OneDrive\secrets\env.toml"
+if (Test-Path $envToml) {
+    $content = Get-Content $envToml -Raw
+    if ($content -match 'firecrawl\s*=\s*"([^"]+)"') {
+        $key = $matches[1]
+        [System.Environment]::SetEnvironmentVariable("FIRECRAWL_API_KEY", $key, "User")
+        $env:FIRECRAWL_API_KEY = $key
+        Write-Host "[OK] FIRECRAWL_API_KEY loaded from OneDrive" -ForegroundColor Green
+
+        firecrawl-cli init -y --agent opencode --agent antigravity --agent codex
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] firecrawl CLI configured" -ForegroundColor Green
+        } else {
+            Write-Host "[WARN] firecrawl-cli init failed — run manually: firecrawl-cli init -y --agent opencode --agent antigravity --agent codex" -ForegroundColor Yellow
+        }
+        exit 0
+    }
+    Write-Host "[WARN] env.toml found but no 'firecrawl' key inside" -ForegroundColor Yellow
+    Write-Host "  Se esperaba una línea como: firecrawl = \"fc-...\"" -ForegroundColor Yellow
+    Write-Host "  Edita el archivo y vuelve a ejecutar este script." -ForegroundColor Yellow
+    Write-Host "  Para resetear el estado: chezmoi state delete-bucket --bucket=scriptState" -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host ""
+Write-Host "=====================================================" -ForegroundColor Cyan
+Write-Host "  FIRECRAWL_API_KEY no configurada" -ForegroundColor Cyan
+Write-Host "=====================================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Este script espera que exista:" -ForegroundColor White
+Write-Host "  $envToml" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Con el contenido:" -ForegroundColor White
+Write-Host '  firecrawl = "fc-tu-api-key-aqui"' -ForegroundColor Green
+Write-Host ""
+Write-Host "Pasos:" -ForegroundColor White
+Write-Host "  1. Sincroniza OneDrive (debe estar enlazado)" -ForegroundColor Yellow
+Write-Host "  2. Verifica que secrets\env.toml existe en OneDrive" -ForegroundColor Yellow
+Write-Host "  3. Vuelve a ejecutar: chezmoi apply" -ForegroundColor Yellow
+Write-Host "  4. Si el error persiste: chezmoi state delete-bucket --bucket=scriptState" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Si no tienes API key, registrate en https://www.firecrawl.dev" -ForegroundColor White
+Write-Host "=====================================================" -ForegroundColor Cyan

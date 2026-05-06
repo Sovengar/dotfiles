@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; Añadir opción "Abrir con OpenCode + LazyGit" al clic derecho en carpetas
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithOpenCodeLazygit]
+@="Abrir con OpenCode + LazyGit"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\OpenWithOpenCodeLazygit\command]
+@="wt.exe new-tab --title \"OpenCode\" -- \"%USERPROFILE%\\.local\\bin\\opencode.cmd\" \"%1\" ; split-pane -V -- \"%USERPROFILE%\\.local\\bin\\lazygit.exe\" -p \"%1\""
+
+; También funciona para carpetas en el escritorio (Directory\Background)
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithOpenCodeLazygit]
+@="Abrir con OpenCode + LazyGit"
+"Icon"="cmd.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWithOpenCodeLazygit\command]
+@="wt.exe new-tab --title \"OpenCode\" -- \"%USERPROFILE%\\.local\\bin\\opencode.cmd\" \"%V\" ; split-pane -V -- \"%USERPROFILE%\\.local\\bin\\lazygit.exe\" -p \"%V\""

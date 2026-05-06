@@ -1,0 +1,8 @@
+{{- $envFile := (joinPath (env "USERPROFILE") "OneDrive" "secrets" "env.toml") -}}
+{{- if stat $envFile -}}
+{{-   $cfg := fromToml (include $envFile) -}}
+{{-   $oc := index $cfg "opencode" | default dict -}}
+{{-   index $oc "config" | default "{}" -}}
+{{- else -}}
+{}
+{{- end -}}
