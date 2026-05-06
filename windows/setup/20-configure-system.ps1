@@ -84,7 +84,7 @@ foreach ($name in $wingetTools.Keys) {
         try {
             New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
             $createdLinks += $name
-        } catch { $warnings += "Failed to create symlink for $name: $_" }
+        } catch { $warnings += "Failed to create symlink for $($name): $_" }
     } else { $warnings += "Tool not found: $target" }
 }
 
@@ -129,7 +129,7 @@ foreach ($name in @('docker.exe', 'docker-compose.exe', 'kubectl.exe')) {
     $link = Join-Path $localBin $name
     if (Test-Path $target) {
         if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $name: $_" }
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
     }
 }
 
@@ -139,7 +139,7 @@ foreach ($name in @('podman.exe')) {
     $link = Join-Path $localBin $name
     if (Test-Path $target) {
         if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $name: $_" }
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
     }
 }
 
@@ -164,7 +164,7 @@ foreach ($name in @('wezterm.exe', 'wezterm-gui.exe')) {
     $link = Join-Path $localBin $name
     if (Test-Path $target) {
         if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $name: $_" }
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
     }
 }
 
@@ -191,7 +191,7 @@ foreach ($name in @('git.exe')) {
     $link = Join-Path $localBin $name
     if (Test-Path $target) {
         if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $name: $_" }
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
     }
 }
 
