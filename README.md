@@ -29,19 +29,22 @@ SecciOnado en tres fases: antes de chezmoi → chezmoi apply → después de che
 
 ```powershell
 # 0. Sincronizar OneDrive (necesario para env.toml)
-# 1. Instalar Git y chezmoi
+# 1. En una terminal de PowerShell como Administrador, permitir scripts locales
+Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+
+# 2. Instalar Git y chezmoi
 winget install --id Git.Git -e --source winget --silent
 winget install --id twpayne.chezmoi -e --source winget --silent
 
-# 2. Clonar configuración
+# 3. Clonar configuración
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 3. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
+# 4. WSL2: habilitar virtualización (REQUIERE ADMIN + REINICIO)
 # Ejecutar como Administrador:
 .\windows\setup-wsl-pre-reboot.ps1
 # ... reiniciar ...
 
-# 4. WSL2: instalar Ubuntu (después del reinicio)
+# 5. WSL2: instalar Ubuntu (después del reinicio)
 .\windows\setup-wsl-post-reboot.ps1
 ```
 
