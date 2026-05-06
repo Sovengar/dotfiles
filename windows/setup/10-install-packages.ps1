@@ -88,13 +88,13 @@ if (-not (Test-Path $oneNotePath)) {
 
 $raycastPath = "$env:LOCALAPPDATA\Programs\Raycast\Raycast.exe"
 if (-not (Test-Path $raycastPath)) {
-    Write-Host "Abriendo pagina de descarga de Raycast..." -ForegroundColor Yellow
-    try {
-        Start-Process "https://raycast.com"
-        Write-Host "Raycast abierto en el navegador. Descarga e instala la version para Windows." -ForegroundColor Green
-    } catch {
-        Write-Host "ERROR abriendo pagina de Raycast" -ForegroundColor Red
-        Add-Content -Path $errorFile -Value "Error abriendo pagina de Raycast"
+    Write-Host "[INFO] Installing Raycast via Microsoft Store..." -ForegroundColor Yellow
+    winget install --id 9PFXXSHC64H3 --source msstore --silent --accept-package-agreements 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[OK] Raycast installed" -ForegroundColor Green
+    } else {
+        Write-Host "[INFO] Could not install silently — opening Microsoft Store page..." -ForegroundColor Yellow
+        Start-Process "ms-windows-store://pdp/?productid=9PFXXSHC64H3"
     }
 } else {
     Write-Host "[OK] Raycast already installed" -ForegroundColor Green
