@@ -14,7 +14,8 @@ if (-not $wslInstalled) {
 } else {
     Write-Host "[OK] WSL2 already installed" -ForegroundColor Green
 
-    $ubuntuDistro = wsl --list --quiet | Where-Object { $_.Trim().ToLower().StartsWith("ubuntu") }
+    $wslList = wsl --list 2>$null
+    $ubuntuDistro = $wslList | Where-Object { $_ -like "*Ubuntu*" }
     if (-not $ubuntuDistro) {
         Write-Host "[INFO] Installing Ubuntu distribution..." -ForegroundColor Yellow
         wsl --install -d Ubuntu
