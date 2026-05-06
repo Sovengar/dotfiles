@@ -195,6 +195,13 @@ foreach ($name in @('git.exe')) {
     }
 }
 
+$mavenHome = "$toolingPath\maven"
+$mavenExe = Join-Path $mavenHome "bin\mvn.cmd"
+if (Test-Path $mavenExe) {
+    $link = Join-Path $localBin "mvn.cmd"
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    try { New-Item -ItemType SymbolicLink -Path $link -Target $mavenExe -Force | Out-Null; $createdLinks += "mvn.cmd" } catch { $warnings += "Failed mvn.cmd: $_" }
+}
 [Environment]::SetEnvironmentVariable("JAVA_HOME", $null, "User")
 [Environment]::SetEnvironmentVariable("MAVEN_HOME", $null, "User")
 Write-Host "[OK] Removed obsolete JAVA_HOME and MAVEN_HOME" -ForegroundColor Green
