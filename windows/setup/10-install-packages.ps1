@@ -53,25 +53,7 @@ Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  MANUAL DOWNLOADS (background)" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
-$downloadResults = Start-BackgroundDownloads -Downloads $allPackages.dev.manual_downloads
-
-$failedDownloads = $downloadResults | Where-Object { -not $_.Success }
-$okDownloads = $downloadResults | Where-Object { $_.Success }
-
-if ($okDownloads) {
-    foreach ($dl in $okDownloads) {
-        Write-Host "  [OK] $($dl.Name)" -ForegroundColor Green
-    }
-}
-
-if ($failedDownloads) {
-    Write-Host "" -ForegroundColor Red
-    Write-Host "  DOWNLOAD ERRORS:" -ForegroundColor Red
-    foreach ($dl in $failedDownloads) {
-        Write-Host "    [FAIL] $($dl.Name)" -ForegroundColor Red
-        Add-Content -Path $errorFile -Value "Manual download failed: $($dl.Name)"
-    }
-}
+Start-BackgroundDownloads -Downloads $allPackages.dev.manual_downloads
 
 $oneNotePath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.Office.OneNote_8wekyb3d8bbwe"
 if (-not (Test-Path $oneNotePath)) {

@@ -112,44 +112,21 @@ function Start-BackgroundDownloads {
     param([array]$Downloads)
 
     if (-not $Downloads -or $Downloads.Count -eq 0) {
-        return @()
+        return
     }
 
     $libPath = Join-Path $PSScriptRoot "lib.ps1"
     $initScript = [ScriptBlock]::Create(". '$libPath'")
-    $jobs = @()
 
     foreach ($dl in $Downloads) {
         Write-Host "  [BACKGROUND] $($dl.name)..." -ForegroundColor Cyan
-        $job = Start-Job -Name $dl.name -InitializationScript $initScript -ScriptBlock {
+        $null = Start-Job -Name $dl.name -InitializationScript $initScript -ScriptBlock {
             param($Name, $Url, $Dest, $IsArchive)
             $ErrorActionPreference = "Continue"
             $result = Invoke-ManualDownload -Name $Name -Url $Url -Dest $Dest -IsArchive $IsArchive
             if ($result) { Write-Host "[OK] $Name" } else { Write-Host "[FAIL] $Name" }
-            return $result
         } -ArgumentList $dl.name, $dl.url, $dl.dest, ($dl.archive -eq $true)
-        $jobs += $job
     }
 
-    while ($running = ($jobs | Where-Object { $_.State -eq 'Running' }).Count) {
-        $completed = $jobs.Count - $running
-        $pct = if ($jobs.Count -gt 0) { [math]::Round($completed / $jobs.Count * 100) } else { 0 }
-        Write-Progress -Activity "Downloads" -Status "$completed/$($jobs.Count)" -PercentComplete $pct
-        Start-Sleep -Milliseconds 500
-    }
-    Write-Progress -Activity "Downloads" -Completed
-
-    $results = @()
-    foreach ($job in $jobs) {
-        $success = $false
-        $output = $null
-        try {
-            $output = Receive-Job -Job $job -ErrorAction Stop
-            if ($output -eq $true) { $success = $true }
-        } catch {}
-        $results += [PSCustomObject]@{ Name = $job.Name; Success = $success }
-        Remove-Job -Job $job
-    }
-
-    return $results
+    Write-Host "  [INFO] $($Downloads.Count) downloads running in background" -ForegroundColor Cyan
 }
