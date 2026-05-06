@@ -10,7 +10,6 @@ function Run-Step {
 }
 
 Run-Step "$PSScriptRoot\00-env-vars.ps1"
-Run-Step "$PSScriptRoot\05-wsl.ps1"
 Run-Step "$PSScriptRoot\10-install-packages.ps1"
 Run-Step "$PSScriptRoot\20-configure-system.ps1"
 Run-Step "$PSScriptRoot\personal\ssh-client-setup.ps1"
