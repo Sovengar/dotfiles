@@ -18,7 +18,13 @@ Run-Step "$PSScriptRoot\personal\startup-shortcuts.ps1"
 Run-Step "$PSScriptRoot\personal\setup-listary.ps1"
 Run-Step "$PSScriptRoot\30-setup-registry.ps1"
 Run-Step "$PSScriptRoot\35-setup-auth.ps1"
-Run-Step "$PSScriptRoot\40-setup-docker.ps1"
+
+$dockerInstalled = Get-Command docker -ErrorAction SilentlyContinue
+if ($dockerInstalled) {
+    Run-Step "$PSScriptRoot\40-setup-docker.ps1"
+} else {
+    Write-Host "  [WARN] Docker not installed — skipping Docker setup" -ForegroundColor Yellow
+}
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
