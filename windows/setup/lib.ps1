@@ -149,16 +149,27 @@ function Start-BackgroundDownloads {
 
     $libPath = Join-Path $PSScriptRoot "lib.ps1"
     $initScript = [ScriptBlock]::Create(". '$libPath'")
+    $jobs = @()
 
     foreach ($dl in $Downloads) {
-        Write-Host "  [BACKGROUND] $($dl.name)..." -ForegroundColor Cyan
-        $null = Start-Job -Name $dl.name -InitializationScript $initScript -ScriptBlock {
+        Write-Host "  [DOWNLOAD] $($dl.name)..." -ForegroundColor Cyan
+        $jobs += Start-Job -Name $dl.name -InitializationScript $initScript -ScriptBlock {
             param($Name, $Url, $Dest, $IsArchive)
             $ErrorActionPreference = "Continue"
             $result = Invoke-ManualDownload -Name $Name -Url $Url -Dest $Dest -IsArchive $IsArchive
-            if ($result) { Write-Host "[OK] $Name" } else { Write-Host "[FAIL] $Name" }
+            if ($result) { "[OK] $Name" } else { "[FAIL] $Name" }
         } -ArgumentList $dl.name, $dl.url, $dl.dest, ($dl.archive -eq $true)
     }
 
-    Write-Host "  [INFO] $($Downloads.Count) downloads running in background" -ForegroundColor Cyan
+    foreach ($job in $jobs) {
+        $null = Wait-Job $job -Timeout 120
+        $output = Receive-Job $job
+        if ($job.State -eq 'Completed' -and $output -match '\[OK\]') {
+            Write-Host "    $output" -ForegroundColor Green
+        } else {
+            Write-Host "    $output" -ForegroundColor Red
+            Add-SetupLog -Message "[FAIL] Download: $($job.Name)"
+        }
+        Remove-Job $job -Force
+    }
 }
