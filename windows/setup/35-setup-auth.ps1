@@ -9,7 +9,9 @@ if ($response -match '^[yY]') {
 
 $response = Read-Host "Authenticate OpenCode (opencode login)? (y/n)"
 if ($response -match '^[yY]') {
+    Push-Location $HOME
     opencode login
+    Pop-Location
     if ($LASTEXITCODE -eq 0) { Write-Host "[OK] OpenCode authenticated" -ForegroundColor Green }
     else { Write-Host "[WARN] opencode login failed or skipped" -ForegroundColor Yellow }
 }
