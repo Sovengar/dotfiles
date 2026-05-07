@@ -16,9 +16,9 @@ Run-Step "$PSScriptRoot\personal\ssh-client-setup.ps1"
 Run-Step "$PSScriptRoot\personal\setup-ssh-server.ps1"
 Run-Step "$PSScriptRoot\personal\startup-shortcuts.ps1"
 Run-Step "$PSScriptRoot\personal\setup-listary.ps1"
-Run-Step "$PSScriptRoot\25-setup-docker-post-apply.ps1"
 Run-Step "$PSScriptRoot\30-setup-registry.ps1"
 Run-Step "$PSScriptRoot\35-setup-auth.ps1"
+Run-Step "$PSScriptRoot\40-setup-docker.ps1"
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan

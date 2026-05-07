@@ -67,9 +67,9 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 - `20-configure-system.ps1` — PATH, symlinks
 - `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
 - `personal/startup-shortcuts.ps1`, `setup-listary.ps1` — personales (con prompt)
-- `25-setup-docker-post-apply.ps1` — Docker WSL2 integration
 - `30-setup-registry.ps1` — context menus
 - `35-setup-auth.ps1` — gh + opencode login (con prompt)
+- `40-setup-docker.ps1` — Docker WSL2 integration (último)
 
 Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde env.toml).
 
@@ -94,7 +94,7 @@ dotfiles/
 │   │   ├── 10-install-packages.ps1
 │   │   ├── 20-configure-system.ps1
 │   │   ├── lib.ps1
-│   │   ├── setup-docker-post-apply.ps1
+│   │   ├── 40-setup-docker.ps1
 │   │   ├── setup-registry.ps1
 │   │   ├── registry/             ← .reg files
 │   │   │   ├── Wezterm/
