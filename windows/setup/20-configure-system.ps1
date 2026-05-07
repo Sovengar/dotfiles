@@ -6,14 +6,6 @@ $movedItems = @()
 $removedPaths = @()
 $warnings = @()
 
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-$devModeKey = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" -Name "AllowDevelopmentWithoutDevLicense" -ErrorAction SilentlyContinue
-$symlinksAvailable = $isAdmin -or ($devModeKey -and $devModeKey.AllowDevelopmentWithoutDevLicense -eq 1)
-
-if (-not $symlinksAvailable) {
-    Write-Host "[INFO] Symlinks not available (no admin, no Developer Mode). Using CMD wrappers instead" -ForegroundColor Yellow
-}
-
 New-Item -ItemType Directory -Force -Path $localBin | Out-Null
 Write-Host "[INFO] Consolidating executables to $localBin" -ForegroundColor Cyan
 
@@ -21,14 +13,17 @@ function Add-Link {
     param([string]$Name, [string]$Target)
     $link = Join-Path $script:localBin $Name
     if (Test-Path $link) { Remove-Item -Path $link -Force }
-    if ($script:symlinksAvailable) {
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $Target -Force | Out-Null; $script:createdLinks += $Name; return } catch { $script:warnings += "Failed symlink $Name, fallback to wrapper: $_" }
+    try {
+        New-Item -ItemType SymbolicLink -Path $link -Target $Target -Force -ErrorAction Stop | Out-Null
+        $script:createdLinks += $Name
+        return
+    } catch {
+        $wrapperName = [System.IO.Path]::GetFileNameWithoutExtension($Name) + ".cmd"
+        $wrapperPath = Join-Path $script:localBin $wrapperName
+        $content = "@echo off`n`"$Target`" %*"
+        Set-Content -Path $wrapperPath -Value $content -Encoding ASCII -Force
+        $script:createdLinks += "$wrapperName (wrapper)"
     }
-    $wrapperName = [System.IO.Path]::GetFileNameWithoutExtension($Name) + ".cmd"
-    $wrapperPath = Join-Path $script:localBin $wrapperName
-    $content = "@echo off`n`"$Target`" %*"
-    Set-Content -Path $wrapperPath -Value $content -Encoding ASCII -Force
-    $script:createdLinks += "$wrapperName (wrapper)"
 }
 
 function Move-BinContents {
