@@ -39,13 +39,13 @@ function Read-Packages {
 function Install-WingetApp {
     param([string]$AppId)
     Write-Host "    (attempting silent install...)" -ForegroundColor DarkGray
-    cmd /c "echo y | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements"
+    winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
     }
     Write-Host "    (silent failed, retrying without --silent...)" -ForegroundColor DarkGray
-    cmd /c "echo y | winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements"
+    winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true

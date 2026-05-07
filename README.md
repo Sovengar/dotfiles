@@ -68,7 +68,7 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 - `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
 - `personal/startup-shortcuts.ps1`, `setup-listary.ps1` — personales (con prompt)
 - `30-setup-registry.ps1` — context menus
-- `35-setup-auth.ps1` — gh + opencode login (con prompt)
+- `35-setup-auth.ps1` — gh auth login (con prompt)
 - `40-setup-docker.ps1` — Docker WSL2 integration (último)
 
 Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde env.toml).

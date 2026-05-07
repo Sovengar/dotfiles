@@ -207,8 +207,28 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "  BUILD TOOLS (LazyVim dep)" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Install-WingetApp -AppId "Microsoft.VisualStudio.2022.BuildTools"
-Add-SetupLog -Message "[ACTION] Visual Studio Installer: open it and select 'Desktop development with C++' workload"
-Write-Host "NOTE: In Visual Studio Installer, select 'Desktop development with C++'" -ForegroundColor Yellow
+
+$vsInstallPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\BuildTools"
+$vcvars = "$vsInstallPath\VC\Auxiliary\Build\vcvarsall.bat"
+if (-not (Test-Path $vcvars)) {
+    $vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+    if (Test-Path $vsInstaller) {
+        Write-Host "[INFO] Adding 'Desktop development with C++' workload..." -ForegroundColor Cyan
+        $proc = Start-Process -FilePath $vsInstaller -ArgumentList "modify --installPath `"$vsInstallPath`" --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait --norestart" -Wait -PassThru
+        if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq 3010) {
+            Write-Host "[OK] C++ build tools installed" -ForegroundColor Green
+            Add-SetupLog -Message "[OK] C++ build tools workload installed"
+        } else {
+            Write-Host "[WARN] VS installer exit code $($proc.ExitCode). Open Visual Studio Installer and add 'Desktop development with C++' manually." -ForegroundColor Yellow
+            Add-SetupLog -Message "[WARN] VS installer exit code $($proc.ExitCode)"
+        }
+    } else {
+        Add-SetupLog -Message "[ACTION] Visual Studio Installer not found at $vsInstaller"
+        Write-Host "[WARN] Visual Studio Installer not found. Please open it and select 'Desktop development with C++'" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[OK] C++ build tools already installed" -ForegroundColor Green
+}
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
