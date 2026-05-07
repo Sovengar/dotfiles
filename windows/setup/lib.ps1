@@ -18,7 +18,6 @@
 
 function Install-WingetApp {
     param([string]$AppId)
-    Write-Host "  Installing: $AppId" -ForegroundColor Cyan
     cmd /c "echo y | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements"
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
@@ -46,6 +45,8 @@ function Install-WingetList {
             $appId = $item.id
             $interactive = if ($item.interactive) { $true } else { $false }
         }
+
+        Write-Host "  Installing: $appId" -ForegroundColor Cyan
 
         if ($interactive) {
             $response = Read-Host "  Install $appId? [Y/n]"

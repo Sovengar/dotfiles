@@ -23,27 +23,79 @@ function Find-AppPath {
     return $null
 }
 
-$apps = @(
-    @{ Name = 'GitHub Desktop'; Exe = 'GitHubDesktop.exe'; Paths = @("$env:LOCALAPPDATA\GitHubDesktop\GitHubDesktop.exe", 'C:\Program Files\GitHub Desktop\GitHubDesktop.exe') },
-    @{ Name = 'Bruno'; Exe = 'Bruno.exe'; Paths = @("$env:LOCALAPPDATA\Programs\Bruno\Bruno.exe", "$env:LOCALAPPDATA\Programs\bruno\Bruno.exe") },
-    @{ Name = 'DBeaver'; Exe = 'dbeaver.exe'; Paths = @("$env:LOCALAPPDATA\DBeaver\dbeaver.exe", 'C:\Program Files\DBeaver\dbeaver.exe') },
-    @{ Name = 'Beekeeper Studio'; Exe = 'Beekeeper Studio.exe'; Paths = @("$env:LOCALAPPDATA\Programs\Beekeeper Studio\Beekeeper Studio.exe") },
-    @{ Name = 'Podman Desktop'; Exe = 'Podman Desktop.exe'; Paths = @("$env:LOCALAPPDATA\Programs\podman-desktop\Podman Desktop.exe") },
-    @{ Name = 'Podman CLI'; Exe = 'podman.exe'; Paths = @("C:\Program Files\RedHat\Podman\podman.exe") },
-    @{ Name = 'Docker Desktop'; Exe = 'Docker Desktop.exe'; Paths = @("C:\Program Files\Docker\Docker\Docker Desktop.exe") },
-    @{ Name = 'JMeter'; Exe = 'jmeter.bat'; Paths = @("$toolingPath\jmeter\bin\jmeter.bat") },
-    @{ Name = 'SoapUI'; Exe = 'soapui.bat'; Paths = @('C:\Program Files\SmartBear\SoapUI-5.9.1\bin\soapui.bat', 'C:\Program Files\SmartBear\SoapUI-5.7.0\bin\soapui.bat') },
-    @{ Name = 'WinSCP'; Exe = 'WinSCP.exe'; Paths = @("$env:LOCALAPPDATA\Programs\WinSCP\WinSCP.exe", 'C:\Program Files\WinSCP\WinSCP.exe') },
-    @{ Name = 'VisualVM'; Exe = 'visualvm.exe'; Paths = @("$toolingPath\visualvm\bin\visualvm.exe") },
-    @{ Name = 'JD-GUI'; Exe = 'jd-gui.bat'; Paths = @("$toolingPath\jd-gui\jd-gui.bat") },
-    @{ Name = 'Antigravity'; Exe = 'Antigravity.exe'; Paths = @("$toolingPath\Antigravity\Antigravity.exe") },
-    @{ Name = 'IntelliJ IDEA'; Exe = 'idea64.exe'; Paths = @("$toolingPath\IntelliJ IDEA\bin\idea64.exe") },
-    @{ Name = 'WezTerm'; Exe = 'wezterm.exe'; Paths = @("C:\Program Files\WezTerm\wezterm.exe") },
-    @{ Name = 'VSCode'; Exe = 'Code.exe'; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") }
-)
+$shortcutMap = @{
+    "GitHub.GitHubDesktop" = @{ Name = "GitHub Desktop"; Exe = "GitHubDesktop.exe"; Paths = @("$env:LOCALAPPDATA\GitHubDesktop\GitHubDesktop.exe", 'C:\Program Files\GitHub Desktop\GitHubDesktop.exe') }
+    "Microsoft.VisualStudioCode" = @{ Name = "VSCode"; Exe = "Code.exe"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", 'C:\Program Files\Microsoft VS Code\Code.exe') }
+    "wez.wezterm.nightly" = @{ Name = "WezTerm"; Exe = "wezterm.exe"; Paths = @("C:\Program Files\WezTerm\wezterm.exe") }
+    "JetBrains.IntelliJIDEA" = @{ Name = "IntelliJ IDEA"; Exe = "idea64.exe"; Paths = @("$toolingPath\IntelliJ IDEA\bin\idea64.exe") }
+    "Bruno.Bruno" = @{ Name = "Bruno"; Exe = "Bruno.exe"; Paths = @("$env:LOCALAPPDATA\Programs\Bruno\Bruno.exe", "$env:LOCALAPPDATA\Programs\bruno\Bruno.exe") }
+    "DBeaver.DBeaver.Community" = @{ Name = "DBeaver"; Exe = "dbeaver.exe"; Paths = @("$env:LOCALAPPDATA\DBeaver\dbeaver.exe", 'C:\Program Files\DBeaver\dbeaver.exe') }
+    "beekeeper-studio.beekeeper-studio" = @{ Name = "Beekeeper Studio"; Exe = "Beekeeper Studio.exe"; Paths = @("$env:LOCALAPPDATA\Programs\Beekeeper Studio\Beekeeper Studio.exe") }
+    "RedHat.Podman" = @{ Name = "Podman Desktop"; Exe = "Podman Desktop.exe"; Paths = @("$env:LOCALAPPDATA\Programs\podman-desktop\Podman Desktop.exe") }
+    "Docker.DockerDesktop" = @{ Name = "Docker Desktop"; Exe = "Docker Desktop.exe"; Paths = @("C:\Program Files\Docker\Docker\Docker Desktop.exe") }
+    "DEVCOM.JMeter" = @{ Name = "JMeter"; Exe = "jmeter.bat"; Paths = @("$toolingPath\jmeter\bin\jmeter.bat") }
+    "SmartBear.SoapUI" = @{ Name = "SoapUI"; Exe = "soapui.bat"; Paths = @('C:\Program Files\SmartBear\SoapUI-5.9.1\bin\soapui.bat', 'C:\Program Files\SmartBear\SoapUI-5.7.0\bin\soapui.bat') }
+    "WinSCP.WinSCP" = @{ Name = "WinSCP"; Exe = "WinSCP.exe"; Paths = @("$env:LOCALAPPDATA\Programs\WinSCP\WinSCP.exe", 'C:\Program Files\WinSCP\WinSCP.exe') }
+    "Google.Antigravity" = @{ Name = "Antigravity"; Exe = "Antigravity.exe"; Paths = @("$toolingPath\Antigravity\Antigravity.exe") }
+}
+
+$manualShortcutMap = @{
+    "JMeter" = @{ Name = "JMeter"; Exe = "jmeter.bat"; Paths = @("$toolingPath\jmeter\bin\jmeter.bat") }
+    "JD-GUI" = @{ Name = "JD-GUI"; Exe = "jd-gui.bat"; Paths = @("$toolingPath\jd-gui\jd-gui.bat") }
+    "VisualVM" = @{ Name = "VisualVM"; Exe = "visualvm.exe"; Paths = @("$toolingPath\visualvm\bin\visualvm.exe") }
+}
+
+function Read-DevPackages {
+    $json = chezmoi execute-template "{{ toJson .packages.dev }}" 2>$null
+    if (-not $json) {
+        $yamlPath = Join-Path $env:USERPROFILE ".local\share\chezmoi\home\.chezmoidata\packages.yaml"
+        if (Test-Path $yamlPath) {
+            $json = chezmoi execute-template "{{ toJson .packages.dev }}" --source "$yamlPath" 2>$null
+        }
+    }
+    if ($json) {
+        return ($json | ConvertFrom-Json)
+    }
+    return $null
+}
+
+function Get-ShortcutWingetIds {
+    param($WingetList)
+    $ids = @()
+    foreach ($item in $WingetList) {
+        if ($item -is [string]) { continue }
+        if ($item.shortcut) { $ids += $item.id }
+    }
+    return $ids
+}
+
+function Get-ShortcutManualNames {
+    param($ManualDownloads)
+    $names = @()
+    foreach ($item in $ManualDownloads) {
+        if ($item.shortcut) { $names += $item.name }
+    }
+    return $names
+}
+
+$dev = Read-DevPackages
+if (-not $dev) {
+    Write-Host "[WARN] Cannot read packages data — no shortcuts created" -ForegroundColor Yellow
+    exit
+}
+
+$shortcutIds = Get-ShortcutWingetIds -WingetList $dev.winget
+$manualShortcutNames = Get-ShortcutManualNames -ManualDownloads $dev.manual_downloads
 
 $WshShell = New-Object -ComObject WScript.Shell
-foreach ($app in $apps) {
+$created = 0; $skipped = 0
+
+foreach ($id in $shortcutIds) {
+    $app = $shortcutMap[$id]
+    if (-not $app) {
+        Write-Host "  [WARN] No shortcut mapping for: $id" -ForegroundColor Yellow
+        continue
+    }
     $target = Find-AppPath -ExeName $app.Exe -SearchPaths $app.Paths
     if ($target) {
         $lnkPath = "$toolingPath\$($app.Name).lnk"
@@ -54,9 +106,34 @@ foreach ($app in $apps) {
         }
         $Shortcut.Save()
         Write-Host "  [OK] $($app.Name).lnk -> $target" -ForegroundColor Green
+        $created++
     } else {
         Write-Host "  [SKIP] $($app.Name) - executable not found" -ForegroundColor Yellow
+        $skipped++
     }
 }
 
-Write-Host "Dev shortcuts creation complete." -ForegroundColor Green
+foreach ($name in $manualShortcutNames) {
+    $app = $manualShortcutMap[$name]
+    if (-not $app) {
+        Write-Host "  [WARN] No shortcut mapping for manual download: $name" -ForegroundColor Yellow
+        continue
+    }
+    $target = Find-AppPath -ExeName $app.Exe -SearchPaths $app.Paths
+    if ($target) {
+        $lnkPath = "$toolingPath\$($app.Name).lnk"
+        $Shortcut = $WshShell.CreateShortcut($lnkPath)
+        $Shortcut.TargetPath = $target
+        if ($target -match '\.(bat|cmd)$') {
+            $Shortcut.WorkingDirectory = (Split-Path $target)
+        }
+        $Shortcut.Save()
+        Write-Host "  [OK] $($app.Name).lnk -> $target" -ForegroundColor Green
+        $created++
+    } else {
+        Write-Host "  [SKIP] $($app.Name) - executable not found" -ForegroundColor Yellow
+        $skipped++
+    }
+}
+
+Write-Host "Dev shortcuts: $created created, $skipped skipped" -ForegroundColor Green

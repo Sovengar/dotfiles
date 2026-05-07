@@ -19,23 +19,35 @@ packages:
     winget:
       - Microsoft.PowerShell
       - Git.Git
-      - GitHub.GitHubDesktop
+      - id: GitHub.GitHubDesktop
+        shortcut: true
       - GitHub.cli
-      - Microsoft.VisualStudioCode
+      - id: Microsoft.VisualStudioCode
+        shortcut: true
       - Neovim.Neovim
-      - wez.wezterm.nightly
+      - id: wez.wezterm.nightly
+        shortcut: true
       - Starship.Starship
       - jdx.mise
       - DEVCOM.JetBrainsMonoNerdFont
-      - JetBrains.IntelliJIDEA
-      - Bruno.Bruno
-      - DBeaver.DBeaver.Community
-      - beekeeper-studio.beekeeper-studio
-      - RedHat.Podman
-      - Docker.DockerDesktop
-      - DEVCOM.JMeter
-      - SmartBear.SoapUI
-      - WinSCP.WinSCP
+      - id: JetBrains.IntelliJIDEA
+        shortcut: true
+      - id: Bruno.Bruno
+        shortcut: true
+      - id: DBeaver.DBeaver.Community
+        shortcut: true
+      - id: beekeeper-studio.beekeeper-studio
+        shortcut: true
+      - id: RedHat.Podman
+        shortcut: true
+      - id: Docker.DockerDesktop
+        shortcut: true
+      - id: DEVCOM.JMeter
+        shortcut: true
+      - id: SmartBear.SoapUI
+        shortcut: true
+      - id: WinSCP.WinSCP
+        shortcut: true
       - JesseDuffield.lazygit
       - OpenAI.Codex
       - GitKraken.cli
@@ -44,7 +56,8 @@ packages:
       - jj-vcs.jj
       - sxyazi.yazi
       - Dystroy.broot
-      - Google.Antigravity
+      - id: Google.Antigravity
+        shortcut: true
       - Clement.bottom
       - BurntSushi.ripgrep.MSVC
       - sharkdp.fd
@@ -78,10 +91,12 @@ packages:
         url: "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.zip"
         archive: true
         dest: "dev\\tooling\\jmeter"
+        shortcut: true
       - name: "JD-GUI"
         url: "https://github.com/java-decompiler/jd-gui/releases/download/v1.6.6/jd-gui-1.6.6.jar"
         archive: false
         dest: "dev\\tooling\\jd-gui"
+        shortcut: true
       - name: "Datree"
         url: "https://github.com/datreeio/datree/releases/download/1.9.19/datree-cli_1.9.19_windows_x86_64.zip"
         archive: true
@@ -90,6 +105,7 @@ packages:
         url: "https://github.com/oracle/visualvm/releases/download/2.1.10/visualvm_2110.zip"
         archive: true
         dest: "dev\\tooling\\visualvm"
+        shortcut: true
 
   user:
     winget:
