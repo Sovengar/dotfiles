@@ -52,13 +52,17 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 .\windows\setup\01-wsl-setup.ps1
 # Reiniciar si el script lo indica; crear usuario Ubuntu la primera vez
 
-# 5. Setup all (instala o actualiza)
+# 5. (Work PC) Developer Mode para symlinks — CORRER COMO ADMIN
+.\windows\setup\02-enable-symlinks.ps1
+# Abre PowerShell como administrador (usuario admin), corre esto, cierra.
+# Solo toca el registro, no tus dotfiles. Se hace una vez por máquina.
+
+# 6. Setup all (instala o actualiza)
 .\windows\setup\run-all.ps1
 ```
 
 `run-all.ps1` corre en orden:
 - `00-env-vars.ps1` — variables XDG
-- `02-enable-symlinks.ps1` — Developer Mode (permisos para symlinks)
 - `10-install-packages.ps1` — ~70+ apps via winget + manual
 - `20-configure-system.ps1` — PATH, symlinks
 - `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
