@@ -147,10 +147,19 @@ foreach ($name in @('wezterm.exe', 'wezterm-gui.exe')) {
     if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
 
-$ideaSource = "$toolingPath\IntelliJ IDEA\bin\idea64.exe"
-if (Test-Path $ideaSource) {
+$ideaSource = $null
+$ideaPaths = @(
+    "$toolingPath\IntelliJ IDEA\bin\idea64.exe"
+    "${env:ProgramFiles}\JetBrains\IntelliJ IDEA*\bin\idea64.exe"
+    "${env:ProgramFiles(x86)}\JetBrains\IntelliJ IDEA*\bin\idea64.exe"
+)
+foreach ($p in $ideaPaths) {
+    $matched = Resolve-Path $p -ErrorAction SilentlyContinue
+    if ($matched) { $ideaSource = $matched.Path; break }
+}
+if ($ideaSource) {
     Add-Link -Name "idea.exe" -Target $ideaSource
-} else { $warnings += "IntelliJ IDEA not found" }
+} else { $warnings += "IntelliJ IDEA not found (searched winget and tooling paths)" }
 
 $antigravityDir = "$toolingPath\Antigravity"
 $antigravityExe = Join-Path $antigravityDir "Antigravity.exe"
