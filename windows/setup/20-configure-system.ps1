@@ -46,7 +46,7 @@ if (Test-Path $opencodeTarget) {
     if (Test-Path $opencodeWrapper) { Remove-Item -Path $opencodeWrapper -Force }
     $wrapperContent = "@echo off`n`"$opencodeTarget`" %*"
     Set-Content -Path $opencodeWrapper -Value $wrapperContent -Encoding ASCII -Force
-    $createdLinks += "opencode.cmd"
+    $createdLinks += "opencode.cmd (wrapper)"
     Write-Host "[OK] Created opencode.cmd wrapper" -ForegroundColor Green
 }
 
@@ -248,7 +248,13 @@ Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  System Configuration Complete" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "[LINKED]  $($createdLinks.Count) links/wrappers" -ForegroundColor Green
+$symlinkCount = ($createdLinks | Where-Object { $_ -notlike "* (wrapper)*" }).Count
+$wrapperCount = ($createdLinks | Where-Object { $_ -like "* (wrapper)*" }).Count
+if ($symlinkCount -gt 0) {
+    Write-Host "[LINKS]   $symlinkCount symlinks + $wrapperCount wrappers" -ForegroundColor Green
+} else {
+    Write-Host "[LINKS]   $wrapperCount wrappers (no symlinks)" -ForegroundColor Green
+}
 Write-Host "[CLEANED] $($removedPaths.Count) USER PATH + $($machineRemoved.Count) MACHINE PATH" -ForegroundColor Green
 if ($warnings.Count -gt 0) {
     Write-Host "`n[WARNINGS]" -ForegroundColor Yellow
