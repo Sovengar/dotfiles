@@ -1,9 +1,5 @@
 New-Alias op opencode
 New-Alias lgit lazygit
-New-Alias vim nvim
-
-# Configura EDITOR para que abra VS Code: con --wait
-$env:EDITOR = "nvim"
 
 #Starlship
 $ENV:STARSHIP_CONFIG = "$HOME\.starship\starship.toml"
@@ -120,4 +116,10 @@ if (Test-Path $datreeCompletion) { . $datreeCompletion }
 if (Get-Command mise -ErrorAction SilentlyContinue) {
     (&mise activate pwsh) | Out-String | Invoke-Expression
 }
-. "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
+
+# broot launcher
+$brootBr = "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
+if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyContinue)) {
+    broot --install 2>$null | Out-Null
+}
+if (Test-Path $brootBr) { . $brootBr }
