@@ -41,6 +41,8 @@ $wingetTools = @{
     'glab.exe'     = "$env:LOCALAPPDATA\Programs\glab\glab.exe"
 }
 
+# opencode: no es un tool gestionado por mise (es un global de bun),
+# asi que mise no crea shim para el. Necesitamos un wrapper en $localBin.
 $opencodeTarget = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
 $opencodeWrapper = Join-Path $localBin "opencode.cmd"
 if (Test-Path $opencodeTarget) {

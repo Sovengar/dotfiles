@@ -2,7 +2,7 @@
 description: Senior Debugger - investiga bugs y errores
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.4
 tools:
   bash: true

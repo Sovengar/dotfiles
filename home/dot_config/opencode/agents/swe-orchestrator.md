@@ -4,7 +4,7 @@ name: SW Engineer
 description: "Orchestrates SW Engineering. Planning → Execution → Review → Close"
 disable: true
 mode: primary
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 artifact_store_mode: engram
 color: '#ff2f00'
 tools:

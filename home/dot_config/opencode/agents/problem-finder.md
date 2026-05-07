@@ -3,7 +3,7 @@ id: problem-finder
 name: Problem Finder
 description: Problem Finder - Coordina investigación de bugs, errores de compilación/build, problemas de rendimiento, exceptions y todo tipo de errores de programación
 mode: subagent
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 color: '#4CAF50'
 tools:

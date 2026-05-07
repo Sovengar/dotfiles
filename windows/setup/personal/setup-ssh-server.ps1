@@ -2,10 +2,10 @@
 # Configures this Windows machine as an OpenSSH SSH server.
 # Run on the REMOTE machine that will accept SSH connections (e.g., VPS, work PC).
 
+. "$PSScriptRoot\..\lib.ps1"
 $ErrorActionPreference = "Continue"
 
-$response = Read-Host "Configure this machine as an SSH server (personal machine only)? [y/N]"
-if ($response -ne 'y' -and $response -ne 'Y') {
+if (-not (Confirm-Step "Configure this machine as an SSH server (personal machine only)")) {
     Write-Host "[SKIP] SSH server setup skipped" -ForegroundColor Yellow
     exit 0
 }

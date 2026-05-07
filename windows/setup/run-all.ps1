@@ -2,12 +2,39 @@
 $ErrorActionPreference = "Continue"
 Reset-SetupLog
 
+# --- Setup Memory ---
+$global:SetupMemory = Get-SetupMemory
+if ($global:SetupMemory) {
+    $lastRun = $global:SetupMemory.last_run
+    Write-Host "[MEMORY] Se encontraron decisiones previas (ultima ejecucion: $lastRun)" -ForegroundColor Cyan
+    $reuse = Read-Host "Aplicar las mismas decisiones? [y/N]"
+    if ($reuse -match '^[yY]') {
+        Write-Host "[MEMORY] Reutilizando decisiones anteriores" -ForegroundColor Green
+    } else {
+        $global:SetupMemory = Initialize-SetupMemory
+    }
+} else {
+    $global:SetupMemory = Initialize-SetupMemory
+}
+
 function Run-Step {
     param([string]$Path)
+    $scriptName = Split-Path $Path -Leaf
+
+    if ($global:SetupMemory.scripts.$scriptName -eq "skipped") {
+        Add-SetupLog -Message "[SKIP] $scriptName (reusing previous decision)"
+        Write-Host "  [SKIP] $scriptName — reusing previous decision" -ForegroundColor Yellow
+        return
+    }
+
     & $Path
     if (-not $?) {
         Write-Host "[STOP] $Path failed — fix the issue and run again" -ForegroundColor Red
         exit 1
+    }
+
+    if (-not $global:SetupMemory.scripts.$scriptName) {
+        Set-ScriptMemory -ScriptName $scriptName -Status "done"
     }
 }
 
@@ -28,6 +55,10 @@ if ($dockerInstalled) {
     Add-SetupLog -Message "[SKIP] Docker setup (Docker not installed)"
     Write-Host "  [WARN] Docker not installed — skipping Docker setup" -ForegroundColor Yellow
 }
+
+# --- Save Memory ---
+$global:SetupMemory.last_run = (Get-Date -Format o)
+Save-SetupMemory -Memory $global:SetupMemory
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan

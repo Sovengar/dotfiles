@@ -3,7 +3,7 @@ id: swe-planner
 name: SWE Planner
 description: Coordinates the SWE planning process until completion.
 mode: all
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 artifact_store_mode: engram
 tools:

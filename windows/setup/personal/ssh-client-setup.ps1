@@ -1,7 +1,7 @@
-﻿$ErrorActionPreference = "Continue"
+﻿. "$PSScriptRoot\..\lib.ps1"
+$ErrorActionPreference = "Continue"
 
-$response = Read-Host "Run SSH setup (personal machine only)? [y/N]"
-if ($response -ne 'y' -and $response -ne 'Y') {
+if (-not (Confirm-Step "Run SSH setup (personal machine only)")) {
     Write-Host "[SKIP] SSH setup skipped" -ForegroundColor Yellow
     exit 0
 }

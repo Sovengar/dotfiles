@@ -1,7 +1,7 @@
-﻿$ErrorActionPreference = "Continue"
+﻿. "$PSScriptRoot\..\lib.ps1"
+$ErrorActionPreference = "Continue"
 
-$response = Read-Host "Install startup shortcuts (Mechvibes, TaskbarX)? (y/n)"
-if ($response -notmatch '^[yY]') {
+if (-not (Confirm-Step "Install startup shortcuts (Mechvibes, TaskbarX)")) {
     Write-Host "[SKIP] Startup shortcuts — user declined" -ForegroundColor Yellow
     exit 0
 }

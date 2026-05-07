@@ -2,7 +2,7 @@
 id: architect
 description: "Expert in system boundaries - strategic, process, physical, and development levels"
 mode: subagent
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 hidden: true
 artifact_store_mode: engram

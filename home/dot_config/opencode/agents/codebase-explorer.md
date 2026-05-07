@@ -2,7 +2,7 @@
 description: Advanced codebase discovery, deep architectural analysis, and persistent project index generation. The eyes and ears of the framework. Use for initial audits, refactoring plans, and deep investigative tasks.
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 tools: 
     read: true 
     grep: true 

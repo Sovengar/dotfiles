@@ -4,7 +4,7 @@ name: Idea Refiner
 description: Create well-structured GitHub issues using the User Story format
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.3
 artifact_store_mode: engram
 tools:

@@ -2,7 +2,7 @@
 description: Full development
 mode: primary
 disable: false
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 color: '#FF5FAF'
 tools:
   write: true

@@ -61,6 +61,17 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
     }
 }
 
+# Alt+C → lanzar cdx TUI (como Ctrl+T de fzf pero para directorios)
+Set-PSReadLineKeyHandler -Key Alt+C -ScriptBlock {
+    $line = $null; $cursor = $null
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+    $query = $line.Substring(0, $cursor).Trim()
+    [Microsoft.PowerShell.PSConsoleReadLine]::BeginningOfLine()
+    [Microsoft.PowerShell.PSConsoleReadLine]::KillLine()
+    if ($query) { cdx $query } else { cdx }
+    [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
+}
+
 # kubectl completion (for 'k' alias already defined above)
 if (Get-Command kubectl -ErrorAction SilentlyContinue) {
     kubectl completion powershell | Out-String | Invoke-Expression
@@ -82,12 +93,37 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
-# cdx - CD Interactivo Unificado
-# Jump:    cdx <name>       → cd directo → zoxide → TUI con query
-# Browse:  cdx              → TUI fd/rg (Ctrl+R toggle)
-# Search:  cdx -g <query>   → ripgrep búsqueda de contenido
-$cdxScript = Join-Path $PSScriptRoot 'Cdx.ps1'
-if (Test-Path $cdxScript) { . $cdxScript }
+# cdx — CD Interactivo Unificado (Rust binary)
+$cdxBin = "$HOME\.local\bin\cdx-rs.exe"
+function cdx {
+    if (-not (Test-Path $cdxBin)) {
+        Write-Host "[!] cdx-rs.exe not found at $cdxBin" -ForegroundColor Red
+        Write-Host "    Build: cd ~/dev/cdx-rs; cargo build --release" -ForegroundColor DarkGray
+        return
+    }
+    $target = & $cdxBin @args 2>$null
+    if ($LASTEXITCODE -ne 0) { return }
+    if ($target -and (Test-Path $target)) {
+        Set-Location $target
+        Show-CdxResult
+    }
+}
+function Show-CdxResult {
+    $path = (Get-Location).Path
+    $display = if ($path.StartsWith($env:USERPROFILE)) {
+        "~" + $path.Substring($env:USERPROFILE.Length).Replace('\', '/')
+    } else { $path.Replace('\', '/') }
+    Write-Host "`n$display" -ForegroundColor Cyan
+    if (Get-Command eza -ErrorAction SilentlyContinue) {
+        eza --icons --group-directories-first
+    } else { Get-ChildItem -Force | Format-Table }
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        $gitRoot = git rev-parse --show-toplevel 2>$null
+        if ($gitRoot) {
+            Write-Host "  Consider using: yazi, broot, nvim, lazygit, code ." -ForegroundColor DarkGray
+        }
+    }
+}
 
 # fzf fuzzy finder (module must be installed first)
 # Install-Module PSFzf -Scope CurrentUser

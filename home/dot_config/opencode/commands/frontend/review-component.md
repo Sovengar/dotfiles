@@ -1,6 +1,6 @@
 ---
 description: Review component
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 subtask: true
 ---
 

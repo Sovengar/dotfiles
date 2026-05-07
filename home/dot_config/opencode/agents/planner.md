@@ -1,7 +1,7 @@
 ---
 description: Coordinates the planning process to produce a refined specification.
 mode: subagent
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 hidden: true
 artifact_store_mode: engram

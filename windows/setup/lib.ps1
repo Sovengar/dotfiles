@@ -18,6 +18,63 @@ function Reset-SetupLog {
     }
 }
 
+# === Setup Memory ===
+$script:SetupMemoryPath = "$env:TEMP\.dotfiles-setup-memory.json"
+
+function Get-SetupMemory {
+    if (Test-Path $script:SetupMemoryPath) {
+        return Get-Content $script:SetupMemoryPath -Raw | ConvertFrom-Json
+    }
+    return $null
+}
+
+function Save-SetupMemory {
+    param($Memory)
+    $dir = Split-Path $script:SetupMemoryPath -Parent
+    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    $Memory | ConvertTo-Json | Set-Content $script:SetupMemoryPath -Encoding UTF8
+}
+
+function Initialize-SetupMemory {
+    return [PSCustomObject]@{
+        version = 1
+        last_run = (Get-Date -Format o)
+        scripts = [PSCustomObject]@{}
+        skipped_packages = @()
+    }
+}
+
+function Set-ScriptMemory {
+    param([string]$ScriptName, [string]$Status)
+    if (-not $global:SetupMemory) { return }
+    $global:SetupMemory.scripts | Add-Member -NotePropertyName $ScriptName -NotePropertyValue $Status -Force
+}
+
+function Confirm-Step {
+    param(
+        [string]$Message,
+        [string]$Default = "N",
+        [string]$ScriptName = ""
+    )
+    if (-not $ScriptName) {
+        $caller = (Get-PSCallStack)[1].ScriptName
+        $ScriptName = Split-Path $caller -Leaf
+    }
+    if ($global:SetupMemory -and $global:SetupMemory.scripts.$ScriptName -eq "skipped") {
+        Write-Host "  [SKIP] $ScriptName — reusing previous decision" -ForegroundColor Yellow
+        return $false
+    }
+    $prompt = if ($Default -eq "N") { "[y/N]" } else { "[Y/n]" }
+    $response = Read-Host "$Message $prompt"
+    if ($Default -eq "N") {
+        if ($response -match '^[yY]') { return $true }
+    } else {
+        if ($response -notmatch '^[nN]') { return $true }
+    }
+    Set-ScriptMemory -ScriptName $ScriptName -Status "skipped"
+    return $false
+}
+
 function Read-Packages {
     $json = chezmoi execute-template "{{ toJson .packages }}" 2>$null
     if (-not $json) {
@@ -109,8 +166,17 @@ function Install-WingetList {
         if ($stable) { Write-Host "    (using latest stable version)" -ForegroundColor DarkGray }
 
         if ($interactive) {
+            if ($global:SetupMemory -and $global:SetupMemory.skipped_packages -contains $appId) {
+                Add-SetupLog -Message "[SKIP] $appId (reusing previous decision)"
+                Write-Host "  [SKIP] $appId — reusing previous decision" -ForegroundColor Yellow
+                $skipped++
+                continue
+            }
             $response = Read-Host "  Install $appId? [Y/n]"
             if ($response -eq 'n' -or $response -eq 'N') {
+                if ($global:SetupMemory -and ($global:SetupMemory.skipped_packages -notcontains $appId)) {
+                    $global:SetupMemory.skipped_packages += $appId
+                }
                 Add-SetupLog -Message "[SKIP] $appId"
                 Write-Host "    [SKIP] $appId" -ForegroundColor Yellow
                 $skipped++

@@ -2,7 +2,7 @@
 description: Analysis and planning without making changes
 mode: primary
 disable: false
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.6
 color: '#FFEB3B'
 tools:

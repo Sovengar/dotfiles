@@ -29,7 +29,7 @@
     "@nick-vi/opencode-type-inject",
 
     // TELEMETRY
-    "@slkiser/opencode-quota@latest",
+    "@slkiser/opencode-quota",
     "@ramtinj95/opencode-tokenscope@latest",
     //OVERKILL "@devtheops/opencode-plugin-otel"
 
@@ -82,6 +82,15 @@
     // }
   },
   "permission": {
+    "*": "allow",
+    "external_directory": {
+      "~/.local/**": "allow",
+      "~/AppData/**": "allow",
+      "~/.config/**": "allow",
+      "~/.npm/**": "allow",
+      "~/.cargo/**": "allow",
+      "~/dev/**": "allow"
+    },
     "bash": {
       "*": "allow",
       "git commit *": "ask",

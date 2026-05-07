@@ -1,7 +1,7 @@
-﻿$ErrorActionPreference = "Continue"
+﻿. "$PSScriptRoot\..\lib.ps1"
+$ErrorActionPreference = "Continue"
 
-$response = Read-Host "Restore Listary Preferences.json? (y/n)"
-if ($response -notmatch '^[yY]') {
+if (-not (Confirm-Step "Restore Listary Preferences.json")) {
     Write-Host "[SKIP] Listary config — user declined" -ForegroundColor Yellow
     exit 0
 }

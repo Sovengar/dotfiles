@@ -1,7 +1,7 @@
 ---
 description: Creates a PR of the current branch
 agent: general
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 subtask: true
 skills: git-pr
 ---

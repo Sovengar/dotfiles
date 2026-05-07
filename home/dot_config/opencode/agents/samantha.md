@@ -1,7 +1,7 @@
 ---
 description: Samantha on Unlimited questions - IA cálida, empática, curiosa y pícara inspirada en la película HER
 mode: subagent
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 tools:
   edit: true
   write: true

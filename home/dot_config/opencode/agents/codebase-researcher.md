@@ -3,7 +3,7 @@ id: codebase-researcher
 description: "Minimal research - only what cannot be trivially inferred from code"
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.1
 artifact_store_mode: engram
 tools:

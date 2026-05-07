@@ -2,7 +2,7 @@
 description: Especialista en onboarding humano de proyectos. Reconstruye flujos reales desde el código y los traduce a documentación navegable por dominio, con trazabilidad técnica, validaciones, datos críticos y ruta de aprendizaje.
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 artifact_store_mode: engram
 tools:

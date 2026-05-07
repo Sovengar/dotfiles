@@ -3,7 +3,7 @@ description: >
   Descarta cambios locales (git checkout) y registra la decisión 
   en engram como "mala solución" para no repetir el mismo error.
 agent: general
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 ---
 
 Recibe un parámetro $reason que es el motivo por el cual se descartan los cambios.

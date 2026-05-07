@@ -1,7 +1,7 @@
 ---
 description: "Ejecuta tareas individuales usando TDD (RED→GREEN→REFACTOR). Un solo agente escribe test + código."
 mode: subagent
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 artifact_store_mode: engram
 hidden: true
 tools:

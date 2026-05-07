@@ -1,7 +1,7 @@
 ---
 description: Makes a commit with the unstaged and staged files
 agent: general
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 subtask: true
 skills: git-commit
 ---

@@ -2,7 +2,7 @@
 description: Reviews code for quality, best practices and potential issues
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 temperature: 0.1
 tools:
   write: true

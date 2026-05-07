@@ -4,7 +4,7 @@ name: Spec Reviewer
 description: "Verifies implementation matches specification"
 mode: subagent
 hidden: true
-model: opencode/minimax-m2.5-free
+model: opencode-go/deepseek-v4-flash
 artifact_store_mode: engram
 tools:
   read: true
