@@ -2,7 +2,6 @@
 $localBin = "$env:USERPROFILE\.local\bin"
 $toolingPath = "$env:USERPROFILE\dev\tooling"
 $createdLinks = @()
-$movedItems = @()
 $removedPaths = @()
 $warnings = @()
 
@@ -25,30 +24,6 @@ function Add-Link {
         $script:createdLinks += "$wrapperName (wrapper)"
     }
 }
-
-function Move-BinContents {
-    param([string]$SourceDir, [string]$Label)
-    if (-not (Test-Path $SourceDir)) { return @() }
-    $moved = @()
-    $items = Get-ChildItem -Path $SourceDir -Recurse -File
-    foreach ($item in $items) {
-        $relativePath = $item.FullName.Substring($SourceDir.Length + 1)
-        $dest = Join-Path $localBin $relativePath
-        $destDir = Split-Path -Parent $dest
-        New-Item -ItemType Directory -Force -Path $destDir | Out-Null
-        if (Test-Path $dest) { Remove-Item -Path $dest -Force }
-        Move-Item -Path $item.FullName -Destination $dest -Force
-        $moved += $relativePath
-    }
-    if ($moved.Count -gt 0 -and (Get-ChildItem -Path $SourceDir -Recurse -File).Count -eq 0) {
-        Remove-Item -Path $SourceDir -Recurse -Force -ErrorAction SilentlyContinue
-    }
-    Write-Host "[OK] Moved $($moved.Count) items from $Label" -ForegroundColor Green
-    return $moved
-}
-
-$movedItems += Move-BinContents -SourceDir "$env:USERPROFILE\go\bin" -Label "~/go/bin"
-$movedItems += Move-BinContents -SourceDir "$env:USERPROFILE\bin" -Label "~/bin"
 
 $ghSystemPath = "C:\Program Files\GitHub CLI\gh.exe"
 if (Test-Path $ghSystemPath) {
@@ -273,7 +248,6 @@ Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  System Configuration Complete" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "[MOVED]   $($movedItems.Count) items" -ForegroundColor Green
 Write-Host "[LINKED]  $($createdLinks.Count) links/wrappers" -ForegroundColor Green
 Write-Host "[CLEANED] $($removedPaths.Count) USER PATH + $($machineRemoved.Count) MACHINE PATH" -ForegroundColor Green
 if ($warnings.Count -gt 0) {
