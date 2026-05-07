@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 $toolingPath = "$env:USERPROFILE\dev\tooling"
 New-Item -ItemType Directory -Path $toolingPath -Force | Out-Null
 
