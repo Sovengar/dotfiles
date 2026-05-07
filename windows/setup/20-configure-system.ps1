@@ -51,15 +51,8 @@ $movedItems += Move-BinContents -SourceDir "$env:USERPROFILE\go\bin" -Label "~/g
 $movedItems += Move-BinContents -SourceDir "$env:USERPROFILE\bin" -Label "~/bin"
 
 $ghSystemPath = "C:\Program Files\GitHub CLI\gh.exe"
-$ghLocalPath = Join-Path $localBin "gh.exe"
-if ((Test-Path $ghSystemPath) -and -not (Test-Path $ghLocalPath)) {
-    try {
-        Move-Item -Path $ghSystemPath -Destination $ghLocalPath -Force
-        $movedItems += "gh.exe"
-        Write-Host "[OK] Moved gh.exe from system to ~/.local/bin" -ForegroundColor Green
-    } catch {
-        $warnings += "Failed to move gh.exe: $_"
-    }
+if (Test-Path $ghSystemPath) {
+    Add-Link -Name "gh.exe" -Target $ghSystemPath
 }
 
 $wingetTools = @{
