@@ -120,4 +120,4 @@ if (Test-Path $datreeCompletion) { . $datreeCompletion }
 if (Get-Command mise -ErrorAction SilentlyContinue) {
     (&mise activate pwsh) | Out-String | Invoke-Expression
 }
-. 'C:\Users\buble\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1'
+. "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
