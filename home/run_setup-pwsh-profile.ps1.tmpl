@@ -1,16 +1,16 @@
 {{ if eq .chezmoi.hostname "NTTD-1H8613110L" -}}
+$sourceDir = Join-Path $env:USERPROFILE "Documents\PowerShell"
 $profileDir = Split-Path -Parent $PROFILE
-$sourcePath = Join-Path $env:USERPROFILE "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
 if (-not (Test-Path $profileDir)) {
     New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
     Write-Host "Created profile directory: $profileDir"
 }
 
-if (Test-Path $sourcePath) {
-    Copy-Item -Path $sourcePath -Destination $PROFILE -Force
-    Write-Host "Copied profile: $sourcePath → $PROFILE"
+if (Test-Path $sourceDir) {
+    Copy-Item -Path "$sourceDir\*" -Destination $profileDir -Recurse -Force
+    Write-Host "Synced $sourceDir → $profileDir"
 } else {
-    Write-Warning "Source profile not found: $sourcePath"
+    Write-Warning "Source directory not found: $sourceDir"
 }
 {{ end -}}
