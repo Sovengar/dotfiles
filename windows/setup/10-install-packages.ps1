@@ -2,7 +2,6 @@
 $ErrorActionPreference = "Continue"
 
 $allPackages = Read-Packages
-$errorFile = "$env:TEMP\dotfiles-install-errors.log"
 if (-not $allPackages) { exit 1 }
 
 Write-Host "===============================================" -ForegroundColor Cyan
@@ -29,8 +28,8 @@ if ($wslOpencodeCheck -match "installed") {
         wsl bash -c "curl -fsSL https://opencode.ai/install | bash" 2>&1 | ForEach-Object { Write-Host "  $_" }
         Write-Host "[OK] OpenCode installed in WSL2" -ForegroundColor Green
     } catch {
+        Add-SetupLog -Message "[WARN] WSL2 OpenCode install skipped (WSL2 not available)"
         Write-Host "[WARN] WSL2 not available, skipping OpenCode install" -ForegroundColor Yellow
-        Add-Content -Path $errorFile -Value "WSL2 OpenCode install failed"
     }
 }
 
@@ -92,6 +91,7 @@ Write-Host "  MISE TOOLS" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 $miseBinDir = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jdx.mise_Microsoft.Winget.Source_8wekyb3d8bbwe\mise\bin"
 if (-not (Test-Path "$miseBinDir\mise.exe")) {
+    Add-SetupLog -Message "[WARN] mise not found, skipping mise tools install"
     Write-Host "[WARN] mise not found, skipping mise install" -ForegroundColor Yellow
 } else {
     $env:Path = "$miseBinDir;$env:Path"
@@ -182,6 +182,7 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
         }
     }
 } else {
+    Add-SetupLog -Message "[WARN] gh not found, skipping gh extensions"
     Write-Host "[WARN] gh not found, skipping gh extensions" -ForegroundColor Yellow
 }
 
@@ -206,6 +207,7 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "  BUILD TOOLS (LazyVim dep)" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Install-WingetApp -AppId "Microsoft.VisualStudio.2022.BuildTools"
+Add-SetupLog -Message "[ACTION] Visual Studio Installer: open it and select 'Desktop development with C++' workload"
 Write-Host "NOTE: In Visual Studio Installer, select 'Desktop development with C++'" -ForegroundColor Yellow
 
 Write-Host ""
@@ -222,6 +224,7 @@ if (-not (Test-Path "$nvimDir\init.lua")) {
         Write-Host "[OK] LazyVim starter cloned" -ForegroundColor Green
         Write-Host "Custom configs will be applied by chezmoi apply" -ForegroundColor Green
     } else {
+        Add-SetupLog -Message "[FAIL] Could not clone LazyVim starter"
         Write-Host "[FAIL] Could not clone LazyVim starter" -ForegroundColor Red
     }
 } else {

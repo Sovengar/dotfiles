@@ -258,6 +258,9 @@ if ($symlinkCount -gt 0) {
 Write-Host "[CLEANED] $($removedPaths.Count) USER PATH + $($machineRemoved.Count) MACHINE PATH" -ForegroundColor Green
 if ($warnings.Count -gt 0) {
     Write-Host "`n[WARNINGS]" -ForegroundColor Yellow
-    foreach ($warn in $warnings) { Write-Host "  ! $warn" -ForegroundColor Yellow }
+    foreach ($warn in $warnings) {
+        Write-Host "  ! $warn" -ForegroundColor Yellow
+        Add-SetupLog -Message "[WARN] $warn"
+    }
 }
 Write-Host "`n[INFO] Restart your terminal to apply PATH changes" -ForegroundColor Magenta

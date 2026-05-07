@@ -1,4 +1,6 @@
-﻿$ErrorActionPreference = "Continue"
+﻿. "$PSScriptRoot\lib.ps1"
+$ErrorActionPreference = "Continue"
+Reset-SetupLog
 
 function Run-Step {
     param([string]$Path)
@@ -23,6 +25,7 @@ $dockerInstalled = Get-Command docker -ErrorAction SilentlyContinue
 if ($dockerInstalled) {
     Run-Step "$PSScriptRoot\40-setup-docker.ps1"
 } else {
+    Add-SetupLog -Message "[SKIP] Docker setup (Docker not installed)"
     Write-Host "  [WARN] Docker not installed — skipping Docker setup" -ForegroundColor Yellow
 }
 
@@ -31,4 +34,6 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "  ALL SETUP COMPLETE" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "Next step: chezmoi apply --verbose" -ForegroundColor Yellow
+
+Show-SetupLog
 

@@ -1,4 +1,24 @@
-﻿function Read-Packages {
+﻿$script:SetupLogFile = "$env:TEMP\dotfiles-setup-summary.txt"
+
+function Add-SetupLog {
+    param([string]$Message)
+    $line = "[$(Get-Date -Format HH:mm:ss)] $Message"
+    Add-Content -Path $script:SetupLogFile -Value $line -Encoding UTF8
+}
+
+function Show-SetupLog {
+    if (Test-Path $script:SetupLogFile) {
+        Start-Process notepad -ArgumentList $script:SetupLogFile
+    }
+}
+
+function Reset-SetupLog {
+    if (Test-Path $script:SetupLogFile) {
+        Remove-Item $script:SetupLogFile -Force
+    }
+}
+
+function Read-Packages {
     $json = chezmoi execute-template "{{ toJson .packages }}" 2>$null
     if (-not $json) {
         $yamlPath = Join-Path $PSScriptRoot "..\..\home\.chezmoidata\packages.yaml"
@@ -18,14 +38,21 @@
 
 function Install-WingetApp {
     param([string]$AppId)
+    Write-Host "    (attempting silent install...)" -ForegroundColor DarkGray
     cmd /c "echo y | winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements"
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
-    } else {
-        Write-Host "    [FAIL] $AppId (ExitCode: $LASTEXITCODE)" -ForegroundColor Red
-        return $false
     }
+    Write-Host "    (silent failed, retrying without --silent...)" -ForegroundColor DarkGray
+    cmd /c "echo y | winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements"
+    if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
+        Write-Host "    [OK] $AppId" -ForegroundColor Green
+        return $true
+    }
+    Add-SetupLog -Message "[FAIL] $AppId"
+    Write-Host "    [FAIL] $AppId (ExitCode: $LASTEXITCODE)" -ForegroundColor Red
+    return $false
 }
 
 function Reset-WingetSources {
@@ -51,6 +78,7 @@ function Install-WingetList {
         if ($interactive) {
             $response = Read-Host "  Install $appId? [Y/n]"
             if ($response -eq 'n' -or $response -eq 'N') {
+                Add-SetupLog -Message "[SKIP] $appId"
                 Write-Host "    [SKIP] $appId" -ForegroundColor Yellow
                 $skipped++
                 continue
@@ -63,6 +91,9 @@ function Install-WingetList {
     if ($fail -gt 0) { $parts += "$fail FAIL" }
     if ($skipped -gt 0) { $parts += "$skipped SKIPPED" }
     Write-Host "  [$($parts -join ', ')]" -ForegroundColor Green
+    if ($fail -gt 0 -or $skipped -gt 0) {
+        Add-SetupLog -Message ">>> Result: $($parts -join ', ')"
+    }
 }
 
 function Invoke-ManualDownload {
