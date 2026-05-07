@@ -58,6 +58,7 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
 `run-all.ps1` corre en orden:
 - `00-env-vars.ps1` — variables XDG
+- `02-enable-symlinks.ps1` — Developer Mode (permisos para symlinks)
 - `10-install-packages.ps1` — ~70+ apps via winget + manual
 - `20-configure-system.ps1` — PATH, symlinks
 - `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
@@ -85,6 +86,7 @@ dotfiles/
 │   ├── setup/                    ← TODO: scripts standalone, NO chezmoi
 │   │   ├── 00-env-vars.ps1
 │   │   ├── 01-wsl-setup.ps1
+│   │   ├── 02-enable-symlinks.ps1
 │   │   ├── 10-install-packages.ps1
 │   │   ├── 20-configure-system.ps1
 │   │   ├── lib.ps1

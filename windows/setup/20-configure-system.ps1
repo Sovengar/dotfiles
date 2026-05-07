@@ -6,17 +6,6 @@ $movedItems = @()
 $removedPaths = @()
 $warnings = @()
 
-$devModePath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
-try {
-    if (-not (Test-Path $devModePath)) {
-        New-Item -Path $devModePath -Force | Out-Null
-    }
-    Set-ItemProperty -Path $devModePath -Name "AllowDevelopmentWithoutDevLicense" -Value 1 -ErrorAction Stop
-    Write-Host "[OK] Developer Mode enabled for symlinks" -ForegroundColor Green
-} catch {
-    Write-Host "[WARN] Could not enable Developer Mode (requires admin). Symlinks may fail." -ForegroundColor Yellow
-}
-
 New-Item -ItemType Directory -Force -Path $localBin | Out-Null
 Write-Host "[INFO] Consolidating executables to $localBin" -ForegroundColor Cyan
 
