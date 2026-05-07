@@ -161,16 +161,23 @@ if ($ideaSource) {
     Add-Link -Name "idea.exe" -Target $ideaSource
 } else { $warnings += "IntelliJ IDEA not found (searched winget and tooling paths)" }
 
-$antigravityDir = "$toolingPath\Antigravity"
-$antigravityExe = Join-Path $antigravityDir "Antigravity.exe"
-$antigravityCli = Join-Path $antigravityDir "resources\app\out\cli.js"
-if (Test-Path $antigravityExe) {
+$antigravityDirs = @(
+    "$toolingPath\Antigravity"
+    "$env:LOCALAPPDATA\Programs\Antigravity"
+)
+$antigravityExe = $null; $antigravityCli = $null
+foreach ($d in $antigravityDirs) {
+    $exe = Join-Path $d "Antigravity.exe"
+    $cli = Join-Path $d "resources\app\out\cli.js"
+    if ((Test-Path $exe) -and (Test-Path $cli)) { $antigravityExe = $exe; $antigravityCli = $cli; break }
+}
+if ($antigravityExe) {
     $wrapper = Join-Path $localBin "antigravity.cmd"
     $content = "@echo off`nset ELECTRON_RUN_AS_NODE=1`n`"$antigravityExe`" `"$antigravityCli`" %*"
     Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
     $createdLinks += "antigravity.cmd (wrapper)"
     Write-Host "[OK] Created antigravity.cmd wrapper" -ForegroundColor Green
-} else { $warnings += "Antigravity not found" }
+} else { $warnings += "Antigravity not found (searched tooling and AppData)" }
 
 foreach ($name in @('git.exe')) {
     $target = "C:\Program Files\Git\cmd\$name"
