@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $existingKey = [System.Environment]::GetEnvironmentVariable("FIRECRAWL_API_KEY", "User")
 if ($existingKey) {
@@ -19,12 +19,12 @@ if (Test-Path $envToml) {
         if ($LASTEXITCODE -eq 0) {
             Write-Host "[OK] firecrawl CLI configured" -ForegroundColor Green
         } else {
-            Write-Host "[WARN] firecrawl-cli init failed — run manually: firecrawl-cli init -y --agent opencode --agent antigravity --agent codex" -ForegroundColor Yellow
+            Write-Host "[WARN] firecrawl-cli init failed - run manually: firecrawl-cli init -y --agent opencode --agent antigravity --agent codex" -ForegroundColor Yellow
         }
         exit 0
     }
     Write-Host "[WARN] env.toml found but no 'firecrawl' key inside" -ForegroundColor Yellow
-    Write-Host "  Se esperaba una línea como: firecrawl = \"fc-...\"" -ForegroundColor Yellow
+    Write-Host "  Se esperaba una linea como: firecrawl = `"fc-...`"" -ForegroundColor Yellow
     Write-Host "  Edita el archivo y vuelve a ejecutar este script." -ForegroundColor Yellow
     Write-Host "  Para resetear el estado: chezmoi state delete-bucket --bucket=scriptState" -ForegroundColor Yellow
     exit 1

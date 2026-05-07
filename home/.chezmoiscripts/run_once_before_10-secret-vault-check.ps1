@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Continue"
+﻿$ErrorActionPreference = "Continue"
 
 $vaultRoot = "$env:USERPROFILE\OneDrive"
 $secretFile = "$vaultRoot\secrets\env.toml"
@@ -17,11 +17,11 @@ if (-not (Test-Path $vaultRoot)) {
     Write-Host ""
     Write-Host "Este archivo contiene secretos que usan los" -ForegroundColor White
     Write-Host "templates de chezmoi:" -ForegroundColor White
-    Write-Host "  - [git] email       → gitconfig" -ForegroundColor Yellow
-    Write-Host "  - [ssh] host        → WezTerm SSH config" -ForegroundColor Yellow
-    Write-Host "  - [ssh] username    → WezTerm SSH config" -ForegroundColor Yellow
-    Write-Host "  - [ssh] identity    → WezTerm SSH config" -ForegroundColor Yellow
-    Write-Host "  - firecrawl         → FIRECRAWL_API_KEY" -ForegroundColor Yellow
+    Write-Host "  - [git] email       -> gitconfig" -ForegroundColor Yellow
+    Write-Host "  - [ssh] host        -> WezTerm SSH config" -ForegroundColor Yellow
+    Write-Host "  - [ssh] username    -> WezTerm SSH config" -ForegroundColor Yellow
+    Write-Host "  - [ssh] identity    -> WezTerm SSH config" -ForegroundColor Yellow
+    Write-Host "  - firecrawl         -> FIRECRAWL_API_KEY" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Pasos:" -ForegroundColor White
     Write-Host "  1. Inicia sesion en OneDrive y sincroniza" -ForegroundColor Yellow
