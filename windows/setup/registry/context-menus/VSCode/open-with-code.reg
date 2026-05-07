@@ -1,0 +1,25 @@
+Windows Registry Editor Version 5.00
+
+; "Abrir con VS Code" al hacer clic derecho en cualquier archivo
+[HKEY_CURRENT_USER\Software\Classes\*\shell\OpenWithVSCode]
+@="Abrir con VS Code"
+"Icon"="C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\OpenWithVSCode\command]
+@="\"C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe\" \"%1\""
+
+; "Abrir con VS Code" al hacer clic derecho en una carpeta
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\OpenWithVSCode]
+@="Abrir con VS Code"
+"Icon"="C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\OpenWithVSCode\command]
+@="\"C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe\" \"%1\""
+
+; "Abrir con VS Code" al hacer clic derecho en el fondo del escritorio/explorador
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OpenWithVSCode]
+@="Abrir con VS Code"
+"Icon"="C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OpenWithVSCode\command]
+@="\"C:\\Users\\buble\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe\" \"%V\""

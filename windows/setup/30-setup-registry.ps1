@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = "Continue"
 
 $regDir = "$PSScriptRoot\registry\context-menus"
-$categories = @("Wezterm", "System")
+$categories = @("VSCode", "Wezterm", "System")
 
 foreach ($category in $categories) {
     $catDir = Join-Path $regDir $category
