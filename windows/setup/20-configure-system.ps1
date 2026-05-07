@@ -52,7 +52,7 @@ $movedItems += Move-BinContents -SourceDir "$env:USERPROFILE\bin" -Label "~/bin"
 
 $ghSystemPath = "C:\Program Files\GitHub CLI\gh.exe"
 $ghLocalPath = Join-Path $localBin "gh.exe"
-if (Test-Path $ghSystemPath -and -not (Test-Path $ghLocalPath)) {
+if ((Test-Path $ghSystemPath) -and -not (Test-Path $ghLocalPath)) {
     try {
         Move-Item -Path $ghSystemPath -Destination $ghLocalPath -Force
         $movedItems += "gh.exe"
