@@ -100,6 +100,7 @@ if (-not $miseFound) { $warnings += "mise.exe not found" }
 $starshipPaths = @(
     "${env:ProgramFiles}\starship\bin\starship.exe",
     "${env:LOCALAPPDATA}\Programs\Starship\bin\starship.exe",
+    "${env:LOCALAPPDATA}\Microsoft\WinGet\Packages\Starship.Starship_Microsoft.Winget.Source_8wekyb3d8bbwe\starship.exe",
     "${env:ProgramFiles(x86)}\starship\bin\starship.exe"
 )
 $starshipFound = $false
@@ -273,7 +274,7 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "  System Configuration Complete" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "[MOVED]   $($movedItems.Count) items" -ForegroundColor Green
-Write-Host "[LINKED]  $($createdLinks.Count) symlinks" -ForegroundColor Green
+Write-Host "[LINKED]  $($createdLinks.Count) links/wrappers" -ForegroundColor Green
 Write-Host "[CLEANED] $($removedPaths.Count) USER PATH + $($machineRemoved.Count) MACHINE PATH" -ForegroundColor Green
 if ($warnings.Count -gt 0) {
     Write-Host "`n[WARNINGS]" -ForegroundColor Yellow
