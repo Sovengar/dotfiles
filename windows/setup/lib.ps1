@@ -36,16 +36,46 @@ function Read-Packages {
     return $null
 }
 
-function Install-WingetApp {
+function Get-StableWingetVersion {
     param([string]$AppId)
-    Write-Host "    (attempting silent install...)" -ForegroundColor DarkGray
-    winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements
+    $versions = winget show $AppId --versions 2>&1 | Select-String -Pattern "^\d+\.\d+\.\d+" | ForEach-Object { $_.Line.Trim() }
+    if (-not $versions) { return $null }
+    if ($versions.Count -le 1) { return $versions[0] }
+
+    $groups = @{}
+    foreach ($v in $versions) {
+        $parts = $v -split '\.'
+        $key = "$($parts[0]).$($parts[1])"
+        if (-not $groups.ContainsKey($key)) { $groups[$key] = @() }
+        $groups[$key] += $v
+    }
+
+    $sortedKeys = $groups.Keys | Sort-Object -Descending { [version]"$($_).0.0" }
+    if ($sortedKeys.Count -ge 2) {
+        return ($groups[$sortedKeys[1]] | Sort-Object -Descending)[0]
+    }
+    return $versions[0]
+}
+
+function Install-WingetApp {
+    param([string]$AppId, [string]$Version)
+    if ($Version) {
+        Write-Host "    (installing version $Version...)" -ForegroundColor DarkGray
+        winget install -e --id $AppId --version $Version --source winget --silent --accept-package-agreements --accept-source-agreements
+    } else {
+        Write-Host "    (attempting silent install...)" -ForegroundColor DarkGray
+        winget install -e --id $AppId --source winget --silent --accept-package-agreements --accept-source-agreements
+    }
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
     }
     Write-Host "    (silent failed, retrying without --silent...)" -ForegroundColor DarkGray
-    winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements
+    if ($Version) {
+        winget install -e --id $AppId --version $Version --source winget --accept-package-agreements --accept-source-agreements
+    } else {
+        winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements
+    }
     if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
@@ -68,12 +98,15 @@ function Install-WingetList {
         if ($item -is [string]) {
             $appId = $item
             $interactive = $false
+            $stable = $false
         } else {
             $appId = $item.id
             $interactive = if ($item.interactive) { $true } else { $false }
+            $stable = $item.version_strategy -eq "stable"
         }
 
         Write-Host "  Installing: $appId" -ForegroundColor Cyan
+        if ($stable) { Write-Host "    (using latest stable version)" -ForegroundColor DarkGray }
 
         if ($interactive) {
             $response = Read-Host "  Install $appId? [Y/n]"
@@ -85,7 +118,16 @@ function Install-WingetList {
             }
         }
 
-        if (Install-WingetApp -AppId $appId) { $success++ } else { $fail++ }
+        if ($stable) {
+            $version = Get-StableWingetVersion -AppId $appId
+            if ($version) {
+                if (Install-WingetApp -AppId $appId -Version $version) { $success++ } else { $fail++ }
+            } else {
+                $fail++
+            }
+        } else {
+            if (Install-WingetApp -AppId $appId) { $success++ } else { $fail++ }
+        }
     }
     $parts = @("$success OK")
     if ($fail -gt 0) { $parts += "$fail FAIL" }

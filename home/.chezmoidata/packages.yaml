@@ -32,6 +32,7 @@ packages:
       - DEVCOM.JetBrainsMonoNerdFont
       - id: JetBrains.IntelliJIDEA
         shortcut: true
+        version_strategy: stable
       - id: Bruno.Bruno
         shortcut: true
       - id: DBeaver.DBeaver.Community
