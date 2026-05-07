@@ -6,8 +6,30 @@ $movedItems = @()
 $removedPaths = @()
 $warnings = @()
 
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$devModeKey = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" -Name "AllowDevelopmentWithoutDevLicense" -ErrorAction SilentlyContinue
+$symlinksAvailable = $isAdmin -or ($devModeKey -and $devModeKey.AllowDevelopmentWithoutDevLicense -eq 1)
+
+if (-not $symlinksAvailable) {
+    Write-Host "[INFO] Symlinks not available (no admin, no Developer Mode). Using CMD wrappers instead" -ForegroundColor Yellow
+}
+
 New-Item -ItemType Directory -Force -Path $localBin | Out-Null
 Write-Host "[INFO] Consolidating executables to $localBin" -ForegroundColor Cyan
+
+function Add-Link {
+    param([string]$Name, [string]$Target)
+    $link = Join-Path $script:localBin $Name
+    if (Test-Path $link) { Remove-Item -Path $link -Force }
+    if ($script:symlinksAvailable) {
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $Target -Force | Out-Null; $script:createdLinks += $Name; return } catch { $script:warnings += "Failed symlink $Name, fallback to wrapper: $_" }
+    }
+    $wrapperName = [System.IO.Path]::GetFileNameWithoutExtension($Name) + ".cmd"
+    $wrapperPath = Join-Path $script:localBin $wrapperName
+    $content = "@echo off`n`"$Target`" %*"
+    Set-Content -Path $wrapperPath -Value $content -Encoding ASCII -Force
+    $script:createdLinks += "$wrapperName (wrapper)"
+}
 
 function Move-BinContents {
     param([string]$SourceDir, [string]$Label)
@@ -67,13 +89,8 @@ if (Test-Path $opencodeTarget) {
 
 foreach ($name in $wingetTools.Keys) {
     $target = $wingetTools[$name]
-    $link = Join-Path $localBin $name
     if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try {
-            New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
-            $createdLinks += $name
-        } catch { $warnings += "Failed to create symlink for $($name): $_" }
+        Add-Link -Name $name -Target $target
     } else { $warnings += "Tool not found: $target" }
 }
 
@@ -86,10 +103,7 @@ $misePaths = @(
 $miseFound = $false
 foreach ($path in $misePaths) {
     if (Test-Path $path) {
-        $link = Join-Path $localBin "mise.exe"
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        New-Item -ItemType SymbolicLink -Path $link -Target $path -Force | Out-Null
-        $createdLinks += "mise.exe"
+        Add-Link -Name "mise.exe" -Target $path
         $miseFound = $true; break
     }
 }
@@ -103,10 +117,7 @@ $starshipPaths = @(
 $starshipFound = $false
 foreach ($path in $starshipPaths) {
     if (Test-Path $path) {
-        $link = Join-Path $localBin "starship.exe"
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        New-Item -ItemType SymbolicLink -Path $link -Target $path -Force | Out-Null
-        $createdLinks += "starship.exe"
+        Add-Link -Name "starship.exe" -Target $path
         $starshipFound = $true; break
     }
 }
@@ -115,21 +126,13 @@ if (-not $starshipFound) { $warnings += "starship.exe not found" }
 $dockerBin = "C:\Program Files\Docker\Docker\resources\bin"
 foreach ($name in @('docker.exe', 'docker-compose.exe', 'kubectl.exe')) {
     $target = Join-Path $dockerBin $name
-    $link = Join-Path $localBin $name
-    if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
-    }
+    if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
 
 $podmanBin = "C:\Program Files\RedHat\Podman"
 foreach ($name in @('podman.exe')) {
     $target = Join-Path $podmanBin $name
-    $link = Join-Path $localBin $name
-    if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
-    }
+    if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
 
 $nvimBin = "C:\Program Files\Neovim\bin"
@@ -141,27 +144,17 @@ if (Test-Path $nvimExe) {
     $createdLinks += "nvim.cmd (wrapper)"
 }
 $win32yank = Join-Path $nvimBin "win32yank.exe"
-if (Test-Path $win32yank) {
-    $link = Join-Path $localBin "win32yank.exe"
-    if (Test-Path $link) { Remove-Item -Path $link -Force }
-    try { New-Item -ItemType SymbolicLink -Path $link -Target $win32yank -Force | Out-Null; $createdLinks += "win32yank.exe" } catch { $warnings += "Failed win32yank: $_" }
-}
+if (Test-Path $win32yank) { Add-Link -Name "win32yank.exe" -Target $win32yank }
 
 $weztermBin = "C:\Program Files\WezTerm"
 foreach ($name in @('wezterm.exe', 'wezterm-gui.exe')) {
     $target = Join-Path $weztermBin $name
-    $link = Join-Path $localBin $name
-    if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
-    }
+    if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
 
 $ideaSource = "$toolingPath\IntelliJ IDEA\bin\idea64.exe"
-$ideaLink = Join-Path $localBin "idea.exe"
 if (Test-Path $ideaSource) {
-    if (Test-Path $ideaLink) { Remove-Item -Path $ideaLink -Force }
-    try { New-Item -ItemType SymbolicLink -Path $ideaLink -Target $ideaSource -Force | Out-Null; $createdLinks += "idea.exe" } catch { $warnings += "Failed idea.exe: $_" }
+    Add-Link -Name "idea.exe" -Target $ideaSource
 } else { $warnings += "IntelliJ IDEA not found" }
 
 $antigravityDir = "$toolingPath\Antigravity"
@@ -177,11 +170,7 @@ if (Test-Path $antigravityExe) {
 
 foreach ($name in @('git.exe')) {
     $target = "C:\Program Files\Git\cmd\$name"
-    $link = Join-Path $localBin $name
-    if (Test-Path $target) {
-        if (Test-Path $link) { Remove-Item -Path $link -Force }
-        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null; $createdLinks += $name } catch { $warnings += "Failed $($name): $_" }
-    }
+    if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
 
 [Environment]::SetEnvironmentVariable("JAVA_HOME", $null, "User")
