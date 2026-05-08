@@ -8,7 +8,7 @@ $readyEvent.Set()
 
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="QuickCmd"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Width="600" Height="50"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -38,23 +38,25 @@ $readyEvent.Set()
 </Window>
 '@
 
-$reader = [System.Xml.XmlNodeReader]::new($xaml)
-
 function Show-QuickCmdPopup {
-    $reader.Position = 0
-    $window = [Windows.Markup.XamlReader]::Load($reader)
-    $box = $window.FindName("cmdBox")
-    $window.Add_Loaded({ $box.Focus() })
-    $window.Add_KeyDown({ param($s,$e) if($e.Key -eq 'Escape'){$window.Close()} })
-    $script:cmd = $null
-    $box.Add_KeyDown({ param($s,$e)
-        if ($e.Key -eq 'Enter') {
-            $script:cmd = $box.Text.Trim()
-            $window.Close()
-        }
-    })
-    $window.ShowDialog() | Out-Null
-    $script:cmd
+    try {
+        $reader = [System.Xml.XmlNodeReader]::new($xaml)
+        $window = [Windows.Markup.XamlReader]::Load($reader)
+        $box = $window.FindName("cmdBox")
+        $window.Add_Loaded({ $box.Focus() })
+        $window.Add_KeyDown({ param($s,$e) if($e.Key -eq 'Escape'){$window.Close()} })
+        $cmd = $null
+        $box.Add_KeyDown({ param($s,$e)
+            if ($e.Key -eq 'Enter') {
+                $cmd = $box.Text.Trim()
+                $window.Close()
+            }
+        })
+        $window.ShowDialog() | Out-Null
+        return $cmd
+    } catch {
+        return $null
+    }
 }
 
 while ($true) {
