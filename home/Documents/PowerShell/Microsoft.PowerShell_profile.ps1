@@ -142,7 +142,9 @@ if (Test-Path $fzfRgScript) { . $fzfRgScript }
 
 # Cargar completion de Datree
 $datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
-if (Test-Path $datreeCompletion) { . $datreeCompletion }
+if (Test-Path $datreeCompletion) {
+    try { . $datreeCompletion } catch { Write-Warning "Datree completion failed: $_" }
+}
 
 #[[
 #============================
