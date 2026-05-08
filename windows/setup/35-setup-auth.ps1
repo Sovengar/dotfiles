@@ -7,3 +7,10 @@ if ($response -match '^[yY]') {
     else { Write-Host "[WARN] gh auth login failed or skipped" -ForegroundColor Yellow }
 }
 
+$response = Read-Host "Authenticate GitLab CLI (glab auth login)? (y/n)"
+if ($response -match '^[yY]') {
+    glab auth login
+    if ($LASTEXITCODE -eq 0) { Write-Host "[OK] GitLab authenticated" -ForegroundColor Green }
+    else { Write-Host "[WARN] glab auth login failed or skipped" -ForegroundColor Yellow }
+}
+
