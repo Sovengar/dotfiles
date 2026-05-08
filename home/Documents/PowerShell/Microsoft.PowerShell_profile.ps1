@@ -61,15 +61,10 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
     }
 }
 
-# Alt+C → lanzar cdx TUI (como Ctrl+T de fzf pero para directorios)
-Set-PSReadLineKeyHandler -Key Alt+C -ScriptBlock {
-    $line = $null; $cursor = $null
-    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
-    $query = $line.Substring(0, $cursor).Trim()
-    [Microsoft.PowerShell.PSConsoleReadLine]::BeginningOfLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::KillLine()
-    if ($query) { cdx $query } else { cdx }
-    [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
+# Ctrl+Shift+G → lanzar cdx TUI
+Set-PSReadLineKeyHandler -Key Ctrl+Shift+G -ScriptBlock {
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert("cdx")
+    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
 
 # kubectl completion (for 'k' alias already defined above)
@@ -94,18 +89,25 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 }
 
 # cdx — CD Interactivo Unificado (Rust binary)
-$cdxBin = "$HOME\.local\bin\cdx-rs.exe"
+$cdxBin = "$HOME\.local\bin\cdx.exe"
 function cdx {
     if (-not (Test-Path $cdxBin)) {
-        Write-Host "[!] cdx-rs.exe not found at $cdxBin" -ForegroundColor Red
+        Write-Host "[!] cdx.exe not found at $cdxBin" -ForegroundColor Red
         Write-Host "    Build: cd ~/dev/cdx-rs; cargo build --release" -ForegroundColor DarkGray
         return
     }
-    $target = & $cdxBin @args 2>$null
+    $resultFile = "$env:TEMP\cdx-rs-result.txt"
+    Remove-Item $resultFile -ErrorAction SilentlyContinue
+    & $cdxBin @args 2>$null
     if ($LASTEXITCODE -ne 0) { return }
-    if ($target -and (Test-Path $target)) {
-        Set-Location $target
-        Show-CdxResult
+    if (Test-Path $resultFile) {
+        $target = Get-Content $resultFile -Raw
+        Remove-Item $resultFile -Force
+        $target = $target.Trim()
+        if ($target -and (Test-Path $target)) {
+            Set-Location $target
+            Show-CdxResult
+        }
     }
 }
 function Show-CdxResult {
@@ -161,3 +163,6 @@ if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyConti
     broot --install 2>$null | Out-Null
 }
 if (Test-Path $brootBr) { . $brootBr }
+
+
+
