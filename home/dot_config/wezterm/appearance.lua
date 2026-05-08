@@ -35,6 +35,8 @@ M.setup = function(config, theme)
     border_bottom_color = "transparent",
   }
 
+  -- Wallpaper de fondo (desactivado mientras se usa acrílico en Win11)
+  --[[
   config.background = {
     {
       source = { File = { path = wezterm.config_dir .. '/wallpaper.jpg', speed = 0.0 } },
@@ -43,13 +45,15 @@ M.setup = function(config, theme)
       hsb = { brightness = 0.5, saturation = 0.8, hue = 1.0 },
     }
   }
+  --]]
 
-  config.window_background_opacity = 0.96
-
-  --Acrylic (Not working)
-  --config.window_background_opacity = 0.9
-  --config.win32_system_backdrop = 'Acrylic'
-  --config.win32_window_appearance = 'Dark'
+  if wezterm.target_triple:find("windows") then
+    -- Acrylic: fondo translúcido con blur (solo Windows 11 22H2+)
+    config.window_background_opacity = 0.85
+    config.win32_system_backdrop = 'Acrylic'
+  else
+    config.window_background_opacity = 0.96
+  end
 end
 
 return M
