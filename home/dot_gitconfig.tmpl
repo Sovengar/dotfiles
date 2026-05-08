@@ -8,3 +8,11 @@
 	email = {{ .email }}
 [core]
 	editor = code --wait
+{{ if eq .chezmoi.hostname "NTTD-1H8613110L" -}}
+[credential "https://umane.emeal.nttdata.com"]
+	provider = generic
+[credential "https://umane.everis.com"]
+	provider = generic
+[credential "https://git.intranet.gencat.cat"]
+	provider = generic
+{{ end -}}
