@@ -84,19 +84,6 @@ M.setup = function(config)
     table.insert(config.keys, { mods = "LEADER|SHIFT", key = v[1], action = v[2] })
   end
 
-  -- Quick command popup (LEADER + r)
-  table.insert(config.keys, {
-    mods = "LEADER",
-    key = "r",
-    action = wezterm.action_callback(function()
-      wezterm.run_child_process {
-        'powershell', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass',
-        '-NoProfile',
-        '-File', wezterm.config_dir .. '\\quickcmd.ps1',
-      }
-    end),
-  })
-
   -- CTRL+SHIFT bindings
   for _, v in ipairs({
     { "c", act.CopyTo("ClipboardAndPrimarySelection") },
