@@ -52,6 +52,7 @@ packages:
       - JesseDuffield.lazygit
       - OpenAI.Codex
       - GitKraken.cli
+      - GLab.GLab
       - sharkdp.hyperfine
       - sharkdp.pastel
       - jj-vcs.jj

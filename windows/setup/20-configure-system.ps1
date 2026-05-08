@@ -38,6 +38,7 @@ $wingetTools = @{
     'fzf.exe'      = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe\fzf.exe"
     'chezmoi.exe'  = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\twpayne.chezmoi_Microsoft.Winget.Source_8wekyb3d8bbwe\chezmoi.exe"
     'codex.exe'    = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenAI.Codex_Microsoft.Winget.Source_8wekyb3d8bbwe\codex-x86_64-pc-windows-msvc.exe"
+    'glab.exe'     = "$env:LOCALAPPDATA\Programs\glab\glab.exe"
 }
 
 $opencodeTarget = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
