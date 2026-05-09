@@ -23,7 +23,7 @@ M.setup = function(config)
   config.font = M.font
   config.font_size = M.font_size
   config.line_height = M.line_height
-  config.foreground_text_hsb = M.foreground_text_hsb
+  -- config.foreground_text_hsb = M.foreground_text_hsb
 end
 
 return M
