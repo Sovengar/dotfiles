@@ -85,6 +85,7 @@ packages:
       - "github.com/sorenisanerd/gotty@latest"
     gh_extensions:
       - dlvhdr/gh-dash
+      - github/gh-copilot
 
     ps_modules:
       - PSFzf
