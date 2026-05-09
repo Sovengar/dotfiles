@@ -32,15 +32,13 @@ end
 
 local function get_system_stats()
   local ok, stdout, _ = wezterm.run_child_process {
-    'cmd', '/c', 'wmic cpu get loadpercentage /value & wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /value'
+    'powershell', '-NoProfile', '-Command',
+    '$cpu=(Get-CimInstance Win32_Processor).LoadPercentage; $os=Get-CimInstance Win32_OperatingSystem; $used=($os.TotalVisibleMemorySize-$os.FreePhysicalMemory)/$os.TotalVisibleMemorySize*100; Write-Output "$cpu $([math]::Round($used))"'
   }
   if not ok or not stdout then return 'N/A', 'N/A' end
-  local cpu = stdout:match('LoadPercentage=(%d+)')
-  local free, total = stdout:match('FreePhysicalMemory=(%d+).-TotalVisibleMemorySize=(%d+)')
-  if cpu and free and total then
-    local used = tonumber(total) - tonumber(free)
-    local mem = math.floor((used / tonumber(total)) * 100)
-    return cpu, tostring(mem)
+  local cpu, mem = stdout:match('(%d+)%s+(%d+)')
+  if cpu and mem then
+    return cpu, mem
   end
   return 'N/A', 'N/A'
 end
@@ -55,7 +53,8 @@ end
 
 local function get_battery()
   local ok, stdout, _ = wezterm.run_child_process {
-    'wmic', 'path', 'Win32_Battery', 'get', 'EstimatedChargeRemaining,BatteryStatus'
+    'powershell', '-NoProfile', '-Command',
+    '$b=Get-CimInstance Win32_Battery; if($b){Write-Output "$($b.EstimatedChargeRemaining) $($b.BatteryStatus)"}'
   }
   if ok and stdout then
     local charge, status = stdout:match('(%d+)%s+(%d+)')
