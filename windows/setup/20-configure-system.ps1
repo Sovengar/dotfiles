@@ -192,8 +192,7 @@ $pathsToRemove = @(
     "C:\Program Files\starship\bin\"
     "C:\Program Files\Docker\Docker\resources\bin"
     "C:\Program Files\Neovim\bin"
-    "C:\Program Files\WezTerm"
-    "C:\Program Files\WezTerm\"
+
     "C:\Program Files\Git\cmd"
     "C:\Program Files\RedHat\Podman"
     "C:\Program Files\RedHat\Podman\"
@@ -222,7 +221,6 @@ $machinePathsToRemove = @(
     "C:\Program Files\Docker\Docker\resources\bin"
     "C:\Program Files\Neovim\bin"
     "C:\Program Files\bottom\bin\"
-    "C:\Program Files\WezTerm"
     "C:\Program Files\Git\cmd"
 )
 $machineRemoved = @()
