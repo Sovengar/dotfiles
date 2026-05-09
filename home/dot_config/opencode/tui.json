@@ -5,7 +5,7 @@
     "opencode-subagent-statusline/runtime",
     "@slkiser/opencode-quota"
   ],
-  "theme": "ayu-dark",
+  "theme": "transparent",
   "keybinds": {
     "leader": "ctrl+x",
     "scroll_down": "j",

@@ -48,9 +48,17 @@ M.setup = function(config, theme)
   --]]
 
   if wezterm.target_triple:find("windows") then
-    -- Acrylic: fondo translúcido con blur (solo Windows 11 22H2+)
-    config.window_background_opacity = 0.85
-    config.win32_system_backdrop = 'Acrylic'
+    local is_win11 = false
+    if type(wezterm.os_release_info) == "function" then
+      local info = wezterm.os_release_info()
+      is_win11 = info and info.build_number and tonumber(info.build_number) >= 22000
+    end
+    if is_win11 then
+      config.window_background_opacity = 0.85
+      config.win32_system_backdrop = 'Acrylic'
+    else
+      config.window_background_opacity = 0.96
+    end
   else
     config.window_background_opacity = 0.96
   end
