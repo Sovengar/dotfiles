@@ -118,6 +118,13 @@ foreach ($name in @('wezterm.exe', 'wezterm-gui.exe')) {
     $target = Join-Path $weztermBin $name
     if (Test-Path $target) { Add-Link -Name $name -Target $target }
 }
+$weztermMux = Join-Path $weztermBin "wezterm-mux-server.exe"
+if (Test-Path $weztermMux) {
+    $wrapper = Join-Path $localBin "wezterm-mux-server.cmd"
+    $content = "@echo off`n`"$weztermMux`" %*"
+    Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+    $createdLinks += "wezterm-mux-server.cmd (wrapper)"
+}
 
 $ideaSource = $null
 $ideaPaths = @(
