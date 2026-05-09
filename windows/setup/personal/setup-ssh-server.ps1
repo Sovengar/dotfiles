@@ -68,7 +68,7 @@ if (-not (Test-Path $sshKeyPath)) {
     if (-not (Test-Path "$HOME\.ssh")) {
         New-Item -ItemType Directory -Path "$HOME\.ssh" -Force | Out-Null
     }
-    ssh-keygen -t ed25519 -f $sshKeyPath -N '""'
+    ssh-keygen -t ed25519 -f $sshKeyPath -N ""
     Log "Key generated." "Green"
 } else {
     Log "SSH key already exists at ~/.ssh/jon" "Green"
@@ -85,6 +85,23 @@ if (-not (Test-Path $authKeysFile)) {
 
 Log "Setting permissions on authorized_keys..." "Yellow"
 icacls $authKeysFile /inheritance:r /grant "$($env:USERNAME):(R)"
+
+# ============================================
+# 6b. Also add to administrators_authorized_keys if admin user
+# ============================================
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($isAdmin) {
+    Log "User is admin — adding key to administrators_authorized_keys..." "Yellow"
+    $adminKeysFile = "$env:ProgramData\ssh\administrators_authorized_keys"
+    $pubKey = Get-Content "$HOME\.ssh\jon.pub" -ErrorAction SilentlyContinue
+    if ($pubKey) {
+        Add-Content -Path $adminKeysFile -Value $pubKey -Encoding ASCII
+        icacls $adminKeysFile /inheritance:r /grant "SYSTEM:(F)" /grant "BUILTIN\Administradores:(F)"
+        Log "Public key added to administrators_authorized_keys." "Green"
+    }
+} else {
+    Log "User is not admin — administrators_authorized_keys not needed." "Green"
+}
 
 # ============================================
 # 7. Instructions for copying public key
@@ -105,21 +122,39 @@ if ($pubKey) {
 }
 
 Write-Host ""
-Write-Host "--- If this IS your local machine that connects TO a remote server: ---" -ForegroundColor Cyan
-Write-Host "1. Copy the public key (already on clipboard if generated now)" -ForegroundColor White
-Write-Host "2. On the REMOTE machine, paste it in:" -ForegroundColor White
-Write-Host "     C:\Users\<user>\.ssh\authorized_keys" -ForegroundColor Yellow
+Write-Host "=============================================" -ForegroundColor Cyan
+Write-Host "   SETUP COMPLETE — NEXT STEPS" -ForegroundColor Cyan
+Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "--- If this IS the REMOTE machine (server being configured): ---" -ForegroundColor Cyan
-Write-Host "1. From your LOCAL machine, copy jon.pub:" -ForegroundColor White
-Write-Host "     Get-Content ~/.ssh/jon.pub | Set-Clipboard" -ForegroundColor Yellow
-Write-Host "2. Paste it here (in this machine) at:" -ForegroundColor White
-Write-Host "     C:\Users\$($env:USERNAME)\.ssh\authorized_keys" -ForegroundColor Yellow
+Write-Host "  SERVER (this machine):" -ForegroundColor Green
+Write-Host "    ✓ OpenSSH Server installed and running"
+Write-Host "    ✓ Firewall port 22 open"
+Write-Host "    ✓ SSH key pair at ~/.ssh/jon (ed25519, no passphrase)"
+Write-Host "    ✓ Public key in authorized_keys"
+if ($isAdmin) {
+    Write-Host "    ✓ Also in administrators_authorized_keys (admin user)"
+}
 Write-Host ""
-Write-Host "--- Then test the connection from LOCAL: ---" -ForegroundColor Cyan
-Write-Host "  ssh -i ~/.ssh/jon <user>@<host>" -ForegroundColor Yellow
-Write-Host "  wezterm connect <host-alias>" -ForegroundColor Yellow
-Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "  CLIENT machine needs:" -ForegroundColor Yellow
+Write-Host "    1. Copy ~/.ssh/jon (private key, no passphrase)" -ForegroundColor White
+Write-Host "       to the client's ~/.ssh/" -ForegroundColor White
+Write-Host "    2. Copy ~/.ssh/jon.pub (public) to the client's ~/.ssh/" -ForegroundColor White
+Write-Host "    3. In client's wezterm.lua, add ssh_domains entry:" -ForegroundColor White
+Write-Host '       {'
+Write-Host '         name = '<server-alias>','
+Write-Host '         remote_address = '<server-ip>','
+Write-Host "         username = '$($env:USERNAME)',"
+Write-Host "         ssh_option = {"
+Write-Host "           identityfile = wezterm.home_dir .. '/.ssh/jon',"
+Write-Host "         }"
+Write-Host '       }'
+Write-Host "    4. wezterm connect <server-alias>" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  NOTE for admin users on Windows:" -ForegroundColor Cyan
+Write-Host "    OpenSSH on Windows uses administrators_authorized_keys" -ForegroundColor White
+Write-Host "    instead of the user's .ssh/authorized_keys" -ForegroundColor White
+Write-Host "    This script handles it automatically." -ForegroundColor White
+Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 
 Log "OpenSSH Server setup complete." "Green"
