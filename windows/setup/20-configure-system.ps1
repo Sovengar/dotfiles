@@ -114,16 +114,14 @@ $win32yank = Join-Path $nvimBin "win32yank.exe"
 if (Test-Path $win32yank) { Add-Link -Name "win32yank.exe" -Target $win32yank }
 
 $weztermBin = "C:\Program Files\WezTerm"
-foreach ($name in @('wezterm.exe', 'wezterm-gui.exe')) {
+foreach ($name in @('wezterm.exe', 'wezterm-gui.exe', 'wezterm-mux-server.exe')) {
     $target = Join-Path $weztermBin $name
-    if (Test-Path $target) { Add-Link -Name $name -Target $target }
-}
-$weztermMux = Join-Path $weztermBin "wezterm-mux-server.exe"
-if (Test-Path $weztermMux) {
-    $wrapper = Join-Path $localBin "wezterm-mux-server.cmd"
-    $content = "@echo off`n`"$weztermMux`" %*"
-    Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
-    $createdLinks += "wezterm-mux-server.cmd (wrapper)"
+    if (Test-Path $target) {
+        $wrapper = Join-Path $localBin "$([System.IO.Path]::GetFileNameWithoutExtension($name)).cmd"
+        $content = "@echo off`n`"$target`" %*"
+        Set-Content -Path $wrapper -Value $content -Encoding ASCII -Force
+        $createdLinks += "$([System.IO.Path]::GetFileNameWithoutExtension($name)).cmd (wrapper)"
+    }
 }
 
 $ideaSource = $null
