@@ -2,28 +2,10 @@ local wezterm = require "wezterm"
 
 local M = {}
 
-M.setup = function(config, theme)
+local function base_config(config)
   config.default_cursor_style = 'BlinkingUnderline'
-
-  config.window_background_gradient = {
-    orientation = "Vertical",
-    interpolation = "Linear",
-    blend = "Rgb",
-    colors = {
-      theme.bg,
-      "#161b22"
-    },
-  }
-
   config.window_decorations = "RESIZE"
-
-  config.window_padding = {
-    left = 0,
-    right = 0,
-    top = 0,
-    bottom = 0,
-  }
-
+  config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
   config.window_frame = {
     border_left_width = "10px",
     border_right_width = "10px",
@@ -34,18 +16,17 @@ M.setup = function(config, theme)
     border_top_color = "transparent",
     border_bottom_color = "transparent",
   }
+end
 
-  -- Wallpaper de fondo (desactivado mientras se usa acrílico en Win11)
-  --[[
-  config.background = {
-    {
-      source = { File = { path = wezterm.config_dir .. '/wallpaper.jpg', speed = 0.0 } },
-      opacity = 0.25,
-      width = "100%",
-      hsb = { brightness = 0.5, saturation = 0.8, hue = 1.0 },
-    }
+function M.setup_gradient(config, colors)
+  base_config(config)
+
+  config.window_background_gradient = {
+    orientation = "Vertical",
+    interpolation = "Linear",
+    blend = "Rgb",
+    colors = { colors.bg, "#161b22" },
   }
-  --]]
 
   if wezterm.target_triple:find("windows") then
     local is_win11 = false
@@ -63,5 +44,29 @@ M.setup = function(config, theme)
     config.window_background_opacity = 0.96
   end
 end
+
+function M.setup_wallpaper(config, _colors)
+  base_config(config)
+
+  config.background = {
+    {
+      source = { File = { path = wezterm.config_dir .. '/wallpaper.jpg' } },
+      --opacity = 0.25,
+      width = "100%",
+      height = "100%",
+      hsb = { brightness = 0.25, saturation = 1.02, hue = 1.0 },
+    },
+    {
+      source = { Color = "#282c35" },
+      width = "100%",
+      height = "100%",
+      opacity = 0.55,
+    },
+  }
+
+  --config.window_background_opacity = 1.0
+end
+
+M.setup = M.setup_gradient
 
 return M

@@ -30,6 +30,7 @@
 
 local wezterm = require "wezterm"
 local act = wezterm.action
+local quickterm = require "quickterm"
 
 local M = {}
 
@@ -88,6 +89,9 @@ M.setup = function(config)
   for _, v in ipairs({
     { "c", act.CopyTo("ClipboardAndPrimarySelection") },
     { "v", act.PasteFrom("Clipboard") },
+    { "t", wezterm.action_callback(function(win, pane)
+      quickterm.toggle(win, pane)
+    end)},
   }) do
     table.insert(config.keys, { mods = "CTRL|SHIFT", key = v[1], action = v[2] })
   end

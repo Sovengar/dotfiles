@@ -63,12 +63,4 @@ config.max_fps = 120
 config.animation_fps = 120
 config.prefer_egl = true
 
--- Start QuickCmd daemon for instant popup (fire-and-forget)
-pcall(function()
-  wezterm.time.call_after(1, function()
-    os.execute('start "" powershell -WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -File "'
-      .. wezterm.config_dir .. '\\quickcmd_daemon.ps1"')
-  end)
-end)
-
 return config
