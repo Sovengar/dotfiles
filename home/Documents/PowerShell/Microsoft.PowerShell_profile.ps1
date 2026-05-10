@@ -100,12 +100,17 @@ function docker {
 #============================
 # mise: lazy (~450ms -> 0ms en startup)
 #============================
+# Commands like opencode would not work
+# if (Get-Command mise -ErrorAction SilentlyContinue) {
+#     function mise {
+#         Remove-Item function:mise
+#         (& mise activate pwsh) | Out-String | Invoke-Expression
+#         & mise @args
+#     }
+# }
+
 if (Get-Command mise -ErrorAction SilentlyContinue) {
-    function mise {
-        Remove-Item function:mise
-        (& mise activate pwsh) | Out-String | Invoke-Expression
-        & mise @args
-    }
+    (&mise activate pwsh) | Out-String | Invoke-Expression
 }
 
 #============================
