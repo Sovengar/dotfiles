@@ -157,6 +157,15 @@ if (Get-Command mise -ErrorAction SilentlyContinue) {
     (&mise activate pwsh) | Out-String | Invoke-Expression
 }
 
+# goto — quick connect to mux domains
+function goto {
+    param($target)
+    switch ($target) {
+        'jon' { wezterm connect jon }
+        default { Write-Host "Unknown target: $target" }
+    }
+}
+
 # broot launcher
 $brootBr = "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
 if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyContinue)) {
