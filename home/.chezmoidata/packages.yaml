@@ -67,6 +67,9 @@ packages:
       - ajeetdsouza.zoxide
       - sharkdp.bat
       - eza-community.eza
+      - charmbracelet.crush
+      - jqlang.jq
+      - Orange-OpenSource.Hurl
     npm_global:
       - "@openai/codex"
       - backlog.md

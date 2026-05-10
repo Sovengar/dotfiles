@@ -92,8 +92,8 @@ M.colors.tab_hover = {
   bg_color = config.use_rombos and p.hover.bg or "none", 
   fg_color = config.use_rombos and p.hover.fg or p.primary_hover 
 }
-M.colors.new_tab = { bg_color = p.new.bg, fg_color = p.new.fg, intensity = "Bold" }
-M.colors.new_tab_hover = { bg_color = p.new_hover.bg, fg_color = p.new_hover.fg, intensity = "Bold" }
+M.colors.new_tab = p.new.fg
+M.colors.new_tab_hover = p.new_hover.fg
 
 -- Iconos de los bordes
 M.colors.tab_style = {
