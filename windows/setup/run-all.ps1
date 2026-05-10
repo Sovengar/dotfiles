@@ -65,7 +65,6 @@ Write-Host "===============================================" -ForegroundColor Cy
 Write-Host "  ALL SETUP COMPLETE" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "Next step: chezmoi apply --verbose" -ForegroundColor Yellow
-Write-Host "OpenCode Mobile: https://termly.dev/blog/opencode-mobile-setup-guide" -ForegroundColor Magenta
 
 Show-SetupLog
 
