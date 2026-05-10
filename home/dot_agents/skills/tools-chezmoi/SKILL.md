@@ -6,18 +6,21 @@ description: >
 triggers: [chezmoi, dotfiles, sincronizado, sync, dotfiles-repo, config-management]
 ---
 
+## ⚠️ CRITICAL: git status ≠ chezmoi diff
+
+**`git status` solo mira el repo source**. Puede decir "clean" mientras hay cambios sin commitear en casa (modificaciones locales tras `chezmoi apply`). 
+**`chezmoi diff` siempre primero** — compara source vs target real.
+
 ## Sync Check Workflow
 
 When asked "are dotfiles in sync?", run ALL of these:
 
 ```powershell
-# 1. Check what's pending in chezmoi (source vs target)
+# 1. SIEMPRE PRIMERO: chezmoi diff (source vs target real)
+chezmoi diff
 chezmoi status
 
-# 2. Show actual diffs
-chezmoi diff
-
-# 3. Check git repo state
+# 2. Luego git (source repo vs remote)
 git status
 git --no-pager diff
 git --no-pager log --oneline -3
