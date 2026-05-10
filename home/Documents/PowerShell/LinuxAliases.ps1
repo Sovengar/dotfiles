@@ -2,11 +2,6 @@
 # Comandos tipo Linux para PowerShell
 # Ubicacion: $env:USERPROFILE\Documents\PowerShell\LinuxAliases.ps1
 
-# Detectar herramientas disponibles
-$script:HasRg = [bool](Get-Command rg -ErrorAction SilentlyContinue)
-$script:HasFd = [bool](Get-Command fd -ErrorAction SilentlyContinue)
-$script:HasBtm = [bool](Get-Command btm -ErrorAction SilentlyContinue)
-
 # ============================================
 # ls - Listar archivos (con flags tipo Unix)
 # ============================================
@@ -131,7 +126,7 @@ function grep {
     )
     if (-not $Paths) { $Paths = '.' }
     
-    if ($script:HasRg) {
+    if (Get-Command rg -ErrorAction SilentlyContinue) {
         $args = @($Pattern) + $Paths
         if ($r) { $args = @('--recursive') + $args }
         & rg @args --color=always
@@ -281,7 +276,7 @@ function uptime {
 function ps {
     param([string]$aux)
     if ($aux -eq 'aux') {
-        if ($script:HasBtm) {
+        if (Get-Command btm -ErrorAction SilentlyContinue) {
             & btm
         } else {
             Get-Process | Select-Object Id, ProcessName, CPU, WorkingSet, Path | Format-Table -AutoSize
@@ -316,7 +311,7 @@ function find {
         [switch]$type,
         [Parameter(ValueFromRemainingArguments=$true)]$RemainingArgs
     )
-    if ($script:HasFd) {
+    if (Get-Command fd -ErrorAction SilentlyContinue) {
         $fdArgs = @($Path)
         if ($name) { $fdArgs += '--name' }
         if ($type) { $fdArgs += '--type', $RemainingArgs[0]; $RemainingArgs = $RemainingArgs[1..$RemainingArgs.Count] }
@@ -355,7 +350,7 @@ function rm {
 # btm - Wrapper para bottom
 # ============================================
 function btm {
-    if ($script:HasBtm) {
+    if (Get-Command btm -ErrorAction SilentlyContinue) {
         & "$env:USERPROFILE\.local\bin\btm.exe" @args
     } else {
         Write-Host "bottom (btm) not installed. Install with: winget install Clement.bottom" -ForegroundColor Red

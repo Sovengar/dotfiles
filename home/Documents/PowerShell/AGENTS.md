@@ -6,9 +6,9 @@ Perfil de PowerShell con herramientas de navegación TUI, aliases tipo Unix, y c
 
 ## Archivos Clave
 
-- `Microsoft.PowerShell_profile.ps1` — Entry point. Carga todo lo demás.
+- `Microsoft.PowerShell_profile.ps1` — Entry point principal. Carga el FAST + lazy loading de herramientas pesadas (starship, completions, mise, zoxide, PSFzf).
+- `Microsoft.PowerShell_profile.fast.ps1` — Perfil MINIMO para quickterm/miniterm. CERO binarios externos en startup. Puro codigo.
 - `Cdx.ps1` — `cdx`: Navegador interactivo de directorios con fzf+fd+rg. Toggle Ctrl+G (fd↔rg), Ctrl+A (dotfiles), Ctrl+W (WinHidden), Ctrl+C (exit), Esc (cd ..).
-- `CDX_DOCUMENTATION.md` — Documentación técnica (usuario + IA) de cdx. Debe reflejar siempre el estado actual de Cdx.ps1.
 - `LinuxAliases.ps1` — Comandos tipo Unix: `ls` (eza), `grep` (rg), `find` (fd), `touch`, `head`, `tail`, `which`, `df`, `du`, `uptime`, `ps`, `wc`, `rm -rf`, `btm`.
 
 ## Dependencias Externas
@@ -34,7 +34,7 @@ Perfil de PowerShell con herramientas de navegación TUI, aliases tipo Unix, y c
 - NO modificar `Cdx.ps1` sin verificar que `cdx` function siga funcionando
 - NO eliminar/excluir paths sin revisar `$script:CdxExcludeCatA` y `$script:CdxExcludeCatC`
 - NO agregar dotfiles al profile sin preguntar
-- NO modificar `Cdx.ps1` sin actualizar `CDX_DOCUMENTATION.md` para reflejar los cambios (comportamiento, nuevos flags, cambios en atajos, etc.)
+- **SIEMPRE que se modifique `Microsoft.PowerShell_profile.fast.ps1` o `Microsoft.PowerShell_profile.ps1`, verificar si el cambio debe reflejarse en el otro perfil.** El principal sourcea el FAST; cualquier funcion/alias nuevo en el FAST se hereda automaticamente, pero configuraciones especificas (starship, lazy proxies) solo van en el principal.
 
 ## Versionado con Chezmoi
 

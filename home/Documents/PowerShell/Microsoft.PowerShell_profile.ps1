@@ -1,50 +1,16 @@
-New-Alias op opencode
-New-Alias lgit lazygit
+# Microsoft.PowerShell_profile.ps1
+# Perfil principal con lazy loading de herramientas pesadas.
+# Carga la base del perfil FAST y luego anade starship, completions, etc. bajo demanda.
 
-#Starlship
-$ENV:STARSHIP_CONFIG = "$HOME\.starship\starship.toml"
-$ENV:STARSHIP_DISTRO = "者 xcad"
-Invoke-Expression (&starship init powershell)
-
-#Kubernetes
-New-Alias k kubectl
-
-$ENV:KUBECONFIG = ".kube/prod-k8s-clcreative-kubeconfig.yaml;.kube/civo-k8s_test_1-kubeconfig;.kube/k8s_test_1.yml"
-
-function kn {
-    param (
-        $namespace
-    )
-
-    if ($namespace -in "default","d") {
-        kubectl config set-context --current --namespace=default
-    } else {
-        kubectl config set-context --current --namespace=$namespace
-    }
-}
-
-#WezTerm OSC 7 Shell Integration
-$PromptOld = $function:prompt
-function prompt {
-    $loc = Get-Location
-    if ($loc.Provider.Name -eq "FileSystem") {
-        $uri = [System.Uri]::new($loc.Path).AbsoluteUri
-        Write-Host -NoNewLine "`e]7;${uri}`e\"
-    }
-    & $PromptOld
-}
-
-# Cargar comandos tipo Linux
-$linuxAliases = Join-Path $PSScriptRoot 'LinuxAliases.ps1'
-if (Test-Path $linuxAliases) { . $linuxAliases }
-
-#[[
 #============================
-#CLI Completions & Tools
+# Base: todo lo del perfil FAST (aliases, funciones puras, OSC7)
 #============================
-##]]
+$fastProfile = Join-Path (Split-Path -Parent $PROFILE) 'Microsoft.PowerShell_profile.fast.ps1'
+if (Test-Path $fastProfile) { . $fastProfile }
 
-# PSReadLine: Tab acepta predicción, si no hay hace Tab normal
+#============================
+# PSReadLine (solo en perfil principal; en fast no se carga para ahorrar ~260ms)
+#============================
 Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
     $line = $null; $cursor = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
@@ -55,73 +21,139 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
         [Microsoft.PowerShell.PSConsoleReadLine]::TabCompleteNext()
     }
 }
-
-# Ctrl+Shift+G → lanzar cdx TUI
 Set-PSReadLineKeyHandler -Key Ctrl+Shift+G -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert("cdx")
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
 
-# kubectl completion (for 'k' alias already defined above)
+#============================
+# Helper: cachear output de binarios (invalida automatico por LastWriteTime)
+#============================
+function Import-CachedBinaryInit {
+    param(
+        [Parameter(Mandatory)] [string] $Name,
+        [Parameter(Mandatory)] [scriptblock] $InitScript
+    )
+    $bin = (Get-Command $Name -ErrorAction SilentlyContinue)?.Source
+    if (-not $bin) { return }
+    $cacheDir = "$HOME\.cache\pwsh-init"
+    if (-not (Test-Path $cacheDir)) {
+        New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
+    }
+    # Invalidacion por LastWriteTime+Length (instantaneo vs SHA256 de un exe de 10MB)
+    $fi = Get-Item $bin
+    $hash = $fi.LastWriteTimeUtc.ToString("yyyyMMddHHmmss") + "-" + $fi.Length
+    $cache = Join-Path $cacheDir "$Name-$hash.ps1"
+    if (-not (Test-Path $cache)) {
+        & $InitScript | Out-File $cache -Encoding utf8 -Force
+    }
+    . $cache
+}
+
+#============================
+# Starship (~650ms -> ~50ms con cache)
+#============================
+$ENV:STARSHIP_CONFIG = "$HOME\.starship\starship.toml"
+$ENV:STARSHIP_DISTRO = "者 xcad"
+Import-CachedBinaryInit "starship" { starship init powershell --print-full-init }
+
+#============================
+# Zoxide (~80ms -> ~15ms con cache)
+#============================
+Import-CachedBinaryInit "zoxide" { zoxide init powershell }
+
+#============================
+# kubectl completion: lazy (~190ms -> 0ms en startup)
+# Nota: la primera ejecucion de 'kubectl' o 'k' carga el completion.
+# Si necesitas Tab-completion sin haber ejecutado kubectl, escribe 'kubectl' y dale Enter una vez.
+#============================
 if (Get-Command kubectl -ErrorAction SilentlyContinue) {
-    kubectl completion powershell | Out-String | Invoke-Expression
+    function kubectl {
+        Remove-Item function:kubectl
+        kubectl completion powershell | Out-String | Invoke-Expression
+        & kubectl @args
+    }
 }
 
-# GitHub CLI completion
+#============================
+# gh completion: lazy (~190ms -> 0ms en startup)
+#============================
 if (Get-Command gh -ErrorAction SilentlyContinue) {
-    Invoke-Expression -Command $(gh completion -s powershell | Out-String)
-}
-
-# Docker completion (module must be installed first)
-# Install-Module DockerCompletion -Scope CurrentUser
-if (Get-Module -ListAvailable -Name DockerCompletion) {
-    Import-Module DockerCompletion
-}
-
-# Zoxide (smart cd, learns your most-used directories)
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-}
-
-# cdx — CD Interactivo Unificado (Rust binary)
-$cdxBin = "$HOME\.local\bin\cdx.exe"
-function cdx {
-    if (-not (Test-Path $cdxBin)) {
-        Write-Host "[!] cdx.exe not found at $cdxBin" -ForegroundColor Red
-        Write-Host "    Build: cd ~/dev/cdx-rs; cargo build --release" -ForegroundColor DarkGray
-        return
-    }
-    $resultFile = "$env:TEMP\cdx-rs-result.txt"
-    Remove-Item $resultFile -ErrorAction SilentlyContinue
-    & $cdxBin @args 2>$null
-    if ($LASTEXITCODE -ne 0) { return }
-    if (Test-Path $resultFile) {
-        $target = Get-Content $resultFile -Raw
-        Remove-Item $resultFile -Force
-        $target = $target.Trim()
-        if ($target -and (Test-Path $target)) {
-            Set-Location $target
-            Show-CdxResult
-        }
-    }
-}
-function Show-CdxResult {
-    $path = (Get-Location).Path
-    $display = if ($path.StartsWith($env:USERPROFILE)) {
-        "~" + $path.Substring($env:USERPROFILE.Length).Replace('\', '/')
-    } else { $path.Replace('\', '/') }
-    Write-Host "`n$display" -ForegroundColor Cyan
-    if (Get-Command eza -ErrorAction SilentlyContinue) {
-        eza --icons --group-directories-first
-    } else { Get-ChildItem -Force | Format-Table }
-    if (Get-Command git -ErrorAction SilentlyContinue) {
-        $gitRoot = git rev-parse --show-toplevel 2>$null
-        if ($gitRoot) {
-            Write-Host "  Consider using: yazi, broot, nvim, lazygit, code ." -ForegroundColor DarkGray
-        }
+    function gh {
+        Remove-Item function:gh
+        Invoke-Expression -Command $(& gh completion -s powershell | Out-String)
+        & gh @args
     }
 }
 
+#============================
+# DockerCompletion: lazy (~40ms -> 0ms en startup)
+#============================
+function docker {
+    Remove-Item function:docker
+    if (Get-Module -ListAvailable -Name DockerCompletion) {
+        Import-Module DockerCompletion
+    }
+    & docker @args
+}
+
+#============================
+# mise: lazy (~450ms -> 0ms en startup)
+#============================
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    function mise {
+        Remove-Item function:mise
+        (& mise activate pwsh) | Out-String | Invoke-Expression
+        & mise @args
+    }
+}
+
+#============================
+# broot launcher: lazy (~10ms -> 0ms en startup)
+#============================
+function br {
+    Remove-Item function:br
+    $brootBr = "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
+    if (Test-Path $brootBr) { . $brootBr }
+    if (Get-Command br -ErrorAction SilentlyContinue) { br @args }
+}
+# Auto-install de broot si no existe el launcher pero si el binario
+$brootBr = "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
+if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyContinue)) {
+    broot --install 2>$null | Out-Null
+}
+
+#============================
+# Datree completion: lazy (~7ms -> 0ms en startup)
+#============================
+$datreeCompletion = Join-Path (Split-Path -Parent $PROFILE) 'DatreeCompletion.ps1'
+if (Test-Path $datreeCompletion) {
+    function datree {
+        Remove-Item function:datree
+        try { . $datreeCompletion } catch { Write-Warning "Datree completion failed: $_" }
+        & datree @args
+    }
+}
+
+#============================
+# PSFzf: DESHABILITADO por alto costo de startup (~330-390ms en Import-Module)
+#
+# Los handlers "nativos" con fzf directo no funcionan porque PSReadLine ScriptBlocks
+# ejecutan en un contexto sin TTY accesible. fzf necesita control total del terminal
+# (stdin interactivo, dibujo de UI) que solo PSFzf puede proporcionar via su propia
+# gestion de pseudo-TTY.
+#
+# Para re-habilitar, descomenta el bloque de abajo. El modulo debe estar instalado:
+#   Install-Module PSFzf -Scope CurrentUser
+#
+# Alternativas consideradas y descartadas:
+#   - fzf directo en ScriptBlock: fzf se cuelga esperando stdin (no hay TTY)
+#   - Start-Process fzf: no puede devolver el resultado al buffer de PSReadLine
+#   - Out-GridView: solo Windows, no tiene preview de archivos, lento
+#
+# Original del backup (Microsoft.PowerShell_profile.ps1.backup.20260510-150538):
+#============================
+<#
 # fzf fuzzy finder (module must be installed first)
 # Install-Module PSFzf -Scope CurrentUser
 if (Get-Module -ListAvailable -Name PSFzf) {
@@ -130,43 +162,4 @@ if (Get-Module -ListAvailable -Name PSFzf) {
                     -PSReadlineChordReverseHistory 'Ctrl+R' `
                     -EnableAliasFuzzyGitStatus
 }
-
-# rgx — fzf + ripgrep content search (rg vitaminado)
-$fzfRgScript = Join-Path $PSScriptRoot 'FzfRg.ps1'
-if (Test-Path $fzfRgScript) { . $fzfRgScript }
-
-# Cargar completion de Datree
-$datreeCompletion = Join-Path $PSScriptRoot 'DatreeCompletion.ps1'
-if (Test-Path $datreeCompletion) {
-    try { . $datreeCompletion } catch { Write-Warning "Datree completion failed: $_" }
-}
-
-#[[
-#============================
-# Others
-#============================
-##]]
-
-# mise-en-place
-if (Get-Command mise -ErrorAction SilentlyContinue) {
-    (&mise activate pwsh) | Out-String | Invoke-Expression
-}
-
-# connect — quick wezterm mux
-function connect {
-    param($target)
-    switch ($target) {
-        'jon' { wezterm connect jon }
-        default { Write-Host "Unknown target: $target" }
-    }
-}
-
-# broot launcher
-$brootBr = "$HOME\AppData\Roaming\dystroy\broot\config\launcher\powershell\br.ps1"
-if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyContinue)) {
-    broot --install 2>$null | Out-Null
-}
-if (Test-Path $brootBr) { . $brootBr }
-
-
-
+#>

@@ -30,6 +30,7 @@ local blockingFlagsPs = ps_array(settings.blockingFlags)
 -- Build the PowerShell script that runs inside the quickterm pane.
 -- We concatenate lines so we can inject the Lua-derived arrays.
 local ps_script = table.concat({
+  '. "' .. wezterm.home_dir .. '\\Documents\\PowerShell\\Microsoft.PowerShell_profile.fast.ps1"',
   "& {",
   "  $ErrorActionPreference = 'Stop'",
   "  $autoCloseList = " .. autoClosePs,
