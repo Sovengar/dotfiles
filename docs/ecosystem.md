@@ -26,6 +26,7 @@
 | Tool | What |
 |---|---|
 | **[opencode](https://opencode.ai)** | AI coding agent — plans, codes, reviews |
+| **opencode mobile** | [Mobile setup guide](https://termly.dev/blog/opencode-mobile-setup-guide) |
 | **[mise](https://mise.jdx.dev)** | Runtime version manager (replaces nvm/pyenv/rbenv) |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
 | **[gh](https://cli.github.com)** | GitHub CLI |
