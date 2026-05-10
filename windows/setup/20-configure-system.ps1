@@ -161,6 +161,38 @@ if ($antigravityExe) {
     Write-Host "[OK] Created antigravity.cmd wrapper" -ForegroundColor Green
 } else { $warnings += "Antigravity not found (searched tooling and AppData)" }
 
+# mvnw: busca el wrapper hacia arriba en el arbol
+$mvnwWrapper = Join-Path $localBin "mvnw.cmd"
+$mvnwContent = @'
+@echo off
+setlocal enabledelayedexpansion
+
+set "current=%cd%"
+
+:loop
+if exist "%current%\mvnw.cmd" (
+    call "%current%\mvnw.cmd" %*
+    exit /b %errorlevel%
+)
+
+if exist "%current%\mvnw" (
+    call "%current%\mvnw" %*
+    exit /b %errorlevel%
+)
+
+for %%I in ("%current%\..") do set "parent=%%~fI"
+if "%parent%"=="%current%" goto notfound
+set "current=%parent%"
+goto loop
+
+:notfound
+echo Error: mvnw not found in current directory or any parent >&2
+exit /b 1
+'@
+Set-Content -Path $mvnwWrapper -Value $mvnwContent -Encoding ASCII -Force
+$createdLinks += "mvnw.cmd (wrapper)"
+Write-Host "[OK] Created mvnw.cmd wrapper" -ForegroundColor Green
+
 foreach ($name in @('git.exe')) {
     $target = "C:\Program Files\Git\cmd\$name"
     if (Test-Path $target) { Add-Link -Name $name -Target $target }

@@ -23,11 +23,6 @@ function kn {
     }
 }
 
-# Maven Wrapper mvnw
-function mvnw {
-    & ".\mvnw.cmd" $args
-}
-
 #WezTerm OSC 7 Shell Integration
 $PromptOld = $function:prompt
 function prompt {
