@@ -43,6 +43,8 @@ git --no-pager log --oneline -3
 
 > **⚠️ `chezmoi re-add` siempre con ruta absoluta.** Rutas relativas tipo `.config/foo` pueden fallar con falsos `not managed`. Usa el path completo del target, e.g. `chezmoi re-add "C:\Users\buble\.config\wezterm\appearance.lua"`.
 
+> **⚠️ `chezmoi re-add` NO funciona con `.tmpl` files.** No sabe convertir un target (ej. `file.lua`) de vuelta a un template (`file.lua.tmpl`). Para templates, editar el **source directamente** (`~/.local/share/chezmoi/home/dot_*/file.lua.tmpl`).
+
 ## Workflow: Edit + Commit + Apply
 
 ```powershell
