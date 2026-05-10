@@ -157,8 +157,8 @@ if (Get-Command mise -ErrorAction SilentlyContinue) {
     (&mise activate pwsh) | Out-String | Invoke-Expression
 }
 
-# goto — quick connect to mux domains
-function goto {
+# connect — quick wezterm mux
+function connect {
     param($target)
     switch ($target) {
         'jon' { wezterm connect jon }
