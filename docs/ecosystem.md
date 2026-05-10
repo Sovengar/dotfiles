@@ -30,7 +30,7 @@
 | **[mise](https://mise.jdx.dev)** | Runtime version manager (replaces nvm/pyenv/rbenv) |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
 | **[gh](https://cli.github.com)** | GitHub CLI |
-| **gh dash** | Dashboard TUI for PRs/issues/CI |
+| **gh dash** | Dashboard TUI for PRs/issues/CI — [Video guide](https://www.youtube.com/watch?v=Z-3dUHDnkEI) |
 | **gh copilot** ⚠️ | GH CLI AI assistant (NOT INSTALLED) |
 | **[snyk](https://snyk.io)** | Security/SAST scanner |
 | **[hyperfine](https://github.com/sharkdp/hyperfine)** | Command benchmarking |
