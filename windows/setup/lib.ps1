@@ -127,16 +127,6 @@ function Install-WingetApp {
         Write-Host "    [OK] $AppId" -ForegroundColor Green
         return $true
     }
-    Write-Host "    (silent failed, retrying without --silent...)" -ForegroundColor DarkGray
-    if ($Version) {
-        winget install -e --id $AppId --version $Version --source winget --accept-package-agreements --accept-source-agreements
-    } else {
-        winget install -e --id $AppId --source winget --accept-package-agreements --accept-source-agreements
-    }
-    if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
-        Write-Host "    [OK] $AppId" -ForegroundColor Green
-        return $true
-    }
     Add-SetupLog -Message "[FAIL] $AppId"
     Write-Host "    [FAIL] $AppId (ExitCode: $LASTEXITCODE)" -ForegroundColor Red
     return $false

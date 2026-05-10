@@ -274,11 +274,64 @@ if (Test-Path $lazyVimPlugins) {
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "  WINGET UPGRADE ALL" -ForegroundColor Cyan
+Write-Host "  INSTALL CDX (Rust CLI)" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "[INFO] Upgrading all winget packages..." -ForegroundColor Yellow
-winget upgrade --all --silent --accept-package-agreements --accept-source-agreements 2>&1 | ForEach-Object { Write-Host "  $_" }
-Write-Host "[OK] winget upgrades complete" -ForegroundColor Green
+$repoUrl = "https://github.com/Sovengar/cdx.git"
+$projectDir = "$env:TEMP\cdx-rs-build"
+$binDir = "$env:USERPROFILE\.local\bin"
+$binPath = "$binDir\cdx.exe"
+
+New-Item -ItemType Directory -Path $binDir -Force -ErrorAction SilentlyContinue | Out-Null
+
+Write-Host "[cdx] Cloning repo..." -ForegroundColor Cyan
+Remove-Item -LiteralPath $projectDir -Recurse -Force -ErrorAction SilentlyContinue
+git clone $repoUrl $projectDir 2>$null
+
+if (-not (Test-Path "$projectDir\Cargo.toml")) {
+    Write-Host "[cdx] Failed to clone repo" -ForegroundColor Red
+} else {
+    $hasRust = Get-Command rustc -ErrorAction SilentlyContinue
+    if (-not $hasRust) {
+        Write-Host "[cdx] Rust not found, installing via rustup..." -ForegroundColor Yellow
+        $rustupUrl = "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe"
+        $rustupPath = "$env:TEMP\rustup-init.exe"
+        Invoke-WebRequest -Uri $rustupUrl -OutFile $rustupPath
+        & $rustupPath -y
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
+    }
+
+    Push-Location $projectDir
+    Write-Host "[cdx] Building release..." -ForegroundColor Cyan
+    cargo build --release
+    $buildOk = $LASTEXITCODE -eq 0
+    Pop-Location
+
+    if ($buildOk) {
+        $retries = 5
+        do {
+            try {
+                Copy-Item -LiteralPath "$projectDir\target\release\cdx-rs.exe" -Destination $binPath -Force -ErrorAction Stop
+                $copied = $true
+            } catch {
+                $copied = $false
+                $retries--
+                if ($retries -gt 0) {
+                    Write-Host "[cdx] Binary in use, retrying in 2s..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 2
+                }
+            }
+        } while (-not $copied -and $retries -gt 0)
+        if ($copied) {
+            Write-Host "[cdx] Installed to $binPath" -ForegroundColor Green
+        } else {
+            Write-Host "[cdx] Could not copy binary (in use). Close cdx and re-run." -ForegroundColor Red
+        }
+    } else {
+        Write-Host "[cdx] Build failed" -ForegroundColor Red
+    }
+    Remove-Item -LiteralPath $projectDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan

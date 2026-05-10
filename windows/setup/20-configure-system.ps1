@@ -41,6 +41,11 @@ $wingetTools = @{
     'glab.exe'     = "$env:LOCALAPPDATA\Programs\glab\glab.exe"
 }
 
+$cdxTarget = "$localBin\cdx.exe"
+if (Test-Path $cdxTarget) {
+    Add-Link -Name "cdx.exe" -Target $cdxTarget
+}
+
 # opencode: no es un tool gestionado por mise (es un global de bun),
 # asi que mise no crea shim para el. Necesitamos un wrapper en $localBin.
 $opencodeTarget = "$env:USERPROFILE\.cache\.bun\bin\opencode.exe"
