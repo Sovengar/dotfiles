@@ -279,7 +279,7 @@ Write-Host "===============================================" -ForegroundColor Cy
 $repoUrl = "https://github.com/Sovengar/cdx.git"
 $projectDir = "$env:TEMP\cdx-rs-build"
 $binDir = "$env:USERPROFILE\.local\bin"
-$binPath = "$binDir\cdx.exe"
+$binPath = "$binDir\cdx-rs.exe"
 
 New-Item -ItemType Directory -Path $binDir -Force -ErrorAction SilentlyContinue | Out-Null
 

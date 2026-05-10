@@ -38,10 +38,10 @@ if (Test-Path $linuxAliases) { . $linuxAliases }
 #============================
 # cdx
 #============================
-$cdxBin = "$HOME\.local\bin\cdx.exe"
+$cdxBin = "$HOME\.local\bin\cdx-rs.exe"
 function cdx {
     if (-not (Test-Path $cdxBin)) {
-        Write-Host "[!] cdx.exe not found at $cdxBin" -ForegroundColor Red
+        Write-Host "[!] cdx-rs.exe not found at $cdxBin" -ForegroundColor Red
         Write-Host "    Build: cd ~/dev/cdx-rs; cargo build --release" -ForegroundColor DarkGray
         return
     }
