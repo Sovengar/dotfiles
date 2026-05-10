@@ -1,5 +1,5 @@
 local wezterm = require "wezterm"
-local icons = require "icons"
+local icons = require "appearance.icons"
 
 local M = {}
 

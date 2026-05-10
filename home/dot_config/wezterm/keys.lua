@@ -1,33 +1,3 @@
--- ===================================================
--- Leader Key:
--- The leader key is set to ALT + q.
--- With a timeout of 2000 milliseconds (2 seconds).
-
--- Keybindings:
--- 1. Tab Management:
---    - LEADER + enter: Create a new tab in the current pane's domain.
---    - LEADER + return: Close the current pane (with confirmation).
---    - LEADER + <number>: Switch to a specific tab (1–9).
-
--- 2. Pane Splitting:
---    - LEADER + w: Split the current pane horizontally into two panes.
---    - LEADER + q: Split the current pane vertically into two panes.
-
--- 3. Pane Navigation:
---    - LEADER + LeftArrow: Move to the pane on the left.
---    - LEADER + DownArrow: Move to the pane below.
---    - LEADER + UpArrow: Move to the pane above.
---    - LEADER + RightArrow: Move to the pane on the right.
-
--- 4. Pane Resizing:
---    - LEADER + : Increase the pane size to the left by 5 units.
---    - LEADER + : Increase the pane size to the right by 5 units.
---    - LEADER + : Increase the pane size downward by 5 units.
---    - LEADER + : Increase the pane size upward by 5 units.
-
--- 5. Status Line:
---    - The status line indicates when the leader key is active, displaying an ocean wave emoji (🌊).
-
 local wezterm = require "wezterm"
 local act = wezterm.action
 local quickterm = require "quickterm"
@@ -42,118 +12,82 @@ M.mouse_bindings = {
   { event = { Down = { streak = 1, button = "Middle" } }, mods = "SHIFT", action = act.CloseCurrentPane { confirm = false } },
 }
 
-M.setup = function(config)
+-- Single source of truth: { mods, key, action, desc }
+M.bindings = {
+  -- LEADER
+  { mods = "LEADER",        key = "Enter",        action = act.SpawnTab "CurrentPaneDomain",                                desc = "New tab" },
+  { mods = "LEADER",        key = "Backspace",    action = act.CloseCurrentPane { confirm = false },                       desc = "Close current pane" },
+  { mods = "LEADER",        key = "q",            action = act.SplitHorizontal { domain = "CurrentPaneDomain" },            desc = "Split pane horizontally" },
+  { mods = "LEADER",        key = "w",            action = act.SplitVertical { domain = "CurrentPaneDomain" },              desc = "Split pane vertically" },
+  { mods = "LEADER",        key = "LeftArrow",    action = act.ActivatePaneDirection "Left",                                desc = "Move to left pane" },
+  { mods = "LEADER",        key = "RightArrow",   action = act.ActivatePaneDirection "Right",                               desc = "Move to right pane" },
+  { mods = "LEADER",        key = "UpArrow",      action = act.ActivatePaneDirection "Up",                                  desc = "Move to pane above" },
+  { mods = "LEADER",        key = "DownArrow",    action = act.ActivatePaneDirection "Down",                                desc = "Move to pane below" },
+  { mods = "LEADER",        key = "=",            action = act.IncreaseFontSize,                                            desc = "Increase font size" },
+  { mods = "LEADER",        key = "-",            action = act.DecreaseFontSize,                                            desc = "Decrease font size" },
+  { mods = "LEADER",        key = "0",            action = act.ResetFontSize,                                               desc = "Reset font size" },
+  { mods = "LEADER",        key = "z",            action = act.TogglePaneZoomState,                                         desc = "Toggle pane zoom" },
+  { mods = "LEADER",        key = "f",            action = act.ToggleFullScreen,                                            desc = "Toggle full screen" },
+
+  -- LEADER+SHIFT
+  { mods = "LEADER|SHIFT",  key = "Enter",        action = wezterm.action_callback(function(win, pane) pane:move_to_new_tab() end), desc = "Move pane to new tab" },
+  { mods = "LEADER|SHIFT",  key = "Backspace",    action = act.QuitApplication,                                             desc = "Quit WezTerm" },
+  { mods = "LEADER|SHIFT",  key = "t",            action = act.EmitEvent('toggle-light-mode'),                              desc = "Toggle light/dark mode" },
+  { mods = "LEADER|SHIFT",  key = "LeftArrow",    action = act.MoveTabRelative(-1),                                         desc = "Move tab left" },
+  { mods = "LEADER|SHIFT",  key = "RightArrow",   action = act.MoveTabRelative(1),                                          desc = "Move tab right" },
+  { mods = "LEADER|SHIFT",  key = "UpArrow",      action = act.MoveTabRelative(-1),                                         desc = "Move tab left (alt)" },
+  { mods = "LEADER|SHIFT",  key = "DownArrow",    action = act.MoveTabRelative(1),                                          desc = "Move tab right (alt)" },
+  { mods = "LEADER|SHIFT",  key = "r",            action = act.ReloadConfiguration,                                         desc = "Reload configuration" },
+  { mods = "LEADER|SHIFT",  key = "[",            action = act.EmitEvent('opacity-dec'),                                    desc = "Decrease opacity" },
+  { mods = "LEADER|SHIFT",  key = "]",            action = act.EmitEvent('opacity-inc'),                                    desc = "Increase opacity" },
+  { mods = "LEADER|SHIFT",  key = "o",            action = act.EmitEvent('toggle-transparency'),                            desc = "Toggle transparency" },
+  { mods = "LEADER|SHIFT",  key = "n",            action = act.EmitEvent('cycle-wallpaper-folder'),                         desc = "Cycle wallpaper folder" },
+  { mods = "LEADER|SHIFT",  key = "b",            action = act.EmitEvent('cycle-wallpaper'),                                desc = "Cycle wallpaper image" },
+  { mods = "LEADER|SHIFT",  key = "v",            action = act.EmitEvent('clear-background'),                               desc = "Clear wallpaper background" },
+
+  -- LEADER+CTRL+SHIFT
+  { mods = "LEADER|CTRL|SHIFT", key = "LeftArrow",  action = act.AdjustPaneSize { "Left", 5 },                             desc = "Resize pane left" },
+  { mods = "LEADER|CTRL|SHIFT", key = "RightArrow", action = act.AdjustPaneSize { "Right", 5 },                            desc = "Resize pane right" },
+  { mods = "LEADER|CTRL|SHIFT", key = "UpArrow",    action = act.AdjustPaneSize { "Up", 5 },                               desc = "Resize pane up" },
+  { mods = "LEADER|CTRL|SHIFT", key = "DownArrow",  action = act.AdjustPaneSize { "Down", 5 },                             desc = "Resize pane down" },
+
+  -- CTRL+SHIFT
+  { mods = "CTRL|SHIFT",    key = "c",            action = act.CopyTo("ClipboardAndPrimarySelection"),                      desc = "Copy to clipboard" },
+  { mods = "CTRL|SHIFT",    key = "v",            action = act.PasteFrom("Clipboard"),                                      desc = "Paste from clipboard" },
+  { mods = "CTRL|SHIFT",    key = "t",            action = wezterm.action_callback(function(win, pane) quickterm.toggle(win, pane) end), desc = "Toggle quickterm" },
+
+  -- Tab switching (LEADER + 1-9)
+  { mods = "LEADER", key = "1", action = act.ActivateTab(0), desc = "Switch to tab 1" },
+  { mods = "LEADER", key = "2", action = act.ActivateTab(1), desc = "Switch to tab 2" },
+  { mods = "LEADER", key = "3", action = act.ActivateTab(2), desc = "Switch to tab 3" },
+  { mods = "LEADER", key = "4", action = act.ActivateTab(3), desc = "Switch to tab 4" },
+  { mods = "LEADER", key = "5", action = act.ActivateTab(4), desc = "Switch to tab 5" },
+  { mods = "LEADER", key = "6", action = act.ActivateTab(5), desc = "Switch to tab 6" },
+  { mods = "LEADER", key = "7", action = act.ActivateTab(6), desc = "Switch to tab 7" },
+  { mods = "LEADER", key = "8", action = act.ActivateTab(7), desc = "Switch to tab 8" },
+  { mods = "LEADER", key = "9", action = act.ActivateTab(8), desc = "Switch to tab 9" },
+}
+
+function M.setup(config)
   config.keys = {}
   config.leader = M.leader
   config.mouse_bindings = M.mouse_bindings
-
-  -- LEADER bindings
-  for _, v in ipairs({
-    { "Enter", act.SpawnTab "CurrentPaneDomain" },
-    { "Backspace", act.CloseCurrentPane { confirm = false } },
-    { "q", act.SplitHorizontal { domain = "CurrentPaneDomain" } },
-    { "w", act.SplitVertical { domain = "CurrentPaneDomain" } },
-    { "LeftArrow", act.ActivatePaneDirection "Left" },
-    { "RightArrow", act.ActivatePaneDirection "Right" },
-    { "UpArrow", act.ActivatePaneDirection "Up" },
-    { "DownArrow", act.ActivatePaneDirection "Down" },
-    { "=", act.IncreaseFontSize },
-    { "-", act.DecreaseFontSize },
-    { "0", act.ResetFontSize },
-    { "z", act.TogglePaneZoomState },
-    { "f", act.ToggleFullScreen },
-  }) do
-    table.insert(config.keys, { mods = "LEADER", key = v[1], action = v[2] })
+  for _, b in ipairs(M.bindings) do
+    table.insert(config.keys, { mods = b.mods, key = b.key, action = b.action })
   end
-
-  --   {"LeftArrow", act.AdjustPaneSize { "Left", 5 }},
-  --   {"RightArrow", act.AdjustPaneSize { "Right", 5 }},
-  --   {"UpArrow", act.AdjustPaneSize { "Up", 5 }},
-  --   {"DownArrow", act.AdjustPaneSize { "Down", 5 }},
-  --   {"z", act.TogglePaneZoomState},
-  --   {"=", act.PaneSelect{mode='SwapWithActive'}},
-
-  -- LEADER+SHIFT bindings
-  for _, v in ipairs({
-    { "Enter", wezterm.action_callback(function(win, pane)
-        pane:move_to_new_tab()
-      end) },
-    { "Backspace", act.QuitApplication },
-    --{ "Backspace", act.CloseCurrentTab { confirm = false } },
-
-  }) do
-    table.insert(config.keys, { mods = "LEADER|SHIFT", key = v[1], action = v[2] })
-  end
-
-  -- CTRL+SHIFT bindings
-  for _, v in ipairs({
-    { "c", act.CopyTo("ClipboardAndPrimarySelection") },
-    { "v", act.PasteFrom("Clipboard") },
-    { "t", wezterm.action_callback(function(win, pane)
-      quickterm.toggle(win, pane)
-    end)},
-  }) do
-    table.insert(config.keys, { mods = "CTRL|SHIFT", key = v[1], action = v[2] })
-  end
-
-  -- CTRL+SHIFT+ALT: move tabs
-  for _, v in ipairs({
-    { "LeftArrow", act.MoveTabRelative(-1) },
-    { "RightArrow", act.MoveTabRelative(1) },
-  }) do
-    table.insert(config.keys, { mods = "CTRL|SHIFT|ALT", key = v[1], action = v[2] })
-  end
-
-  -- Tab switching (LEADER + 1-9)
-  for i = 1, 9 do
-    table.insert(config.keys, { key = tostring(i), mods = "LEADER", action = act.ActivateTab(i - 1) })
-  end
-
-  --table.insert(config.keys, { key = 'r', mods = 'CTRL|SHIFT', action = act.ReloadConfiguration })
-
 end
 
--- -- WSL new tab (SpawnTab with domain)
--- if first_wsl_name then
---   table.insert(config.keys, {
---     key = 'w', mods = 'CTRL|ALT',
---     action = act.SpawnTab { DomainName = first_wsl_name },
---   })
--- else
---   table.insert(config.keys, {
---     key = 'w', mods = 'CTRL|ALT',
---     action = act.SpawnCommandInNewTab { args = { 'wsl.exe' } },
---   })
--- end
-
--- -- PowerShell new tab in Windows domain (no vanish)
--- if has_pwsh then
---   table.insert(config.keys, {
---     key = 'p', mods = 'CTRL|ALT',
---     action = act.SpawnCommandInNewTab {
---       domain = { DomainName = "local" },
---       args = { 'pwsh.exe', '-NoLogo' },
---     },
---   })
--- elseif has_powershell then
---   table.insert(config.keys, {
---     key = 'p', mods = 'CTRL|ALT',
---     action = act.SpawnCommandInNewTab {
---       domain = { DomainName = "local" },
---       args = { 'powershell.exe', '-NoLogo' },
---     },
---   })
--- end
-
--- -- cmd new tab in Windows domain (no vanish)
--- if has_cmd then
---   table.insert(config.keys, {
---     key = 'c', mods = 'CTRL|ALT',
---     action = act.SpawnCommandInNewTab {
---       domain = { DomainName = "local" },
---       args = { 'cmd.exe' },
---     },
---   })
--- end
+wezterm.on('augment-command-palette', function()
+  local entries = {}
+  for _, b in ipairs(M.bindings) do
+    local mods_display = b.mods:gsub("LEADER", "ALT+q")
+    table.insert(entries, {
+      brief = string.format("%-24s %s", mods_display, b.desc),
+      icon = "md_keyboard",
+      action = wezterm.action_callback(function() end),
+    })
+  end
+  return entries
+end)
 
 return M
