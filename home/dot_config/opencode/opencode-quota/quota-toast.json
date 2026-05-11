@@ -1,0 +1,14 @@
+{
+  "enableToast": false,
+  "enabledProviders": ["openai", "opencode-go"],
+  "formatStyle": "allWindows",
+  "percentDisplayMode": "used",
+  "tuiSidebarPanel": {
+    "enabled": true
+  },
+  "tuiCompactStatus": {
+    "enabled": true,
+    "homeBottom": true,
+    "sessionPrompt": false
+  }
+}
