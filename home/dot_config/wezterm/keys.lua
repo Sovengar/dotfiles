@@ -44,6 +44,7 @@ M.bindings = {
   { mods = "LEADER|SHIFT",  key = "n",            action = act.EmitEvent('cycle-wallpaper-folder'),                         desc = "Cycle wallpaper folder" },
   { mods = "LEADER|SHIFT",  key = "b",            action = act.EmitEvent('cycle-wallpaper'),                                desc = "Cycle wallpaper image" },
   { mods = "LEADER|SHIFT",  key = "v",            action = act.EmitEvent('clear-background'),                               desc = "Clear wallpaper background" },
+  { mods = "LEADER|SHIFT",  key = "x",            action = act.EmitEvent('no-wallpaper'),                                  desc = "No wallpaper (solid background)" },
 
   -- LEADER+CTRL+SHIFT
   { mods = "LEADER|CTRL|SHIFT", key = "LeftArrow",  action = act.AdjustPaneSize { "Left", 5 },                             desc = "Resize pane left" },

@@ -43,7 +43,7 @@ status.setup(theme.colors)
 appearance.setup_wallpaper(config, theme.colors)
 
 -- Dynamic modules
-wallpaper.setup(config, global)
+wallpaper.setup(config, global, theme.colors)
 global.pre_toggle_opacity = config.window_background_opacity or 0.95
 opacity.setup(global)
 lightmode.setup(global)

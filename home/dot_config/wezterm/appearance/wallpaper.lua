@@ -1,4 +1,5 @@
 local wezterm = require "wezterm"
+local appearance = require "appearance"
 
 local M = {}
 local WALLPAPER_DIR = (wezterm.config_dir):gsub("\\", "/") .. '/appearance/wallpapers'
@@ -126,7 +127,19 @@ local function cycle_wallpaper(g, window)
   wezterm.log_info("wallpaper: next selected=" .. g.selected_wallpaper)
 end
 
-function M.setup(config, g)
+local function apply_gradient_background(window, colors)
+  local gradient_config = {}
+  appearance.setup_gradient(gradient_config, colors)
+
+  local overrides = window:get_config_overrides() or {}
+  overrides.background = gradient_config.background
+  overrides.window_background_opacity = gradient_config.window_background_opacity
+  overrides.win32_system_backdrop = gradient_config.win32_system_backdrop
+  overrides.win32_acrylic_accent_color = nil
+  window:set_config_overrides(overrides)
+end
+
+function M.setup(config, g, colors)
   wezterm.log_info("wallpaper: M.setup called, config_dir=" .. (wezterm.config_dir or "nil"))
 
   g.wallpapers = g.wallpapers or {}
@@ -152,6 +165,11 @@ function M.setup(config, g)
     local overrides = window:get_config_overrides() or {}
     overrides.background = nil
     window:set_config_overrides(overrides)
+  end)
+
+  wezterm.on('no-wallpaper', function(window, _)
+    wezterm.log_info("wallpaper: event 'no-wallpaper' fired")
+    apply_gradient_background(window, colors)
   end)
 
   -- Load immediately and apply first wallpaper on startup
