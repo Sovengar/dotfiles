@@ -50,21 +50,6 @@ When user's prompt is NOT in English:
 2. **Respond in user's language** - match their communication
 3. **Code comments/variables** remain in English
 
-## Session Handling
-
-After each agent run or session :
-
-1. Export the session for traceability:
-   opencode export
-
-2. Save a summary in:
-   docs/agent-sessions/<date>-session.md
-
-3. Include:
-   - goal
-   - files changed
-   - commands run
-
 <!-- gentle-ai:engram-protocol -->
 ## Engram Persistent Memory — Protocol
 
