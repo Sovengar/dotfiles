@@ -2,34 +2,66 @@
 
 Gestionados con [chezmoi](https://www.chezmoi.io).
 
-Dos flujos independientes:
+Dos flujos independientes por SO:
 
-| Flujo | ¿Cuándo? | ¿Cómo? |
-|-------|----------|--------|
-| **Dotfiles** `(1)` | Cualquier máquina (diario) | `chezmoi apply` |
-| **Formateo** `(2)` | Máquina nueva o actualizar paquetes | `.\windows\setup\run-all.ps1` |
+| Flujo | SO | ¿Cuándo? | ¿Cómo? |
+|-------|----|----------|--------|
+| **Dotfiles** `(1)` | Linux / Windows | Cualquier máquina (diario) | `chezmoi apply` |
+| **Formateo Linux** `(2a)` | Linux | Máquina nueva | `curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/linux/setup/install.sh \| bash` |
+| **Formateo Windows** `(2b)` | Windows | Máquina nueva o actualizar paquetes | `.\windows\setup\run-all.ps1` |
 
 ---
 
 ## (1) Flujo Dotfiles — máquina ya configurada
 
-```powershell
+```bash
 chezmoi apply
 ```
 
-Aplica **solo dotfiles** (configs de shell, wezterm, lazygit, opencode, starship, git, etc.) y scripts ligeros. 
+Aplica **solo dotfiles** (configs de shell, wezterm, lazygit, opencode, starship, git, etc.) y scripts ligeros.
 Rápido, predecible, sin instalación de apps.
 
 ### Para mantener actualizado
 
-```powershell
+```bash
 chezmoi update
 # = git pull + chezmoi apply
 ```
 
 ---
 
-## (2) Flujo Formateo — máquina nueva (o actualización)
+## (2a) Flujo Formateo — Linux (máquina nueva)
+
+Script bash que instala dependencias y aplica dotfiles:
+
+```bash
+curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/linux/setup/install.sh | bash
+```
+
+O descargar y ejecutar localmente:
+
+```bash
+# 1. Dependencias
+sudo apt update && sudo apt install -y git curl          # Debian/Ubuntu
+# sudo pacman -Sy --noconfirm git curl                   # Arch
+# sudo dnf install -y git curl                           # Fedora
+
+# 2. Chezmoi + aplicar dotfiles
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply https://github.com/Sovengar/dotfiles
+```
+
+El script `install.sh` hace:
+1. Instala `git` si no está presente (detecta apt/pacman/dnf)
+2. Instala `chezmoi` via `get.chezmoi.io`
+3. Ejecuta `chezmoi init --apply` con el repo
+4. Configura variables XDG (vía `linux/setup/00-env-vars.sh`)
+
+> **Nota:** Los scripts de Linux están en `linux/setup/` y son bash.  
+> Los scripts heredados están en `linux/old/`.
+
+---
+
+## (2b) Flujo Formateo — Windows (máquina nueva o actualización)
 
 `run-all.ps1` es **idempotente**: puedes ejecutarlo en máquina nueva (instala todo)
 o en máquina ya configurada (actualiza lo que falte). Cada sub-script verifica
@@ -45,7 +77,7 @@ winget install --id twpayne.chezmoi -e --source winget --silent
 # 2. Clone config
 chezmoi init https://github.com/Sovengar/dotfiles
 
-# 3 (Windows). Allow script execution 
+# 3. Allow script execution 
 Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 
 # 4. WSL + prerequisitos (virtualización, Ubuntu, crear usuario Linux)
@@ -86,8 +118,14 @@ dotfiles/
 │   ├── dot_config/               ← Configs en ~/.config (wezterm, lazygit, etc.)
 │   └── Documents/                ← PowerShell profile, PowerToys backup
 │
-├── windows/
-│   ├── setup/                    ← TODO: scripts standalone, NO chezmoi
+├── linux/                        ← Scripts para Linux (bash)
+│   ├── setup/
+│   │   ├── install.sh            ← Bootstrap: git + chezmoi + apply
+│   │   └── 00-env-vars.sh        ← Variables XDG
+│   └── old/                      ← Dotfiles heredados (pre-chezmoi)
+│
+├── windows/                      ← Scripts para Windows (PowerShell)
+│   ├── setup/
 │   │   ├── 00-env-vars.ps1
 │   │   ├── 01-wsl-setup.ps1
 │   │   ├── 02-enable-symlinks.ps1
@@ -104,6 +142,7 @@ dotfiles/
 │   │   ├── personal/             ← Scripts de máquina personal (con prompt)
 │   │   │   └── ...
 │   │   └── run-all.ps1           ← Orquestador
+│   └── unmanaged/                ← Archivos no gestionados por chezmoi
 │
 ├── docs/                         ← Documentación adicional
 ├── README.md
@@ -112,12 +151,12 @@ dotfiles/
 
 ## Arquitectura: separación de concerns
 
-| Capa | Mecanismo | Frecuencia | Qué hace |
-|------|-----------|-----------|----------|
-| **Dotfiles** | `chezmoi apply` | Diario | PowerShell profile, WezTerm, Lazygit, OpenCode, Starship, Git config |
-| **Scripts ligeros** | `run_onchange_` via chezmoi | Cuando cambian | Registry context menus, dev shortcuts, startup |
-| **App installation** | `windows/setup/*.ps1` manual | Solo post-formateo | winget, mise, npm/bun/go globals, manual downloads |
-| **System config** | `windows/setup/*.ps1` manual | Solo post-formateo | PATH, symlinks, env vars, SSH |
+| Capa | Mecanismo | Frecuencia | Linux | Windows |
+|------|-----------|-----------|-------|---------|
+| **Dotfiles** | `chezmoi apply` | Diario | Shell config, WezTerm, Lazygit, OpenCode, Starship, Git config | PowerShell profile, WezTerm, Lazygit, OpenCode, Starship, Git config |
+| **Scripts ligeros** | `run_onchange_` via chezmoi | Cuando cambian | Hooks post-actualización | Registry context menus, dev shortcuts, startup |
+| **App installation** | Script manual | Solo post-formateo | `linux/setup/install.sh` (apt/pacman/dnf + curl) | `windows/setup/10-install-packages.ps1` (winget + manual) |
+| **System config** | Script manual | Solo post-formateo | XDG env vars | PATH, symlinks, registry, SSH, Docker |
 
 ## Paquetes declarativos
 
@@ -149,4 +188,11 @@ Tras refrescar OAuth (`opencode login`), copia los nuevos tokens a `env.toml`.
 
 ## Requisitos
 
+### Linux
+- Gestor de paquetes (apt, pacman, o dnf)
+- `curl` instalado
+
+### Windows
 - OneDrive sincronizado (para env.toml)
+- PowerShell 5.1+
+- winget instalado
