@@ -1,0 +1,8 @@
+# Setup all.sh — complex multi-step setups (icons, launchers, desktop entries, keybinds)
+
+_PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+run_logged "$_PHASE_DIR/00-gemini-app.sh"
+run_logged "$_PHASE_DIR/01-lazygit-scratchpad.sh"
+run_logged "$_PHASE_DIR/01-tui-generator.sh"
+run_logged "$_PHASE_DIR/02-lazydocker-tui.sh"

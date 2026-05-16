@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Gemini
+Comment=Google Gemini AI - Floating Web App
+Exec=pypr toggle gemini
+Icon=gemini
+Type=Application
+Categories=Network;WebBrowser;
+Terminal=false
+StartupWMClass=firefox
+Keywords=gemini;ai;google;

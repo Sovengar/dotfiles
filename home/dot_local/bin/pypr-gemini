@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="pypr-gemini"
+profile_root="${HOME}/.mozilla/firefox"
+
+if ! grep -q "Name=${profile}" "${profile_root}/profiles.ini" 2>/dev/null; then
+  firefox -CreateProfile "${profile}" >/dev/null 2>&1 || true
+fi
+
+exec firefox --no-remote -P "${profile}" --new-window "https://gemini.google.com"

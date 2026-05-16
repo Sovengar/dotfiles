@@ -6,8 +6,12 @@
 [user]
 	name = Sovengar
 	email = {{ .email }}
+[init]
+	defaultBranch = main
 [core]
 	editor = code --wait
+	excludesfile = ~/.gitignore_global
+	attributesfile = ~/.gitattributes_global
 {{ if eq .chezmoi.hostname "NTTD-1H8613110L" -}}
 [credential "https://umane.emeal.nttdata.com"]
 	provider = generic

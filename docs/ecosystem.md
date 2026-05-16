@@ -6,29 +6,8 @@
 
 | Tool | What |
 |---|---|
-| **[cdx](docs/cdx.md)** | CD with fzf + zoxide + rg |
-| **[zoxide](https://github.com/ajeetdsouza/zoxide)** | Smart `cd` that learns |
-| **[fzf](https://github.com/junegunn/fzf)** | Fuzzy finder (Ctrl+T, Ctrl+R, `**<Tab>`) |
-| **[ripgrep](https://github.com/BurntSushi/ripgrep)** | Ultra-fast text search |
-| **[fd](https://github.com/sharkdp/fd)** | Fast file search (replaces `find`) |
-| **[broot](https://dystroy.org/broot)** | Tree explorer + fuzzy |
-
-### File Viewing & Diff
-
-| Tool | What |
-|---|---|
-| **[bat](https://github.com/sharkdp/bat)** | `cat` with syntax highlighting |
-| **[eza](https://github.com/eza-community/eza)** | `ls` replacement with icons, colors, tree |
-| **[pastel](https://github.com/sharkdp/pastel)** | Color manipulation CLI |
-
-### Dev Tools
-
-| Tool | What |
-|---|---|
-| **[opencode](https://opencode.ai)** | AI coding agent — plans, codes, reviews |
-| **opencode mobile** | [Mobile setup guide](https://termly.dev/blog/opencode-mobile-setup-guide) |
-| **[mise](https://mise.jdx.dev)** | Runtime version manager (replaces nvm/pyenv/rbenv) |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
+| **[lazydocker](https://github.com/jesseduffield/lazydocker)** | Docker TUI |
 | **[gh](https://cli.github.com)** | GitHub CLI |
 | **gh dash** | Dashboard TUI for PRs/issues/CI — [Video guide](https://www.youtube.com/watch?v=Z-3dUHDnkEI) |
 | **gh copilot** ⚠️ | GH CLI AI assistant (NOT INSTALLED) |
@@ -39,12 +18,80 @@
 
 | Tool | What |
 |---|---|
+| **[kitty](https://sw.kovidgoyal.net/kitty/)** | GPU-accelerated terminal used by Hypr/pypr scratchpads |
 | **[wezterm](https://wezfurlong.org/wezterm)** | GPU-accelerated terminal (Lua config) |
 | **[starship](https://starship.rs)** | Cross-shell prompt |
+| **[bash-completion](https://github.com/scop/bash-completion)** | Programmable completions for Bash |
+| **[nushell](https://www.nushell.sh/)** | Structured shell |
+| **[fastfetch](https://github.com/fastfetch-cli/fastfetch)** | System information fetch tool |
 | **[Neovim](https://neovim.io) + LazyVim** | Modal editor |
 | **[bottom](https://github.com/ClementTsang/bottom)** | System monitor TUI (`btm`) |
+| **[gum](https://github.com/charmbracelet/gum)** | TUI dialogs/forms for scripts |
+| **[tui-generator](https://github.com/basecamp/omarchy/blob/dev/bin/tui-generator)** | Script to create TUI desktop entries (name, command, tile/float, icon) |
 | **[yazi](https://yazi-rs.github.io)** | Terminal file manager with previews |
+| **[broot](https://dystroy.org/broot/)** | Tree navigator |
+| **[hyperfine](https://github.com/sharkdp/hyperfine)** | Command benchmarking |
+| **[pastel](https://github.com/sharkdp/pastel)** | Color CLI |
+| **[jj](https://github.com/jj-vcs/jj)** | VCS CLI |
+| **[jq](https://jqlang.github.io/jq/)** | JSON processor |
+| **[hurl](https://hurl.dev/)** | HTTP test CLI |
 | **[LinuxAliases.ps1](https://github.com/Sovengar/dotfiles/blob/master/home/Documents/PowerShell/LinuxAliases.ps1)** | Linux muscle memory in PS (`ls -la`, `grep`, `touch`, etc.) |
+
+### Fonts
+
+| Tool | What |
+|---|---|
+| **JetBrainsMono Nerd Font** | Nerd Font used by terminals/editors |
+
+### Runtimes & Environments
+
+| Tool | What |
+|---|---|
+| **[mise](https://mise.jdx.dev/)** | Runtime/version manager |
+| **Java / OpenJDK** | JVM toolchain |
+| **Node.js + npm** | JavaScript runtime and package manager |
+| **Go** | Go runtime/toolchain |
+| **Rust + Cargo** | Rust runtime/toolchain |
+
+### Agents & IDEs
+
+| Tool | What |
+|---|---|
+| **[opencode](https://opencode.ai/)** | AI coding agent |
+| **[Engram](https://github.com/Gentleman-Programming/engram)** | Memory layer / MCP integration for AI agents |
+| **[Gentleman Guardian Angel](https://github.com/Gentleman-Programming/gentleman-guardian-angel)** | Global Git hooks and code guardian (`gga`) |
+| **[Codex CLI](https://www.npmjs.com/package/@openai/codex)** | OpenAI coding agent CLI |
+| **Google Antigravity** | AI IDE/agent |
+| **Visual Studio Code** | Editor |
+| **IntelliJ IDEA** | JetBrains IDE |
+
+### Desktop & Dev Apps
+
+| Tool | What |
+|---|---|
+| **Bruno GUI** | API client GUI |
+| **Beekeeper Studio** | Database GUI |
+| **DBeaver** | Database GUI |
+| **Podman + Podman Desktop** | Container CLI and GUI |
+| **JMeter** | Load testing |
+| **SoapUI** | SOAP/API testing |
+| **JD-GUI** | Java decompiler GUI |
+| **VisualVM** | JVM profiling/monitoring |
+| **Datree** | Kubernetes policy CLI |
+| **[Handy](https://github.com/cjpais/Handy)** | Offline speech-to-text app |
+| **[WebCord](https://github.com/SpacingBat3/WebCord)** | Discord web client wrapper |
+| **[OBS Studio](https://obsproject.com/)** | Recording and streaming studio |
+| **Steam** | Game launcher |
+
+### Desktop System
+
+| Tool | What |
+|---|---|
+| **PipeWire + WirePlumber** | Audio stack |
+| **NetworkManager** | Network management service and tray applet |
+| **BlueZ + Blueman** | Bluetooth stack and GUI |
+| **grim + slurp + satty + hyprpicker** | Wayland screenshot and color picker tools |
+| **cliphist + wl-clip-persist + wl-clipboard** | Wayland clipboard history/persistence |
 
 ### Node.js Utilities
 
@@ -61,6 +108,8 @@
 | Tool | What |
 |---|---|
 | **[chezmoi](https://chezmoi.io)** | Dotfiles manager |
+| **[Git LFS](https://git-lfs.com/)** | Git extension for large files |
+| **[yay](https://github.com/Jguer/yay)** | AUR package manager/helper |
 | **[snip](https://github.com/anomalyco/snip)** | Synthesize verbose command output |
 
 ## Hierarchy
@@ -71,10 +120,13 @@ opencode (orchestration)
   ├── cdx (zoxide+rg+fzf) + fd + broot (nav)
   ├── mise → node/go/rust/... (runtimes)
   └── nvim + bat + eza + pastel (edit/view)
-wezterm + starship + yazi + bottom (shell)
+wezterm + starship + yazi + bottom + gum (shell)
+tui-generator (TUI desktop entries via app launcher)
 chezmoi (everything versioned)
 ```
 
 ## Installed status
 
 All tools installed except `gh copilot` (run `gh extension install github/gh-copilot`).
+
+Desktop TUIs installed: lazydocker and Gemini via pypr scratchpads. Add more terminal apps via `tui-generator`.

@@ -24,6 +24,12 @@
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1vepecca5hyhdn3v6muxqcedyr5y4c20ct8adw8gj06kzy4fu5gqs8hekev"
+
 [data]
     email = {{ $email | quote }}
     ssh_host = {{ $sshHost | quote }}

@@ -1,0 +1,34 @@
+[pyprland]
+plugins = ["scratchpads"]
+
+[pyprland.variables]
+term_with_class = "kitty --class"
+
+[scratchpads.console]
+animation = "fromTop"
+class = "console-dropdown"
+command = "[term_with_class] console-dropdown"
+max_size = "90% 100%"
+size = "75% 60%"
+
+[scratchpads.lazygit]
+animation = "fromTop"
+class = "pypr-lazygit"
+command = "pypr-lazygit-cwd"
+size = "80% 80%"
+lazy = true
+close_on_hide = true
+
+[scratchpads.lazydocker]
+animation = "fromTop"
+class = "pypr-lazydocker"
+command = "kitty --class pypr-lazydocker -e /home/linuxbrew/.linuxbrew/bin/lazydocker"
+size = "80% 80%"
+lazy = true
+
+[scratchpads.gemini]
+animation = "fromTop"
+class = "firefox"
+command = "pypr-gemini"
+size = "80% 90%"
+lazy = true

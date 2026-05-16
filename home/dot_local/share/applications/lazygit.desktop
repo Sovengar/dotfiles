@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=lazygit
+Comment=Git TUI
+Exec=pypr toggle lazygit
+Terminal=false
+Type=Application
+Icon=git
+StartupNotify=true

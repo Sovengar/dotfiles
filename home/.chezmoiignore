@@ -3,6 +3,8 @@
 # ================================================
 
 # Credentials and sensitive data
+.config/zsh/.zsh_history
+dot_config/zsh/private_dot_zsh_history
 
 # OneDrive managed separately (env.toml, .ssh, etc.)
 OneDrive/**
@@ -34,3 +36,28 @@ Documents/PowerToys/Backup/*.ptb
 
 # LazyVim lockfile - regenerated on install
 dot_config/nvim/lazy-lock.json
+
+{{- if ne .chezmoi.os "linux" }}
+# Linux-only desktop/app configs
+dot_config/Code - OSS/User/settings.json
+dot_config/dunst/**
+dot_config/fish/**
+dot_config/gh/**
+dot_config/gtk-3.0/**
+dot_config/symlink_gtk-4.0
+dot_config/keepassxc/**
+dot_config/hypr/**
+dot_config/kitty/**
+dot_config/pypr/**
+dot_config/rclone/**
+dot_config/rofi/**
+dot_config/starship/**
+dot_config/waybar/**
+dot_config/wlogout/**
+dot_config/xdg-terminals.list
+dot_config/private_user-dirs.dirs
+dot_local/bin/pypr-*
+dot_local/share/applications/gemini.desktop
+dot_local/share/applications/lazygit.desktop
+dot_local/share/applications/lazydocker.desktop
+{{- end }}

@@ -50,13 +50,21 @@ sudo apt update && sudo apt install -y git curl          # Debian/Ubuntu
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply https://github.com/Sovengar/dotfiles
 ```
 
-El script `install.sh` hace:
-1. Instala `git` si no está presente (detecta apt/pacman/dnf)
-2. Instala `chezmoi` via `get.chezmoi.io`
-3. Ejecuta `chezmoi init --apply` con el repo
-4. Configura variables XDG (vía `linux/setup/00-env-vars.sh`)
+El script `install.sh` orquesta 4 fases:
 
-> **Nota:** Los scripts de Linux están en `linux/setup/` y son bash.  
+1. **Preflight** — checks de sistema, XDG dirs, Linuxbrew
+2. **Packaging** — git, chezmoi, CLI tools, docker, dropbox, zsh+fish, KeePassXC, Zen Browser
+3. **Config** — shell por defecto, brew en PATH, teclado, autostarts, mounts, audio, pyprland
+4. **Post-install** — resumen + próximos pasos
+
+Los scripts individuales pueden ejecutarse por separado:
+
+```bash
+# Ejemplo: solo instalar shells
+bash ~/.local/share/chezmoi/linux/setup/packaging/30-shells.sh
+```
+
+> **Nota:** Detecta automáticamente apt/pacman/dnf/brew.  
 > Los scripts heredados están en `linux/old/`.
 
 ---
@@ -120,8 +128,12 @@ dotfiles/
 │
 ├── linux/                        ← Scripts para Linux (bash)
 │   ├── setup/
-│   │   ├── install.sh            ← Bootstrap: git + chezmoi + apply
-│   │   └── 00-env-vars.sh        ← Variables XDG
+│   │   ├── install.sh            ← Bootstrap: orquesta preflight → packaging → config → post-install
+│   │   ├── helpers/              ← logging, errores, guards, display
+│   │   ├── preflight/            ← system checks, XDG dirs, brew
+│   │   ├── packaging/            ← git, chezmoi, CLI tools, docker, dropbox, shells, keepassxc, zen
+│   │   ├── config/               ← shell default, PATH, teclado, autostarts, mounts, audio, pyprland
+│   │   └── post-install/         ← resumen final
 │   └── old/                      ← Dotfiles heredados (pre-chezmoi)
 │
 ├── windows/                      ← Scripts para Windows (PowerShell)
@@ -155,8 +167,8 @@ dotfiles/
 |------|-----------|-----------|-------|---------|
 | **Dotfiles** | `chezmoi apply` | Diario | Shell config, WezTerm, Lazygit, OpenCode, Starship, Git config | PowerShell profile, WezTerm, Lazygit, OpenCode, Starship, Git config |
 | **Scripts ligeros** | `run_onchange_` via chezmoi | Cuando cambian | Hooks post-actualización | Registry context menus, dev shortcuts, startup |
-| **App installation** | Script manual | Solo post-formateo | `linux/setup/install.sh` (apt/pacman/dnf + curl) | `windows/setup/10-install-packages.ps1` (winget + manual) |
-| **System config** | Script manual | Solo post-formateo | XDG env vars | PATH, symlinks, registry, SSH, Docker |
+| **App installation** | Script manual | Solo post-formateo | `linux/setup/install.sh` (fases: helpers→preflight→packaging→config→post-install) | `windows/setup/10-install-packages.ps1` (winget + manual) |
+| **System config** | Script manual | Solo post-formateo | XDG env vars, brew PATH, shells, mounts, autostarts | PATH, symlinks, registry, SSH, Docker |
 
 ## Paquetes declarativos
 
