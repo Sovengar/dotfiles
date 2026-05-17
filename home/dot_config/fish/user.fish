@@ -45,4 +45,4 @@ end
 set EDITOR code
 
 #  aurhelper 
-set aurhelper yay
+set aurhelper paru
