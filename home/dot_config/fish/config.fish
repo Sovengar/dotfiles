@@ -28,6 +28,7 @@ function cdx --wraps cdx-rs
         rm -f $result_file
         if test -n "$target" -a -d "$target"
             cd "$target"
+            command eza --icons --group-directories-first 2>/dev/null; or ls --color=auto
         end
     end
 end

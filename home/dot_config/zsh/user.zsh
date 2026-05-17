@@ -32,6 +32,7 @@ function cdx {
         rm -f "$result_file"
         if [[ -n "$target" && -d "$target" ]]; then
             builtin cd "$target"
+            command eza --icons --group-directories-first 2>/dev/null || ls --color=auto
         fi
     fi
 }
