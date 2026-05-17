@@ -8,6 +8,7 @@ fi
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 run_logged "$_PHASE_DIR/git.sh"
+run_logged "$_PHASE_DIR/git-flow.sh"
 run_logged "$_PHASE_DIR/chezmoi.sh"
 run_logged "$_PHASE_DIR/git-lfs.sh"
 run_logged "$_PHASE_DIR/git-worktree.sh"

@@ -7,6 +7,7 @@
 | Tool | What |
 |---|---|
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
+| **[git-flow](https://github.com/nvie/gitflow)** | Git branching workflow extension (`git-flow`) |
 | **[lazydocker](https://github.com/jesseduffield/lazydocker)** | Docker TUI |
 | **[gh](https://cli.github.com)** | GitHub CLI |
 | **gh dash** | Dashboard TUI for PRs/issues/CI — [Video guide](https://www.youtube.com/watch?v=Z-3dUHDnkEI) |
@@ -28,7 +29,7 @@
 | **[Neovim](https://neovim.io) + LazyVim** | Modal editor |
 | **[bottom](https://github.com/ClementTsang/bottom)** | System monitor TUI (`btm`) |
 | **[gum](https://github.com/charmbracelet/gum)** | TUI dialogs/forms for scripts |
-| **[tui-generator](https://github.com/basecamp/omarchy/blob/dev/bin/tui-generator)** | Script to create TUI desktop entries (name, command, tile/float, icon) |
+| **[tui-generator.sh](https://github.com/basecamp/omarchy/blob/dev/bin/tui-generator)** | Script to create TUI desktop entries (name, command, tile/float, icon) |
 | **[yazi](https://yazi-rs.github.io)** | Terminal file manager with previews |
 | **[broot](https://dystroy.org/broot/)** | Tree navigator |
 | **[hyperfine](https://github.com/sharkdp/hyperfine)** | Command benchmarking |
@@ -121,7 +122,7 @@ opencode (orchestration)
   ├── mise → node/go/rust/... (runtimes)
   └── nvim + bat + eza + pastel (edit/view)
 wezterm + starship + yazi + bottom + gum (shell)
-tui-generator (TUI desktop entries via app launcher)
+tui-generator.sh (TUI desktop entries via app launcher)
 chezmoi (everything versioned)
 ```
 
@@ -129,4 +130,4 @@ chezmoi (everything versioned)
 
 All tools installed except `gh copilot` (run `gh extension install github/gh-copilot`).
 
-Desktop TUIs installed: lazydocker and Gemini via pypr scratchpads. Add more terminal apps via `tui-generator`.
+Desktop TUIs installed: lazydocker and Gemini via pypr scratchpads. Add more terminal apps via `tui-generator.sh`.

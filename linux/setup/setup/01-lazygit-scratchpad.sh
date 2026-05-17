@@ -11,6 +11,8 @@ log "Setting up lazygit as pypr scratchpad..."
 PYPR_CONF="${HOME}/.config/hypr/pyprland.conf"
 KEYBIND_CONF="${HOME}/.config/hypr/keybindings.overrides.conf"
 TERM_CLASS="pypr-lazygit"
+DESKTOP_ENTRY="${HOME}/.local/share/applications/lazygit.desktop"
+LAUNCHER="${HOME}/.local/bin/pypr-lazygit-cwd"
 
 if ! _cmd_present pypr; then
   warn "pyprland not installed — skipping lazygit scratchpad"
@@ -21,6 +23,48 @@ if ! _cmd_present lazygit; then
   warn "lazygit not installed — skipping scratchpad"
   return
 fi
+
+mkdir -p "$(dirname "$DESKTOP_ENTRY")" "$(dirname "$LAUNCHER")"
+
+cat > "$LAUNCHER" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cwd="$HOME"
+pid="$(hyprctl activewindow -j 2>/dev/null | jq -r '.pid // empty' 2>/dev/null || true)"
+
+if [[ -n "$pid" && -r "/proc/$pid/cwd" ]]; then
+  current="$pid"
+  while true; do
+    mapfile -t children < <(pgrep -P "$current" 2>/dev/null || true)
+    ((${#children[@]} == 0)) && break
+    current="${children[-1]}"
+  done
+
+  if [[ -r "/proc/$current/cwd" ]]; then
+    cwd="$(readlink "/proc/$current/cwd" 2>/dev/null || printf '%s' "$HOME")"
+  fi
+fi
+
+exec kitty --class pypr-lazygit --working-directory "$cwd" -e lazygit -p "$cwd"
+EOF
+chmod +x "$LAUNCHER"
+success "lazygit pypr launcher configured"
+
+cat > "$DESKTOP_ENTRY" <<'EOF'
+[Desktop Entry]
+Version=1.0
+Name=lazygit
+Comment=Git TUI
+Exec=pypr toggle lazygit
+Terminal=false
+Type=Application
+Icon=git
+StartupNotify=true
+EOF
+chmod +x "$DESKTOP_ENTRY"
+update-desktop-database "${HOME}/.local/share/applications/" 2>/dev/null || true
+success "lazygit rofi entry configured"
 
 # pyprland.conf is managed by chezmoi.
 log "lazygit pypr scratchpad is managed by chezmoi"
@@ -37,4 +81,4 @@ else
   log "pypr daemon started"
 fi
 
-success "Lazygit scratchpad ready (SUPER+Shift+L)"
+success "Lazygit scratchpad ready (SUPER+G)"

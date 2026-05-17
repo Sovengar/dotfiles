@@ -8,17 +8,17 @@ fi
 
 log "Setting up tui-generator..."
 
-TUI_GENERATOR="${HOME}/.local/bin/tui-generator"
+TUI_GENERATOR="${HOME}/.local/bin/tui-generator.sh"
+DESKTOP_ENTRY="${HOME}/.local/share/applications/tui-generator.desktop"
+APPLICATIONS_DIR="${HOME}/.local/share/applications"
+ICON_DIR="${APPLICATIONS_DIR}/icons"
 
-if [[ -f "$TUI_GENERATOR" ]]; then
-  log "tui-generator already installed"
-else
-  mkdir -p "${HOME}/.local/bin" "${HOME}/.local/share/applications/icons"
+mkdir -p "${HOME}/.local/bin" "$ICON_DIR" "$APPLICATIONS_DIR"
 
-  cat > "$TUI_GENERATOR" <<'SCRIPT'
+cat > "$TUI_GENERATOR" <<'SCRIPT'
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 ICON_DIR="$HOME/.local/share/applications/icons"
 
@@ -89,6 +89,23 @@ if (( $# != 4 )); then
 fi
 SCRIPT
 
-  chmod +x "$TUI_GENERATOR"
-  success "tui-generator installed (creates entries for Super+A / rofi)"
-fi
+chmod +x "$TUI_GENERATOR"
+
+cat > "$DESKTOP_ENTRY" <<EOF
+[Desktop Entry]
+Version=1.0
+Name=TUI Generator
+Comment=Create TUI launchers for rofi
+Exec=xdg-terminal-exec --app-id=TUI.float -e ${TUI_GENERATOR}
+Terminal=false
+Type=Application
+Icon=utilities-terminal
+Categories=Utility;System;
+Keywords=tui;terminal;launcher;rofi;
+StartupNotify=true
+EOF
+
+chmod +x "$DESKTOP_ENTRY"
+update-desktop-database "$APPLICATIONS_DIR" 2>/dev/null || true
+
+success "tui-generator installed with rofi launcher"

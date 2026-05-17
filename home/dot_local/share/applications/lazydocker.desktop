@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Name=lazydocker
-Comment=Docker TUI
-Exec=pypr toggle lazydocker
-Terminal=false
-Type=Application
-Icon=/home/buble/.local/share/applications/icons/lazydocker.png
-StartupNotify=true

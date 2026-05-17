@@ -12,7 +12,7 @@ GEMINI_ICON_URL="https://ssl.gstatic.com/images/branding/product/2x/gemini_48dp.
 ICON_DIR="${HOME}/.local/share/icons/hicolor/48x48/apps"
 ICON_PATH="${ICON_DIR}/gemini.png"
 DESKTOP_ENTRY="${HOME}/.local/share/applications/gemini.desktop"
-LAUNCHER="${HOME}/.local/bin/gemini-app"
+LAUNCHER="${HOME}/.local/bin/pypr-gemini"
 PYPR_CONF="${HOME}/.config/hypr/pyprland.conf"
 KEYBIND_CONF="${HOME}/.config/hypr/keybindings.overrides.conf"
 
@@ -32,18 +32,23 @@ else
   fi
 fi
 
-# 2. Create launcher script
-log "Creating launcher script..."
-if [[ -f "$LAUNCHER" ]]; then
-  log "Launcher already exists"
-else
-  cat > "${LAUNCHER}" <<'EOF'
-#!/bin/bash
-exec pypr toggle gemini
-EOF
-  chmod +x "${LAUNCHER}"
-  success "Launcher created: ${LAUNCHER}"
+# 2. Create pypr launcher script
+log "Creating pypr launcher script..."
+cat > "${LAUNCHER}" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="pypr-gemini"
+profile_root="${HOME}/.mozilla/firefox"
+
+if ! grep -q "Name=${profile}" "${profile_root}/profiles.ini" 2>/dev/null; then
+  firefox -CreateProfile "${profile}" >/dev/null 2>&1 || true
 fi
+
+exec firefox --no-remote -P "${profile}" --new-window "https://gemini.google.com"
+EOF
+chmod +x "${LAUNCHER}"
+success "Launcher configured: ${LAUNCHER}"
 
 # 3. Create desktop entry
 log "Creating desktop entry..."

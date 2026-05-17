@@ -14,12 +14,15 @@ ICON_URL="https://raw.githubusercontent.com/docker/compose/main/logo.png"
 PYPR_CONF="${HOME}/.config/hypr/pyprland.conf"
 KEYBIND_CONF="${HOME}/.config/hypr/keybindings.overrides.conf"
 
-if [[ -f "$DESKTOP_ENTRY" ]]; then
-  log "lazydocker TUI already configured"
+mkdir -p "$ICON_DIR" "$(dirname "$DESKTOP_ENTRY")"
+
+if [[ -f "${ICON_DIR}/lazydocker.png" ]]; then
+  log "lazydocker icon already exists"
 else
-  mkdir -p "$ICON_DIR"
   curl -sLo "${ICON_DIR}/lazydocker.png" "$ICON_URL"
-  cat > "$DESKTOP_ENTRY" <<EOF
+fi
+
+cat > "$DESKTOP_ENTRY" <<EOF
 [Desktop Entry]
 Version=1.0
 Name=lazydocker
@@ -30,10 +33,9 @@ Type=Application
 Icon=${ICON_DIR}/lazydocker.png
 StartupNotify=true
 EOF
-  chmod +x "$DESKTOP_ENTRY"
-  update-desktop-database "${HOME}/.local/share/applications/" 2>/dev/null || true
-  success "lazydocker floating TUI created"
-fi
+chmod +x "$DESKTOP_ENTRY"
+update-desktop-database "${HOME}/.local/share/applications/" 2>/dev/null || true
+success "lazydocker rofi entry configured"
 
 log "lazydocker pypr scratchpad is managed by chezmoi"
 
