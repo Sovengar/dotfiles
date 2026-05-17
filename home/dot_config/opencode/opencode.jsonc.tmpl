@@ -1,7 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "C:\\Users\\buble\\.config\\opencode\\plugins\\shell-strategy\\shell_strategy.md"
+    {{- if eq .chezmoi.os "windows" }}
+    "{{ .chezmoi.homeDir }}\\.config\\opencode\\plugins\\shell-strategy\\shell_strategy.md"
+    {{- else }}
+    "{{ .chezmoi.homeDir }}/.config/opencode/plugins/shell-strategy/shell_strategy.md"
+    {{- end }}
   ],
   "plugin": [
     "@tarquinen/opencode-smart-title",
@@ -47,7 +51,7 @@
     },
     "engram": {
       "command": [
-        "C:\\Users\\buble\\AppData\\Local\\engram\\bin\\engram.exe",
+        "engram",
         "mcp",
         "--tools=agent"
       ],

@@ -18,24 +18,32 @@ if ! _cmd_present go; then
   exit 1
 fi
 
-src_dir="$HOME/src/engram"
-mkdir -p "$(dirname "$src_dir")"
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
 
-if [[ -d "$src_dir/.git" ]]; then
-  log "Updating Engram source..."
-  git -C "$src_dir" pull --ff-only
-else
-  git clone https://github.com/Gentleman-Programming/engram.git "$src_dir"
-fi
+git clone --depth 1 https://github.com/Gentleman-Programming/engram.git "$tmp_dir"
 
 (
-  cd "$src_dir"
+  cd "$tmp_dir"
   go install ./cmd/engram
 )
 
+go_bin="$(go env GOPATH)/bin"
+engram_bin="$go_bin/engram"
+local_bin="$HOME/.local/bin"
+target_bin="$local_bin/engram"
+
+if [[ ! -x "$engram_bin" ]]; then
+  err "Engram binary was not created at $engram_bin"
+  exit 1
+fi
+
+mkdir -p "$local_bin"
+mv -f "$engram_bin" "$target_bin"
+chmod +x "$target_bin"
+
 if _cmd_present engram; then
-  success "Engram installed"
+  success "Engram installed to $target_bin"
 else
-  go_bin="$(go env GOPATH)/bin"
-  warn "Engram installed to $go_bin, but it is not available in PATH"
+  warn "Engram installed to $target_bin, but ~/.local/bin is not available in PATH"
 fi
