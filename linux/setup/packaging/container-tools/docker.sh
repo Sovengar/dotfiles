@@ -8,13 +8,13 @@ fi
 
 log "Installing Docker..."
 
-detect_pkg_manager >/dev/null
-_ensure_sudo
-
 if _cmd_present docker; then
   success "docker already installed"
   return
 fi
+
+detect_pkg_manager >/dev/null
+_ensure_sudo
 
 case "$_pkg_manager" in
   apt)
