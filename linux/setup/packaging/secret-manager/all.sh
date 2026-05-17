@@ -1,4 +1,4 @@
-# GitHub CLI extensions all.sh
+# Secret manager all.sh
 
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,4 +7,5 @@ fi
 
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_PHASE_DIR/gh-dash.sh"
+run_logged "$_PHASE_DIR/keepassxc.sh"
+run_logged "$_PHASE_DIR/doppler.sh"
