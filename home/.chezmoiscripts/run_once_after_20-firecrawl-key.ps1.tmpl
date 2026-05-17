@@ -1,4 +1,6 @@
-﻿$ErrorActionPreference = "Continue"
+{{ if eq .chezmoi.os "windows" -}}
+#!/usr/bin/env pwsh
+$ErrorActionPreference = "Continue"
 
 $existingKey = [System.Environment]::GetEnvironmentVariable("FIRECRAWL_API_KEY", "User")
 if ($existingKey) {
@@ -49,3 +51,4 @@ Write-Host "  4. Si el error persiste: chezmoi state delete-bucket --bucket=scri
 Write-Host ""
 Write-Host "Si no tienes API key, registrate en https://www.firecrawl.dev" -ForegroundColor White
 Write-Host "=====================================================" -ForegroundColor Cyan
+{{ end -}}

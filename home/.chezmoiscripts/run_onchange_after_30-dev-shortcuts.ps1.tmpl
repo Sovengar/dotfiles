@@ -1,4 +1,6 @@
-﻿$ErrorActionPreference = "Continue"
+{{ if eq .chezmoi.os "windows" -}}
+#!/usr/bin/env pwsh
+$ErrorActionPreference = "Continue"
 $toolingPath = "$env:USERPROFILE\dev\tooling"
 New-Item -ItemType Directory -Path $toolingPath -Force | Out-Null
 
@@ -137,3 +139,4 @@ foreach ($name in $manualShortcutNames) {
 }
 
 Write-Host "Dev shortcuts: $created created, $skipped skipped" -ForegroundColor Green
+{{ end -}}
