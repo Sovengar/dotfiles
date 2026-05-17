@@ -39,4 +39,20 @@ run_phase() {
   source "$phase_dir/all.sh"
 }
 
+print_phase_summary() {
+  local label="${1:-Phase}"
+
+  if [[ $_RUN_TOTAL -eq 0 ]]; then
+    return
+  fi
+
+  echo ""
+  echo -e "${C_BLUE}${C_BOLD}══════════════════════════════════════════${C_RESET}"
+  echo -e "${C_BOLD}  ${label} complete${C_RESET}"
+  local succeeded=$((_RUN_TOTAL - _RUN_FAILED))
+  echo -e "  ${C_GREEN}${succeeded} succeeded${C_RESET}, ${C_RED}${_RUN_FAILED} failed${C_RESET} (${_RUN_TOTAL} total)"
+  echo -e "${C_BLUE}${C_BOLD}══════════════════════════════════════════${C_RESET}"
+  echo ""
+}
+
 fi

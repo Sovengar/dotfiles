@@ -7,6 +7,8 @@ fi
 
 _SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+reset_run_stats
+
 run_logged "$_SELF_DIR/fonts/all.sh"
 run_logged "$_SELF_DIR/terminal-emulators/all.sh"
 run_logged "$_SELF_DIR/runtimes/all.sh"
@@ -37,3 +39,5 @@ run_logged "$_SELF_DIR/screen-recording/all.sh"
 run_logged "$_SELF_DIR/social/all.sh"
 run_logged "$_SELF_DIR/dev-tools/all.sh"
 run_logged "$_SELF_DIR/gaming/all.sh"
+
+print_phase_summary "Packaging"
