@@ -1,4 +1,4 @@
-# Editors all.sh
+# Developer tools all.sh
 
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,5 +7,8 @@ fi
 
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_PHASE_DIR/neovim.sh"
-run_logged "$_PHASE_DIR/vscode.sh"
+run_logged "$_PHASE_DIR/snyk.sh"
+run_logged "$_PHASE_DIR/kill-port.sh"
+run_logged "$_PHASE_DIR/portless.sh"
+run_logged "$_PHASE_DIR/http-server.sh"
+run_logged "$_PHASE_DIR/pm2.sh"
