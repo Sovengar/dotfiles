@@ -31,6 +31,7 @@ cat > "$LAUNCHER" <<'EOF'
 set -euo pipefail
 
 cwd="$HOME"
+fallback_repo="$HOME/.local/share/chezmoi"
 pid="$(hyprctl activewindow -j 2>/dev/null | jq -r '.pid // empty' 2>/dev/null || true)"
 
 if [[ -n "$pid" && -r "/proc/$pid/cwd" ]]; then
@@ -44,6 +45,12 @@ if [[ -n "$pid" && -r "/proc/$pid/cwd" ]]; then
   if [[ -r "/proc/$current/cwd" ]]; then
     cwd="$(readlink "/proc/$current/cwd" 2>/dev/null || printf '%s' "$HOME")"
   fi
+fi
+
+if git_root="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null)"; then
+  cwd="$git_root"
+elif [[ -d "$fallback_repo/.git" ]]; then
+  cwd="$fallback_repo"
 fi
 
 exec kitty --class pypr-lazygit --working-directory "$cwd" -e lazygit -p "$cwd"
