@@ -5,7 +5,5 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   source "$SCRIPT_DIR/../../../helpers/all.sh"
 fi
 
-_PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-run_logged "$_PHASE_DIR/jd-gui.sh"
-run_logged "$_PHASE_DIR/visualvm.sh"
+run_logged "$(dirname "${BASH_SOURCE[0]}")/jd-gui.sh"
+run_logged "$(dirname "${BASH_SOURCE[0]}")/visualvm.sh"
