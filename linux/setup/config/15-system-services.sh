@@ -15,13 +15,19 @@ fi
 
 enable_service_if_present() {
   local service="$1"
-  if systemctl list-unit-files "$service" &>/dev/null; then
-    _ensure_sudo
-    sudo systemctl enable --now "$service"
-    success "$service enabled"
-  else
+  if ! systemctl list-unit-files "$service" &>/dev/null; then
     log "$service not found, skipping"
+    return
   fi
+
+  if systemctl is-active --quiet "$service" 2>/dev/null; then
+    log "$service already running"
+    return
+  fi
+
+  _ensure_sudo
+  sudo systemctl enable --now "$service"
+  success "$service enabled"
 }
 
 enable_service_if_present NetworkManager.service
