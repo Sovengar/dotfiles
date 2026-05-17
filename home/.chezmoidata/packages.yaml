@@ -147,6 +147,9 @@ packages:
 
   security:
     winget:
+      - KeePassXCTeam.KeePassXC
+      - FiloSottile.age
+      - Mozilla.SOPS
       - id: Malwarebytes.Malwarebytes
         interactive: true
 

@@ -1,8 +1,8 @@
-{{- $envFile := (joinPath (env "USERPROFILE") "OneDrive" "secrets" "env.toml") -}}
-{{- if stat $envFile -}}
-{{-   $cfg := fromToml (include $envFile) -}}
-{{-   $oc := index $cfg "opencode" | default dict -}}
-{{-   index $oc "config" | default "{}" -}}
+{{- $secretsPath := joinPath .chezmoi.sourceDir "secrets/dotfiles.sops.yaml" -}}
+{{- if stat $secretsPath -}}
+{{-   $secrets := secretJSON "sops" "--decrypt" "--output-type" "json" $secretsPath -}}
+{{-   $opencode := index $secrets "opencode" | default dict -}}
+{{-   index $opencode "config" | default "{}" -}}
 {{- else -}}
 {}
 {{- end -}}

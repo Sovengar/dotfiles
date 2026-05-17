@@ -1,3 +1,9 @@
+{{- $secrets := dict -}}
+{{- $secretsPath := joinPath .chezmoi.sourceDir "secrets/dotfiles.sops.yaml" -}}
+{{- if stat $secretsPath -}}
+{{-   $secrets = secretJSON "sops" "--decrypt" "--output-type" "json" $secretsPath -}}
+{{- end -}}
+{{- $git := index $secrets "git" | default dict -}}
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f
@@ -5,7 +11,7 @@
 	process = git-lfs filter-process
 [user]
 	name = Sovengar
-	email = {{ .email }}
+	email = {{ index $git "email" | default .email }}
 [init]
 	defaultBranch = main
 [core]

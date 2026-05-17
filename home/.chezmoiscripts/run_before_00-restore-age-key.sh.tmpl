@@ -1,0 +1,72 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+key_file="$HOME/.config/sops/age/keys.txt"
+database="${KEEPASS_DB:-$HOME/onedrive/BBDD.kdbx}"
+entry="${KEEPASS_AGE_ENTRY:-SO/chezmoi age identity}"
+
+log() { echo "[age-key] $*" >&2; }
+
+if [[ -s "$key_file" ]] && grep -q '^AGE-SECRET-KEY-' "$key_file"; then
+  log "age key already exists at $key_file"
+  chmod 600 "$key_file"
+  if ! command -v sops >/dev/null 2>&1; then
+    echo "[ERROR] sops is required to render chezmoi secret templates" >&2
+    exit 1
+  fi
+  log "sops found; continuing"
+  exit 0
+fi
+
+log "age key missing; restoring from KeePassXC"
+
+if ! command -v keepassxc-cli >/dev/null 2>&1; then
+  echo "[ERROR] keepassxc-cli is required to restore the chezmoi age key" >&2
+  exit 1
+fi
+log "keepassxc-cli found"
+
+if [[ ! -f "$database" ]]; then
+  echo "[ERROR] KeePassXC database not found: $database" >&2
+  exit 1
+fi
+log "KeePassXC database found: $database"
+log "KeePassXC entry: $entry"
+
+if [[ ! -r /dev/tty ]]; then
+  echo "[ERROR] cannot prompt for KeePassXC password: /dev/tty is not readable" >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$key_file")"
+tmp_file="$(mktemp)"
+trap 'rm -f "$tmp_file"' EXIT
+
+log "prompting for KeePassXC database password"
+read -r -s -p "KeePassXC database password: " db_password </dev/tty
+printf '\n' >/dev/tty
+
+log "reading age key from KeePassXC Notes"
+if ! printf '%s\n' "$db_password" | keepassxc-cli show -q -s -a Notes "$database" "$entry" > "$tmp_file"; then
+  unset db_password
+  echo "[ERROR] could not read KeePassXC entry: $entry" >&2
+  exit 1
+fi
+unset db_password
+
+if ! grep -q '^AGE-SECRET-KEY-' "$tmp_file"; then
+  echo "[ERROR] KeePassXC entry does not contain an AGE-SECRET-KEY in Notes" >&2
+  exit 1
+fi
+log "age key found in KeePassXC Notes"
+
+install -m 600 "$tmp_file" "$key_file"
+log "age key restored to $key_file"
+if ! command -v sops >/dev/null 2>&1; then
+  echo "[ERROR] sops is required to render chezmoi secret templates" >&2
+  exit 1
+fi
+log "sops found; continuing"
+echo "[OK] Restored chezmoi age key from KeePassXC"
+{{ end -}}

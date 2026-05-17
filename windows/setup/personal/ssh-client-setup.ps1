@@ -7,7 +7,8 @@ if (-not (Confirm-Step "Run SSH setup (personal machine only)")) {
 }
 
 $sshDir = "$env:USERPROFILE\.ssh"
-$oneDriveSshDir = "$env:USERPROFILE\OneDrive\secrets\.ssh"
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$secretsFile = Join-Path $repoRoot "secrets\dotfiles.sops.yaml"
 
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  SSH Setup" -ForegroundColor Cyan
@@ -30,19 +31,22 @@ if (-not (Test-Path $identityFile)) {
 }
 
 $localKnownHosts = Join-Path $sshDir "known_hosts"
-while (-not (Test-Path $oneDriveSshDir)) {
-    Write-Host "[WARN] OneDrive no sincronizado? No se encuentra: $oneDriveSshDir" -ForegroundColor Yellow
-    $retry = Read-Host "Reintentar (r) o saltar known_hosts (s)? (r/s)"
-    if ($retry -notmatch '^[rR]') {
-        Write-Host "[SKIP] known_hosts — OneDrive no disponible" -ForegroundColor Yellow
-        break
+if ((Test-Path $secretsFile) -and (Get-Command sops -ErrorAction SilentlyContinue) -and (Get-Command ssh-keyscan -ErrorAction SilentlyContinue)) {
+    $json = & sops --decrypt --output-type json $secretsFile 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        $secrets = $json | ConvertFrom-Json
+        $sshHost = $secrets.ssh.host
+        if ($sshHost) {
+            ssh-keyscan $sshHost 2>$null | Set-Content -Path $localKnownHosts -Encoding ascii
+            Write-Host "[OK] known_hosts generated from SOPS ssh.host" -ForegroundColor Green
+        } else {
+            Write-Host "[SKIP] ssh.host not configured in SOPS secrets" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[WARN] Could not decrypt SOPS secrets; skipping known_hosts" -ForegroundColor Yellow
     }
-}
-if (Test-Path "$oneDriveSshDir\known_hosts") {
-    Copy-Item -Path "$oneDriveSshDir\known_hosts" -Destination $localKnownHosts -Force
-    Write-Host "[OK] Restored known_hosts from OneDrive" -ForegroundColor Green
-} elseif (Test-Path $oneDriveSshDir) {
-    Write-Host "[SKIP] known_hosts not found in OneDrive" -ForegroundColor Yellow
+} else {
+    Write-Host "[SKIP] sops or ssh-keyscan unavailable; skipping known_hosts" -ForegroundColor Yellow
 }
 
 $itemsToSecure = @($sshDir, $identityFile, "$identityFile.pub")

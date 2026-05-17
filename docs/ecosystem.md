@@ -114,6 +114,15 @@
 | **Dropbox** | Dropbox desktop sync client |
 | **[rclone](https://rclone.org/)** | Cloud storage CLI used for Google Drive and OneDrive mounts |
 
+### Secret Management
+
+| Tool | What |
+|---|---|
+| **KeePassXC** | Local password manager and backup store for the chezmoi age identity |
+| **[age](https://age-encryption.org/)** | File encryption identity used by chezmoi and SOPS |
+| **[SOPS](https://github.com/getsops/sops)** | Encrypted secrets files for chezmoi templates |
+| **[Doppler](https://www.doppler.com/)** | Optional SaaS secret/config manager for project secrets |
+
 ### Node.js Utilities
 
 | Tool | What |

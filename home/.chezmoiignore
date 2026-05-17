@@ -6,7 +6,7 @@
 .config/zsh/.zsh_history
 dot_config/zsh/private_dot_zsh_history
 
-# OneDrive managed separately (env.toml, .ssh, etc.)
+# OneDrive managed separately (KeePassXC database, cloud files, etc.)
 OneDrive/**
 
 .local/share/opencode/opencode.db

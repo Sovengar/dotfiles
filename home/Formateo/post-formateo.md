@@ -1,87 +1,77 @@
 # Checklist Post-Formateo
 
 ## Paso 0: Pre-requisitos manuales
-- [ ] Iniciar sesión en OneDrive (sincronizar)
-- [ ] Iniciar sesión en Dropbox (si es necesario para accesos directos de startup)
-- [ ] Si el repo de chezmoi es privado: iniciar sesión en GitHub CLI antes de continuar
+- [ ] Iniciar sesion en OneDrive si necesitas la base KeePassXC `BBDD.kdbx`
+- [ ] Iniciar sesion en Dropbox si es necesario para accesos directos de startup
+- [ ] Si el repo de chezmoi es privado: iniciar sesion en GitHub CLI antes de continuar
 
-## Paso 1: Cargar variables de entorno
+## Paso 1: Instalar herramientas base
 Desde PowerShell 7:
 
 ```powershell
-$envFile = "$HOME\OneDrive\Formateo\env.toml"
-if (Test-Path $envFile) {
-    # Leer API keys y exportarlas al sistema
-    $content = Get-Content $envFile -Raw
-    if ($content -match 'firecrawl\s*=\s*"([^"]+)"') {
-        [System.Environment]::SetEnvironmentVariable("FIRECRAWL_API_KEY", $matches[1], "User")
-    }
-    Write-Host "Variables de entorno cargadas." -ForegroundColor Green
-}
-```
-
-## Paso 2: Instalar chezmoi
-```powershell
 winget install --id twpayne.chezmoi -e --silent
+winget install --id KeePassXCTeam.KeePassXC -e --silent
+winget install --id FiloSottile.age -e --silent
+winget install --id Mozilla.SOPS -e --silent
 ```
 
-## Paso 3: Clonar configuración (sin aplicar aún)
+## Paso 2: Restaurar la clave age
+La clave privada vive en KeePassXC:
+
+```text
+Database/SO/chezmoi age identity
+```
+
+La key debe estar en Notes/Anotaciones. `chezmoi apply` ejecuta `run_before_00-restore-age-key.*` y la restaura en:
+
+```text
+~/.config/sops/age/keys.txt
+```
+
+Si quieres hacerlo manualmente antes del apply, crea ese archivo con el contenido completo de la nota y permisos privados.
+
+## Paso 3: Clonar configuracion sin aplicar aun
+
 ```powershell
 chezmoi init https://github.com/Sovengar/dotfiles
 ```
 
-## Paso 4: Previsualizar cambios (OBLIGATORIO)
-> ⚠️ **Este paso es obligatorio.** Nunca apliques sin verificar primero.
+## Paso 4: Previsualizar cambios
+Este paso es obligatorio. Nunca apliques sin verificar primero.
 
 ```powershell
-# Ver diferencias que chezmoi va a hacer
 chezmoi diff
-
-# Simular aplicación completa (incluyendo scripts run_once_)
 chezmoi apply --dry-run
 ```
 
-Revisa la salida. Si ves algo inesperado, corrígelo antes de continuar.
+Revisa la salida. Si ves algo inesperado, corrigelo antes de continuar.
 
-## Paso 5: Aplicar configuración
+## Paso 5: Aplicar configuracion
+
 ```powershell
-# Solo si el --dry-run fue correcto
 chezmoi apply
 ```
 
-## Paso 6: Restaurar known_hosts para SSH (si aplica)
-Si usas la configuración SSH de WezTerm, copia tu `known_hosts` de respaldo:
+## Paso 6: SSH client
+`windows/setup/personal/ssh-client-setup.ps1` genera `~/.ssh/jon` si no existe.
+Si `secrets/dotfiles.sops.yaml` contiene `[ssh].host`, el script genera `known_hosts` con `ssh-keyscan`.
 
-```powershell
-$oneDriveSsh = "$HOME\OneDrive\Formateo\.ssh"
-$localSsh = "$HOME\.ssh"
-if (-not (Test-Path $localSsh)) { New-Item -ItemType Directory -Path $localSsh -Force | Out-Null }
-if (Test-Path "$oneDriveSsh\known_hosts") {
-    Copy-Item "$oneDriveSsh\known_hosts" "$localSsh\known_hosts" -Force
-    Write-Host "known_hosts restaurado." -ForegroundColor Green
-}
-```
-
-> **Nota:** El script `run_once_after_40-ssh-setup.ps1` de chezmoi también intentará hacer esto automáticamente. Este paso manual es solo si prefieres hacerlo antes del apply.
-
-## Paso 7: Configurar SSH Server (solo en máquina remota)
-
-Si esta máquina va a recibir conexiones SSH (VPS, PC de trabajo, etc.):
+## Paso 7: Configurar SSH Server
+Solo en una maquina que va a recibir conexiones SSH:
 
 ```powershell
 .\windows\setup-ssh-server.ps1
 ```
 
-> **En máquina local** que solo se conecta a servidores: no necesitas este script.
-> La clave `~/.ssh/jon` se genera automáticamente en el primer `chezmoi apply`.
+En una maquina local que solo se conecta a servidores, no necesitas este script.
 
 ## Paso 8: Acciones manuales post-chezmoi
-- [ ] **PowerToys**: Abrir app → Settings → General → Backup & Restore → RESTORE
-- [ ] **Listary**: Re-introducir licencia si aplica (opcional)
-- [ ] **GitHub CLI**: `gh auth login` si es repo privado
-- [ ] **Agentes AI**: Re-autenticar si es necesario (opencode, codex, gemini, copilot)
-- [ ] **WSL**: Si es la primera vez, `wsl --install` y reiniciar
-- [ ] **Docker Desktop**: Iniciar, configurar y habilitar integración WSL2
+- [ ] PowerToys: abrir app, Settings, General, Backup & Restore, RESTORE
+- [ ] Listary: re-introducir licencia si aplica
+- [ ] GitHub CLI: `gh auth login` si es repo privado
+- [ ] Agentes AI: re-autenticar si es necesario (opencode, codex, gemini, copilot)
+- [ ] WSL: si es la primera vez, `wsl --install` y reiniciar
+- [ ] Docker Desktop: iniciar, configurar y habilitar integracion WSL2
 
 ## Paso 9: Verificaciones
 - [ ] `starship --version` responde
@@ -89,70 +79,79 @@ Si esta máquina va a recibir conexiones SSH (VPS, PC de trabajo, etc.):
 - [ ] `gh auth status` muestra tu usuario
 - [ ] `docker --version` responde
 - [ ] `wsl --status` muestra WSL2 activo
-- [ ] Windows Terminal abre con tu configuración
+- [ ] Windows Terminal abre con tu configuracion
 - [ ] PowerShell 7 tiene tu perfil
-- [ ] SSH: `ssh -i ~/.ssh/jon buble@157.180.112.216` conecta (o `wezterm connect Jon`)
+- [ ] SSH: `ssh -i ~/.ssh/jon usuario@host` conecta, o `wezterm connect Jon`
 
 ---
 
-## Solución de problemas
+## Solucion de problemas
 
-### Si .env.toml no se encuentra
-El archivo debe estar sincronizado en OneDrive. Verifica que `C:\Users\buble\OneDrive\Formateo\env.toml` existe.
+### Si SOPS no descifra
+Verifica que existe la clave age:
+
+```powershell
+Test-Path "$HOME\.config\sops\age\keys.txt"
+```
+
+Si no existe, abre KeePassXC y revisa la entrada `SO/chezmoi age identity`.
 
 ### Si el email no se detecta
-Puedes introducirlo manualmente cuando chezmoi te lo pida, o verificar que `env.toml` tiene la sección `[git]` con `email = "tu-email"`.
+Edita el secreto cifrado:
+
+```powershell
+sops secrets\dotfiles.sops.yaml
+```
+
+Debe existir:
+
+```yaml
+git:
+  email: tu-email@example.com
+```
 
 ### Si Firecrawl no se configura
-Verifica que la variable está exportada correctamente:
-```powershell
-$env:FIRECRAWL_API_KEY
-```
-Si está vacía, cópiala desde `env.toml` manualmente:
-```powershell
-[System.Environment]::SetEnvironmentVariable("FIRECRAWL_API_KEY", "fc-tu-key-aqui", "User")
+Verifica que el secret cifrado contiene:
+
+```yaml
+api_keys:
+  firecrawl: fc-tu-key-aqui
 ```
 
-### Si WezTerm no muestra la conexión SSH
-1. Verifica que `env.toml` tiene la sección `[ssh]` completa:
-   ```toml
-   [ssh]
-   host = "157.180.112.216"
-   username = "buble"
-   identity = "jon"
-   ```
-2. Ejecuta `chezmoi apply` para regenerar los templates
-3. Verifica que `~/.ssh/jon` existe (se genera automáticamente en el primer `chezmoi apply`)
-4. Si la clave es nueva, copia la pública al servidor remoto:
-   ```powershell
-   Get-Content ~/.ssh/jon.pub | Set-Clipboard
-   # Pégalo en ~/.ssh/authorized_keys del servidor remoto
-   ```
+Despues resetea el script si ya corrio una vez:
 
-### Si known_hosts no se restaura
-Asegúrate de que el archivo existe en OneDrive:
 ```powershell
-Test-Path "$HOME\OneDrive\Formateo\.ssh\known_hosts"
+chezmoi state delete-bucket --bucket=scriptState
+chezmoi apply
 ```
-Si no existe, se creará automáticamente al conectarte por primera vez. Acepta el fingerprint cuando SSH te lo pida, luego copia el archivo a OneDrive para futuros formateos:
+
+### Si WezTerm no muestra la conexion SSH
+Verifica que `secrets/dotfiles.sops.yaml` contiene la seccion `[ssh]`/`ssh` completa:
+
+```yaml
+ssh:
+  host: 157.180.112.216
+  username: buble
+  identity: jon
+```
+
+Luego ejecuta `chezmoi apply` para regenerar templates.
+
+### Si known_hosts no se genera
+Verifica que `sops`, `ssh-keyscan` y `ssh.host` funcionan:
+
 ```powershell
-$oneDriveSsh = "$HOME\OneDrive\Formateo\.ssh"
-if (-not (Test-Path $oneDriveSsh)) { New-Item -ItemType Directory -Path $oneDriveSsh -Force | Out-Null }
-Copy-Item "$HOME\.ssh\known_hosts" "$oneDriveSsh\known_hosts" -Force
+sops --decrypt --output-type json secrets\dotfiles.sops.yaml
+ssh-keyscan tu-host
 ```
 
 ### Si PowerToys no restaura
-PowerToys requiere importación manual desde GUI. No hay forma de automatizar esto.
-1. Abre PowerToys
-2. Ve a Settings → General → Backup & Restore
-3. Busca tu archivo de backup en Documents\PowerToys\Backup
-4. Pulsa RESTORE
+PowerToys requiere importacion manual desde GUI.
 
 ---
 
 ## Notas adicionales
-
-- Este archivo debe quedarse en OneDrive para no perderse tras el formateo
-- NUNCA subas `env.toml` a Git aunque el repo sea público
-- El archivo `.gitignore` del repo de chezmoi ignora `env.toml`
-- Si tienes otras API keys, añádelas en `[api_keys]` de este archivo
+- Este archivo debe quedarse en OneDrive para no perderse tras el formateo.
+- Nunca subas `~/.config/sops/age/keys.txt` a Git.
+- `secrets/dotfiles.sops.yaml` si se sube a Git porque esta cifrado.
+- Tras `opencode login`, actualiza `opencode.config` con `sops secrets/dotfiles.sops.yaml`.

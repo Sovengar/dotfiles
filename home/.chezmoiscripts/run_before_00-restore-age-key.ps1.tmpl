@@ -1,0 +1,69 @@
+{{ if eq .chezmoi.os "windows" -}}
+#!/usr/bin/env pwsh
+$ErrorActionPreference = "Stop"
+
+$keyFile = Join-Path $env:USERPROFILE ".config\sops\age\keys.txt"
+$database = if ($env:KEEPASS_DB) { $env:KEEPASS_DB } else { Join-Path $env:USERPROFILE "OneDrive\BBDD.kdbx" }
+$entry = if ($env:KEEPASS_AGE_ENTRY) { $env:KEEPASS_AGE_ENTRY } else { "SO/chezmoi age identity" }
+
+function Write-AgeKeyLog([string]$Message) {
+    Write-Host "[age-key] $Message" -ForegroundColor Cyan
+}
+
+if ((Test-Path $keyFile) -and ((Get-Content -Path $keyFile -Raw) -match "AGE-SECRET-KEY-")) {
+    Write-AgeKeyLog "age key already exists at $keyFile"
+    if (-not (Get-Command sops -ErrorAction SilentlyContinue)) {
+        Write-Error "sops is required to render chezmoi secret templates"
+        exit 1
+    }
+    Write-AgeKeyLog "sops found; continuing"
+    exit 0
+}
+
+Write-AgeKeyLog "age key missing; restoring from KeePassXC"
+
+if (-not (Get-Command keepassxc-cli -ErrorAction SilentlyContinue)) {
+    Write-Error "keepassxc-cli is required to restore the chezmoi age key"
+    exit 1
+}
+Write-AgeKeyLog "keepassxc-cli found"
+
+if (-not (Test-Path $database)) {
+    Write-Error "KeePassXC database not found: $database"
+    exit 1
+}
+Write-AgeKeyLog "KeePassXC database found: $database"
+Write-AgeKeyLog "KeePassXC entry: $entry"
+
+$keyDir = Split-Path -Parent $keyFile
+New-Item -ItemType Directory -Path $keyDir -Force | Out-Null
+
+Write-AgeKeyLog "prompting for KeePassXC database password"
+$securePassword = Read-Host "KeePassXC database password" -AsSecureString
+$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+
+Write-AgeKeyLog "reading age key from KeePassXC Notes"
+$notes = $plainPassword | & keepassxc-cli show -q -s -a Notes $database $entry
+$plainPassword = $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Could not read KeePassXC entry: $entry"
+    exit 1
+}
+
+if ($notes -notmatch "AGE-SECRET-KEY-") {
+    Write-Error "KeePassXC entry does not contain an AGE-SECRET-KEY in Notes"
+    exit 1
+}
+Write-AgeKeyLog "age key found in KeePassXC Notes"
+
+Set-Content -Path $keyFile -Value ($notes -join "`n") -Encoding ascii -NoNewline
+Write-AgeKeyLog "age key restored to $keyFile"
+if (-not (Get-Command sops -ErrorAction SilentlyContinue)) {
+    Write-Error "sops is required to render chezmoi secret templates"
+    exit 1
+}
+Write-AgeKeyLog "sops found; continuing"
+Write-Host "[OK] Restored chezmoi age key from KeePassXC" -ForegroundColor Green
+{{ end -}}

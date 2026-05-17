@@ -1,0 +1,3 @@
+creation_rules:
+  - path_regex: secrets/.*\.sops\.(toml|ya?ml|json)$
+    age: age1vepecca5hyhdn3v6muxqcedyr5y4c20ct8adw8gj06kzy4fu5gqs8hekev

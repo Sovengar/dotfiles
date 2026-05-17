@@ -109,7 +109,7 @@ Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 - `35-setup-auth.ps1` — gh auth login (con prompt)
 - `40-setup-docker.ps1` — Docker WSL2 integration (último)
 
-Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde env.toml).
+Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde SOPS).
 
 ---
 
@@ -177,24 +177,49 @@ Para modificar qué se instala, editar SOLO ese archivo — no los scripts.
 
 ## 🔐 Secret Vault
 
-Secretos (API keys, tokens, email) via `OneDrive\secrets\env.toml`. **Nunca se suben a Git.**
+Secretos (API keys, tokens, email, `opencode` auth) via `sops + age` en `secrets/dotfiles.sops.yaml`.
+El archivo cifrado se sube a Git; la clave privada `age` **nunca** se sube.
 
-```powershell
-# Solo primera vez:
-New-Item -ItemType Directory -Path "$env:USERPROFILE\OneDrive\secrets" -Force
-notepad "$env:USERPROFILE\OneDrive\secrets\env.toml"
+```bash
+# Linux/macOS
+mkdir -p ~/.config/sops/age
+# Restaurar desde KeePassXC: Database/SO/chezmoi age identity (Notes)
+chmod 600 ~/.config/sops/age/keys.txt
 ```
 
-Formato: usa `home/OneDrive/secrets/env.toml.tmpl` como referencia.
-`[opencode].config` = contenido completo de `~/.local/share/opencode/auth.json`.
+```powershell
+# Windows
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.config\sops\age" -Force
+# Restaurar desde KeePassXC: Database/SO/chezmoi age identity (Anotaciones)
+```
+
+`run_before_00-restore-age-key.*` restaura `~/.config/sops/age/keys.txt` desde KeePassXC si falta.
+
+Para que el restore automatico funcione necesitas tener disponible la base KeePassXC:
+
+| OS | Ruta default esperada |
+|----|----------------------|
+| Linux | `~/onedrive/BBDD.kdbx` |
+| Windows | `%USERPROFILE%\OneDrive\BBDD.kdbx` |
+
+La entrada esperada dentro de la base es `SO/chezmoi age identity` y la key debe estar en Notes/Anotaciones.
+Si usas otra ruta o entrada, sobrescribe `KEEPASS_DB` o `KEEPASS_AGE_ENTRY` antes de `chezmoi apply`.
+
+Editar secrets:
+
+```bash
+sops secrets/dotfiles.sops.yaml
+```
+
+`opencode.config` = contenido completo de `~/.local/share/opencode/auth.json`.
 
 | Quién | Lee | Genera |
 |-------|-----|--------|
-| `.chezmoi.toml.tmpl` | `[git]`, `[ssh]` | `dot_gitconfig.tmpl` |
-| `35-firecrawl-key.ps1` | `[api_keys].firecrawl` | `FIRECRAWL_API_KEY` env |
+| `dot_gitconfig.tmpl` | `[git].email` | `~/.gitconfig` |
+| `run_once_after_20-firecrawl-key.ps1` | `[api_keys].firecrawl` | `FIRECRAWL_API_KEY` env |
 | `auth.json.tmpl` | `[opencode].config` | `~/.local/share/opencode/auth.json` |
 
-Tras refrescar OAuth (`opencode login`), copia los nuevos tokens a `env.toml`.
+Tras refrescar OAuth (`opencode login`), actualiza `opencode.config` con `sops secrets/dotfiles.sops.yaml`.
 
 ## Requisitos
 
@@ -205,6 +230,7 @@ Tras refrescar OAuth (`opencode login`), copia los nuevos tokens a `env.toml`.
 - Máquina ya configurada: `chezmoi` para sincronizar/aplicar dotfiles
 
 ### Windows
-- OneDrive sincronizado (para env.toml)
+- KeePassXC database disponible para restaurar `~/.config/sops/age/keys.txt`
+- `sops` y `age` instalados antes de aplicar templates con secrets
 - PowerShell 5.1+
 - winget instalado

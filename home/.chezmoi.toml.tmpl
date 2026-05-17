@@ -1,37 +1,11 @@
-{{- /* Load env.toml from OneDrive if it exists */ -}}
-{{- $envFile := (joinPath (env "USERPROFILE") "OneDrive" "secrets" "env.toml") -}}
-{{- $email := "bubles_2009@hotmail.com" -}}
-{{- $sshHost := "" -}}
-{{- $sshUsername := "" -}}
-{{- $sshIdentity := "" -}}
-{{- if stat $envFile -}}
-{{-   range $key, $value := fromToml (include $envFile) -}}
-{{-     if eq $key "git" -}}
-{{-       with $value.email -}}
-{{-         $email = . -}}
-{{-       end -}}
-{{-     end -}}
-{{-     if eq $key "ssh" -}}
-{{-       with $value.host -}}
-{{-         $sshHost = . -}}
-{{-       end -}}
-{{-       with $value.username -}}
-{{-         $sshUsername = . -}}
-{{-       end -}}
-{{-       with $value.identity -}}
-{{-         $sshIdentity = . -}}
-{{-       end -}}
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
 encryption = "age"
 
 [age]
-    identity = "~/.config/chezmoi/key.txt"
+    identity = "~/.config/sops/age/keys.txt"
     recipient = "age1vepecca5hyhdn3v6muxqcedyr5y4c20ct8adw8gj06kzy4fu5gqs8hekev"
 
 [data]
-    email = {{ $email | quote }}
-    ssh_host = {{ $sshHost | quote }}
-    ssh_username = {{ $sshUsername | quote }}
-    ssh_identity = {{ $sshIdentity | quote }}
+    email = "bubles_2009@hotmail.com"
+    ssh_host = ""
+    ssh_username = ""
+    ssh_identity = ""
