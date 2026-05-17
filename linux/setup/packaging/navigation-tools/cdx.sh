@@ -34,6 +34,6 @@ git clone --depth 1 "$REPO_URL" "$BUILD_DIR/cdx"
 cargo build --release --manifest-path "$BUILD_DIR/cdx/Cargo.toml"
 
 mkdir -p "$BIN_DIR"
-install -m 755 "$BUILD_DIR/cdx/target/release/cdx-rs" "$BIN_PATH"
+install -m 755 "$BUILD_DIR/cdx/target/release/cdx" "$BIN_PATH"
 
 success "cdx installed to $BIN_PATH"
