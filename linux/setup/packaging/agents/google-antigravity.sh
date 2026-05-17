@@ -10,6 +10,6 @@ log "Installing Google Antigravity..."
 if _cmd_present antigravity; then
   success "Google Antigravity already installed"
 else
-  aur_install google-antigravity
+  aur_install antigravity
   success "Google Antigravity installed"
 fi
