@@ -32,28 +32,26 @@ chezmoi update
 
 ## (2a) Flujo Formateo — Linux (máquina nueva)
 
-Script bash que instala dependencias y aplica dotfiles:
+Script bash que instala Git si falta, clona este repo y ejecuta el setup local. No aplica dotfiles automáticamente:
 
 ```bash
 curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/linux/setup/install.sh | bash
 ```
 
-O descargar y ejecutar localmente:
+Si no usas `curl | bash`, inicializa el source state con `chezmoi` y ejecuta el setup local:
 
 ```bash
-# 1. Dependencias
-sudo apt update && sudo apt install -y git curl          # Debian/Ubuntu
-# sudo pacman -Sy --noconfirm git curl                   # Arch
-# sudo dnf install -y git curl                           # Fedora
-
-# 2. Chezmoi + aplicar dotfiles
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply https://github.com/Sovengar/dotfiles
+chezmoi init https://github.com/Sovengar/dotfiles
+cd ~/.local/share/chezmoi
+./linux/setup/install.sh
 ```
+
+En una máquina nueva, primero ejecuta los scripts Linux y deja `chezmoi apply` para el final, manualmente.
 
 El script `install.sh` orquesta 4 fases:
 
 1. **Preflight** — checks de sistema, XDG dirs, Linuxbrew
-2. **Packaging** — git, chezmoi, CLI tools, docker, dropbox, zsh+fish, KeePassXC, Zen Browser
+2. **Packaging** — CLI tools, API tools, docker, dropbox, zsh+fish, KeePassXC, Zen Browser
 3. **Config** — shell por defecto, brew en PATH, teclado, autostarts, mounts, audio, pyprland
 4. **Post-install** — resumen + próximos pasos
 
@@ -131,7 +129,7 @@ dotfiles/
 │   │   ├── install.sh            ← Bootstrap: orquesta preflight → packaging → config → post-install
 │   │   ├── helpers/              ← logging, errores, guards, display
 │   │   ├── preflight/            ← system checks, XDG dirs, brew
-│   │   ├── packaging/            ← git, chezmoi, CLI tools, docker, dropbox, shells, keepassxc, zen
+│   │   ├── packaging/            ← CLI tools, API tools, docker, dropbox, shells, keepassxc, zen
 │   │   ├── config/               ← shell default, PATH, teclado, autostarts, mounts, audio, pyprland
 │   │   └── post-install/         ← resumen final
 │   └── old/                      ← Dotfiles heredados (pre-chezmoi)
@@ -202,7 +200,9 @@ Tras refrescar OAuth (`opencode login`), copia los nuevos tokens a `env.toml`.
 
 ### Linux
 - Gestor de paquetes (apt, pacman, o dnf)
-- `curl` instalado
+- Máquina nueva con `curl | bash`: `curl`, `bash`, `sudo`, internet y un gestor soportado
+- Máquina nueva sin `curl | bash`: `chezmoi` para inicializar el source state
+- Máquina ya configurada: `chezmoi` para sincronizar/aplicar dotfiles
 
 ### Windows
 - OneDrive sincronizado (para env.toml)

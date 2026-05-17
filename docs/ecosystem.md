@@ -19,6 +19,7 @@
 | Tool | What |
 |---|---|
 | **[kitty](https://sw.kovidgoyal.net/kitty/)** | GPU-accelerated terminal used by Hypr/pypr scratchpads |
+| **[konsole](https://konsole.kde.org/)** | KDE terminal emulator |
 | **[wezterm](https://wezfurlong.org/wezterm)** | GPU-accelerated terminal (Lua config) |
 | **[starship](https://starship.rs)** | Cross-shell prompt |
 | **[bash-completion](https://github.com/scop/bash-completion)** | Programmable completions for Bash |
@@ -77,7 +78,6 @@
 | **SoapUI** | SOAP/API testing |
 | **JD-GUI** | Java decompiler GUI |
 | **VisualVM** | JVM profiling/monitoring |
-| **Datree** | Kubernetes policy CLI |
 | **[Handy](https://github.com/cjpais/Handy)** | Offline speech-to-text app |
 | **[WebCord](https://github.com/SpacingBat3/WebCord)** | Discord web client wrapper |
 | **[OBS Studio](https://obsproject.com/)** | Recording and streaming studio |
