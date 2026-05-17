@@ -43,3 +43,6 @@ export EDITOR=code
 # unset -f command_not_found_handler # Uncomment to prevent searching for commands not found in package manager
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+
+# mise (runtime version manager)
+export PATH="$HOME/.local/share/mise/shims:$HOME/go/bin:$PATH"

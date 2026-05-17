@@ -114,6 +114,18 @@ aur_install() {
 npm_global_install() {
   local package="$1"
   local command_name="${2:-$1}"
+
+  # Ensure mise shims are in PATH so npm is found
+  if command -v mise &>/dev/null; then
+    local mise_bin_paths
+    mise_bin_paths="$(mise bin-paths 2>/dev/null || true)"
+    while IFS= read -r bin_path; do
+      if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+        export PATH="$bin_path:$PATH"
+      fi
+    done <<< "$mise_bin_paths"
+  fi
+
   if command -v "$command_name" &>/dev/null; then
     log "$package already installed"
   else

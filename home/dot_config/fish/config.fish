@@ -13,3 +13,7 @@ test -f $HOME/.config/fish/user.fish && source $HOME/.config/fish/user.fish
 if test -x /home/linuxbrew/.linuxbrew/bin/brew
     /home/linuxbrew/.linuxbrew/bin/brew shellenv fish | source
 end
+
+# mise (runtime version manager)
+fish_add_path $HOME/.local/share/mise/shims
+fish_add_path $HOME/go/bin
