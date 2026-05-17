@@ -8,6 +8,6 @@ fi
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 run_logged "$_PHASE_DIR/hyprland/all.sh"
-run_logged "$_PHASE_DIR/screenshots/all.sh"
-run_logged "$_PHASE_DIR/clipboard/all.sh"
+run_logged "$_PHASE_DIR/wayland-screenshots.sh"
+run_logged "$_PHASE_DIR/wayland-clipboard.sh"
 run_logged "$_PHASE_DIR/rofi.sh"
