@@ -1,4 +1,4 @@
-# Clipboard all.sh
+# Wayland all.sh
 
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,4 +7,6 @@ fi
 
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_PHASE_DIR/wayland-clipboard.sh"
+run_logged "$_PHASE_DIR/hyprland/all.sh"
+run_logged "$_PHASE_DIR/screenshots/all.sh"
+run_logged "$_PHASE_DIR/clipboard/all.sh"
