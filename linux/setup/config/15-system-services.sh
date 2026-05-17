@@ -27,10 +27,4 @@ enable_service_if_present() {
 enable_service_if_present NetworkManager.service
 enable_service_if_present bluetooth.service
 
-if [[ "${ENABLE_SDDM:-0}" == "1" ]]; then
-  enable_service_if_present sddm.service
-else
-  log "sddm.service not enabled automatically; run with ENABLE_SDDM=1 to opt in"
-fi
-
 success "System services configured"
