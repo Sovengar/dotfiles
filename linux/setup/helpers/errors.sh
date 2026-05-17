@@ -24,12 +24,10 @@ run_logged() {
 
   log "Running ${name}..."
 
-  local old_trap
-  old_trap="$(trap -p ERR 2>/dev/null || true)"
-
-  trap '_error_trap $LINENO "'"$name"'"' ERR
-  source "$script" || exit_code=$?
-  trap "${old_trap#trap -- }" ERR 2>/dev/null || trap - ERR
+  (
+    trap '_error_trap $LINENO "'"$name"'"' ERR
+    source "$script"
+  ) || exit_code=$?
 
   _RUN_TOTAL=$((_RUN_TOTAL + 1))
 
