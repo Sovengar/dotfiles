@@ -37,6 +37,14 @@ run_logged() {
     success "${name} done"
   else
     _RUN_FAILED=$((_RUN_FAILED + 1))
+    if [[ -t 0 ]] && [[ "${CI:-}" != "true" ]]; then
+      warn "Continue despite failure? [Y/n] "
+      read -r _continue || true
+      if [[ "${_continue:-y}" =~ ^[Nn] ]]; then
+        err "Aborted by user"
+        exit 1
+      fi
+    fi
   fi
 
   return 0
