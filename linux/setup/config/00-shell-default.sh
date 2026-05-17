@@ -12,6 +12,7 @@ FISH_PATH="$(command -v fish 2>/dev/null || echo "/usr/bin/fish")"
 
 if [[ "$SHELL" == "$FISH_PATH" ]] || [[ "$(getent passwd "$USER" | cut -d: -f7)" == "$FISH_PATH" ]]; then
   success "fish is already the default shell"
+  log "Log out and back in (or reboot) for the new shell to take effect in all sessions"
   return
 fi
 
