@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing fd..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install fd
-success "fd installed"
+
+if _cmd_present fd; then
+  success "fd already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install fd
+  success "fd installed"
+fi

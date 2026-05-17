@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing eza..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install eza
-success "eza installed"
+
+if _cmd_present eza; then
+  success "eza already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install eza
+  success "eza installed"
+fi

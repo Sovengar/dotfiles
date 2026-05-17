@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing bash-completion..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install bash-completion
-success "bash-completion installed"
+
+if pkg_is_installed bash-completion; then
+  success "bash-completion already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install bash-completion
+  success "bash-completion installed"
+fi

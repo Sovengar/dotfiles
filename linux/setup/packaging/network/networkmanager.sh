@@ -7,22 +7,27 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing NetworkManager..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
 
-case "$_pkg_manager" in
-  pacman)
-    pkg_install networkmanager network-manager-applet
-    ;;
-  apt)
-    pkg_install network-manager network-manager-gnome
-    ;;
-  dnf)
-    pkg_install NetworkManager NetworkManager-applet
-    ;;
-  brew)
-    log "NetworkManager is not managed by Homebrew on Linux, skipping"
-    ;;
-esac
+if pkg_is_installed networkmanager || pkg_is_installed network-manager; then
+  success "NetworkManager already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
 
-success "Network packages installed"
+  case "$_pkg_manager" in
+    pacman)
+      pkg_install networkmanager network-manager-applet
+      ;;
+    apt)
+      pkg_install network-manager network-manager-gnome
+      ;;
+    dnf)
+      pkg_install NetworkManager NetworkManager-applet
+      ;;
+    brew)
+      log "NetworkManager is not managed by Homebrew on Linux, skipping"
+      ;;
+  esac
+
+  success "Network packages installed"
+fi

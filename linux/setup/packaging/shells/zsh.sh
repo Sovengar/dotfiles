@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing zsh..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install zsh
-success "zsh installed"
+
+if _cmd_present zsh; then
+  success "zsh already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install zsh
+  success "zsh installed"
+fi

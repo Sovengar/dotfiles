@@ -8,9 +8,11 @@ fi
 
 log "Installing KeePassXC..."
 
-detect_pkg_manager >/dev/null
-_ensure_sudo
-
-pkg_install keepassxc
-
-success "KeePassXC installed"
+if _cmd_present keepassxc; then
+  success "KeePassXC already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install keepassxc
+  success "KeePassXC installed"
+fi

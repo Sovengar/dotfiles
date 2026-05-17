@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing fzf..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install fzf
-success "fzf installed"
+
+if _cmd_present fzf; then
+  success "fzf already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install fzf
+  success "fzf installed"
+fi

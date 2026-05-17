@@ -13,6 +13,22 @@ if ! _cmd_present git; then
   exit 1
 fi
 
+if _cmd_present gga; then
+  success "Gentleman Guardian Angel already installed; skipping reinstall"
+  exit 0
+fi
+
+if [[ -w "/usr/local/bin" ]]; then
+  install_dir="/usr/local/bin"
+else
+  install_dir="$HOME/.local/bin"
+fi
+
+if [[ -f "$install_dir/gga" ]]; then
+  success "Gentleman Guardian Angel already installed at $install_dir/gga; skipping reinstall"
+  exit 0
+fi
+
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 

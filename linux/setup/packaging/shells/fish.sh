@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing fish..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install fish
-success "fish installed"
+
+if _cmd_present fish; then
+  success "fish already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install fish
+  success "fish installed"
+fi

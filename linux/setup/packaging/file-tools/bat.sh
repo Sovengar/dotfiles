@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing bat..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install bat
-success "bat installed"
+
+if _cmd_present bat; then
+  success "bat already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install bat
+  success "bat installed"
+fi

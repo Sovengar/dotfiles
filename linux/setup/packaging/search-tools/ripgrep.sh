@@ -7,7 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing ripgrep..."
-detect_pkg_manager >/dev/null
-_ensure_sudo
-pkg_install ripgrep
-success "ripgrep installed"
+
+if _cmd_present rg; then
+  success "ripgrep already installed"
+else
+  detect_pkg_manager >/dev/null
+  _ensure_sudo
+  pkg_install ripgrep
+  success "ripgrep installed"
+fi
