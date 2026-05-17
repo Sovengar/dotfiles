@@ -6,6 +6,6 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   source "$SCRIPT_DIR/../../../helpers/all.sh"
 fi
 
-_SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_SELF_DIR/pypr.sh"
+run_logged "$_PHASE_DIR/pypr.sh"
