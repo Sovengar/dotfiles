@@ -20,6 +20,23 @@ fi
 # HYDE_ZSH_COMPINIT_CHECK=1 # Set 24 (hours) per compinit security check // lessens startup time
 # HYDE_ZSH_OMZ_DEFER=1 # Set to 1 to defer loading of oh-my-zsh plugins ONLY if prompt is already loaded
 
+# cdx — interactive directory navigator wrapper
+function cdx {
+    local result_file=/tmp/cdx-rs-result.txt
+    rm -f "$result_file"
+    cdx-rs "$@" 2>/dev/null
+    if [[ $? -eq 0 && -f "$result_file" ]]; then
+        local target
+        target=$(<"$result_file")
+        target=${target#$'\n'}
+        target=${target%$'\n'}
+        rm -f "$result_file"
+        if [[ -n "$target" && -d "$target" ]]; then
+            builtin cd "$target"
+        fi
+    fi
+}
+
 if [[ ${HYDE_ZSH_NO_PLUGINS} != "1" ]]; then
     #  OMZ Plugins 
     # manually add your oh-my-zsh plugins here
