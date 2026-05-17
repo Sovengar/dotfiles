@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  source "$SCRIPT_DIR/../helpers/all.sh"
+  source "$SCRIPT_DIR/../../helpers/all.sh"
 fi
 
 log "Setting up Google Drive mount..."
@@ -51,7 +51,10 @@ RestartSec=10
 WantedBy=default.target
 EOF
 
-systemctl --user daemon-reload
-systemctl --user enable --now rclone-gdrive.service 2>/dev/null || log "systemctl not available (inside container?) — mount manually: rclone mount gdrive: $MOUNT_POINT"
+if command -v systemctl &>/dev/null && systemctl --user daemon-reload 2>/dev/null; then
+  systemctl --user enable --now rclone-gdrive.service 2>/dev/null || log "Could not start rclone-gdrive.service — mount manually: rclone mount gdrive: $MOUNT_POINT"
+else
+  log "systemctl not available (inside container?) — mount manually: rclone mount gdrive: $MOUNT_POINT"
+fi
 
 success "Google Drive mount configured at $MOUNT_POINT"

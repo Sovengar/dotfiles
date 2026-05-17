@@ -14,6 +14,7 @@
 | **gh copilot** ⚠️ | GH CLI AI assistant (NOT INSTALLED) |
 | **[snyk](https://snyk.io)** | Security/SAST scanner |
 | **[hyperfine](https://github.com/sharkdp/hyperfine)** | Command benchmarking |
+| **[cdx](https://github.com/Sovengar/cdx)** | Interactive directory navigator built from Rust source |
 
 ### Terminal & Shell
 
@@ -30,7 +31,6 @@
 | **[bottom](https://github.com/ClementTsang/bottom)** | System monitor TUI (`btm`) |
 | **[gum](https://github.com/charmbracelet/gum)** | TUI dialogs/forms for scripts |
 | **[tui-generator.sh](https://github.com/basecamp/omarchy/blob/dev/bin/tui-generator)** | Script to create TUI desktop entries (name, command, tile/float, icon) |
-| **[yazi](https://yazi-rs.github.io)** | Terminal file manager with previews |
 | **[broot](https://dystroy.org/broot/)** | Tree navigator |
 | **[hyperfine](https://github.com/sharkdp/hyperfine)** | Command benchmarking |
 | **[pastel](https://github.com/sharkdp/pastel)** | Color CLI |
@@ -84,6 +84,13 @@
 | **[OBS Studio](https://obsproject.com/)** | Recording and streaming studio |
 | **Steam** | Game launcher |
 
+### File Explorers
+
+| Tool | What |
+|---|---|
+| **Dolphin** | HyDE GUI file explorer |
+| **[yazi](https://yazi-rs.github.io)** | Terminal file manager with previews |
+
 ### Desktop System
 
 | Tool | What |
@@ -93,6 +100,19 @@
 | **BlueZ + Blueman** | Bluetooth stack and GUI |
 | **grim + slurp + satty + hyprpicker** | Wayland screenshot and color picker tools |
 | **cliphist + wl-clip-persist + wl-clipboard** | Wayland clipboard history/persistence |
+
+### Hyprland
+
+| Tool | What |
+|---|---|
+| **[pyprland](https://github.com/hyprland-community/pyprland)** | Hyprland plugin manager used for scratchpads |
+
+### Cloud Storage
+
+| Tool | What |
+|---|---|
+| **Dropbox** | Dropbox desktop sync client |
+| **[rclone](https://rclone.org/)** | Cloud storage CLI used for Google Drive and OneDrive mounts |
 
 ### Node.js Utilities
 
