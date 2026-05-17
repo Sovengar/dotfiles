@@ -129,18 +129,6 @@ if (-not (Test-Path $brootBr) -and (Get-Command broot -ErrorAction SilentlyConti
 }
 
 #============================
-# Datree completion: lazy (~7ms -> 0ms en startup)
-#============================
-$datreeCompletion = Join-Path (Split-Path -Parent $PROFILE) 'DatreeCompletion.ps1'
-if (Test-Path $datreeCompletion) {
-    function datree {
-        Remove-Item function:datree
-        try { . $datreeCompletion } catch { Write-Warning "Datree completion failed: $_" }
-        & datree @args
-    }
-}
-
-#============================
 # PSFzf: DESHABILITADO por alto costo de startup (~330-390ms en Import-Module)
 #
 # Los handlers "nativos" con fzf directo no funcionan porque PSReadLine ScriptBlocks

@@ -103,10 +103,6 @@ packages:
         archive: false
         dest: "dev\\tooling\\jd-gui"
         shortcut: true
-      - name: "Datree"
-        url: "https://github.com/datreeio/datree/releases/download/1.9.19/datree-cli_1.9.19_windows_x86_64.zip"
-        archive: true
-        dest: ".local\\bin\\datree.exe"
       - name: "VisualVM"
         url: "https://github.com/oracle/visualvm/releases/download/2.1.10/visualvm_2110.zip"
         archive: true
