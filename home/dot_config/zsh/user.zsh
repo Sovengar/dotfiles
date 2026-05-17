@@ -24,12 +24,11 @@ fi
 function cdx {
     local result_file=/tmp/cdx-rs-result.txt
     rm -f "$result_file"
-    cdx-rs "$@" 2>/dev/null
+    cdx-rs "$@" >/dev/null 2>&1
     if [[ $? -eq 0 && -f "$result_file" ]]; then
-        local target
-        target=$(<"$result_file")
-        target=${target#$'\n'}
+        local target=$(<"$result_file")
         target=${target%$'\n'}
+        target=${target#$'\n'}
         rm -f "$result_file"
         if [[ -n "$target" && -d "$target" ]]; then
             builtin cd "$target"

@@ -20,13 +20,14 @@ fish_add_path $HOME/go/bin
 
 # cdx — interactive directory navigator wrapper
 function cdx --wraps cdx-rs
-    set result_file /tmp/cdx-rs-result.txt
+    set -l result_file /tmp/cdx-rs-result.txt
     rm -f $result_file
-    cdx-rs $argv 2>/dev/null
-    and test -f $result_file
-    and set target (string trim (cat $result_file))
-    and rm -f $result_file
-    and test -n "$target"
-    and test -d "$target"
-    and cd "$target"
+    cdx-rs $argv >/dev/null 2>&1
+    if test $status -eq 0 -a -f "$result_file"
+        set -l target (string trim (cat $result_file))
+        rm -f $result_file
+        if test -n "$target" -a -d "$target"
+            cd "$target"
+        end
+    end
 end

@@ -1,6 +1,7 @@
 {
     "workbench.colorTheme": "Wallbash",
-  "window.menuBarVisibility": "toggle",
+    "window.titleBarStyle": "native",
+    "window.menuBarVisibility": "hidden",
     "editor.fontSize": 12,
     "editor.scrollbar.vertical": "hidden",
     "editor.scrollbar.verticalScrollbarSize": 0,
@@ -10,12 +11,16 @@
     "editor.minimap.side": "left",
   "editor.fontFamily": "'JetbrainsMono Nerd Font','Maple Mono', monospace",
     "extensions.autoUpdate": false,
+    "wallBash.autoUpdate": true,
+    "wallBash.enableThemeMode": false,
     "workbench.statusBar.visible": false,
+    "workbench.layoutControl.enabled": false,
+    "window.commandCenter": false,
     "terminal.external.linuxExec": "kitty",
     "terminal.explorerKind": "both",
     "terminal.sourceControlRepositoriesKind": "both",
     "telemetry.telemetryLevel": "off",
-    "window.customTitleBarVisibility": "auto",
+    "window.customTitleBarVisibility": "never",
     "editor.minimap.enabled": false
   }
   
