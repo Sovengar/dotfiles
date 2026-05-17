@@ -20,8 +20,8 @@ enable_service_if_present() {
     return
   fi
 
-  if systemctl is-active --quiet "$service" 2>/dev/null; then
-    log "$service already running"
+  if systemctl is-enabled --quiet "$service" 2>/dev/null; then
+    log "$service already enabled"
     return
   fi
 
