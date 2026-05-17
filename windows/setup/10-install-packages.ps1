@@ -234,14 +234,39 @@ Write-Host ""
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host "  LAZYVIM" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
+$treeSitterReady = $false
+if (Get-Command tree-sitter -ErrorAction SilentlyContinue) {
+    tree-sitter --version *> $null
+    $treeSitterReady = $LASTEXITCODE -eq 0
+}
+if (-not $treeSitterReady) {
+    Write-Host "[LazyVim] Installing tree-sitter-cli..." -ForegroundColor Cyan
+    mise exec node -- npm install -g tree-sitter-cli
+    Write-Host "[OK] tree-sitter-cli installed" -ForegroundColor Green
+} else {
+    Write-Host "[OK] tree-sitter-cli already installed" -ForegroundColor Green
+}
+
 $nvimDir = "$env:USERPROFILE\.config\nvim"
-if (-not (Test-Path "$nvimDir\init.lua")) {
-    Write-Host "[LazyVim] Cloning LazyVim starter..." -ForegroundColor Cyan
-    git clone https://github.com/LazyVim/starter "$nvimDir" 2>$null
+$lazyConfig = Join-Path $nvimDir "lua\config\lazy.lua"
+if (-not (Test-Path $lazyConfig)) {
+    Write-Host "[LazyVim] Restoring LazyVim starter files..." -ForegroundColor Cyan
+    $starterDir = Join-Path $env:TEMP "lazyvim-starter"
+    Remove-Item -LiteralPath $starterDir -Recurse -Force -ErrorAction SilentlyContinue
+    git clone --depth 1 https://github.com/LazyVim/starter "$starterDir" 2>$null
     if ($LASTEXITCODE -eq 0) {
-        Remove-Item -Path "$nvimDir\.git" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "$nvimDir\README.md" -Force -ErrorAction SilentlyContinue
-        Write-Host "[OK] LazyVim starter cloned" -ForegroundColor Green
+        New-Item -ItemType Directory -Path $nvimDir -Force -ErrorAction SilentlyContinue | Out-Null
+        Copy-Item -Path "$starterDir\init.lua" -Destination "$nvimDir\init.lua" -Force
+        Copy-Item -Path "$starterDir\.gitignore" -Destination "$nvimDir\.gitignore" -Force
+        Copy-Item -Path "$starterDir\.neoconf.json" -Destination "$nvimDir\.neoconf.json" -Force
+        Copy-Item -Path "$starterDir\stylua.toml" -Destination "$nvimDir\stylua.toml" -Force
+        New-Item -ItemType Directory -Path "$nvimDir\lua" -Force -ErrorAction SilentlyContinue | Out-Null
+        Copy-Item -Path "$starterDir\lua\config" -Destination "$nvimDir\lua" -Recurse -Force
+        if (-not (Test-Path "$nvimDir\lua\plugins")) {
+            Copy-Item -Path "$starterDir\lua\plugins" -Destination "$nvimDir\lua" -Recurse -Force
+        }
+        Remove-Item -LiteralPath $starterDir -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "[OK] LazyVim starter files restored" -ForegroundColor Green
         Write-Host "Custom configs will be applied by chezmoi apply" -ForegroundColor Green
     } else {
         Add-SetupLog -Message "[FAIL] Could not clone LazyVim starter"

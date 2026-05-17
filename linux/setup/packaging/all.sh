@@ -9,9 +9,9 @@ _SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 reset_run_stats
 
+run_logged "$_SELF_DIR/runtimes/all.sh"
 run_logged "$_SELF_DIR/fonts/all.sh"
 run_logged "$_SELF_DIR/terminal-emulators/all.sh"
-run_logged "$_SELF_DIR/runtimes/all.sh"
 run_logged "$_SELF_DIR/shells/all.sh"
 run_logged "$_SELF_DIR/shell-plugins/all.sh"
 run_logged "$_SELF_DIR/hardware/audio/all.sh"

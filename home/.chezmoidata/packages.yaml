@@ -74,7 +74,6 @@ packages:
       - "@openai/codex"
       - backlog.md
       - "@devcontainers/cli"
-      - tree-sitter-cli
       - kill-port
       - "@usebruno/cli"
       - http-server

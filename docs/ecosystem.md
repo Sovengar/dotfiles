@@ -132,6 +132,7 @@
 | **[pm2](https://pm2.keymetrics.io)** | Node process manager |
 | **[portless](https://portless.dev)** | Localhost without ports (`https://myapp.localhost`) |
 | **[@usebruno/cli](https://www.usebruno.com)** | API client CLI (Bruno) |
+| **[tree-sitter-cli](https://tree-sitter.github.io/tree-sitter/cli/)** | Parser generator CLI used by Neovim/LazyVim Tree-sitter workflows |
 
 ### Config & Versioning
 
