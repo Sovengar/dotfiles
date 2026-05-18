@@ -26,6 +26,19 @@ git --no-pager diff
 git --no-pager log --oneline -3
 ```
 
+## Diff Resolution: Source vs Target
+
+Cuando `chezmoi diff` muestra diferencias entre source y target:
+1. **NO asumas cuál está bien.** Source puede tener cambios sin commiteaer. Target puede tener modificaciones locales tras un `chezmoi apply`.
+2. **Compara fechas** de última edición en ambos lados:
+   - Target: `(Get-Item <target-path>).LastWriteTime`
+   - Source: `(Get-Item <chezmoi-source-path>).LastWriteTime`
+3. **Usa el contexto del chat** — si el usuario mencionó haber editado un archivo concreto, ese lado es el que probablemente debe prevalecer.
+4. **Sugerí la dirección**, no la impongas. Formato claro:
+   - `[source] → [target]` (aplicar source al target con `chezmoi apply`)
+   - `[target] → [source]` (capturar target al source con `chezmoi re-add`)
+5. Si no hay contexto suficiente para decidir, preguntá al usuario antes de actuar.
+
 ## Common Commands
 
 | Command | Purpose |
