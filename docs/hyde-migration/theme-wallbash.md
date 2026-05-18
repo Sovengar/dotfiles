@@ -1,0 +1,124 @@
+# Theme And Wallbash Migration
+
+> Goal: replace HyDE's visual pipeline without losing wallpaper, GTK/Qt, Hyprland, dunst, kitty, rofi, or waybar behavior.
+
+## Source Files
+
+| Source | Role |
+|--------|------|
+| `Configs/.local/lib/hyde/wallbash.sh` | Extracts colors from wallpaper using ImageMagick `magick`; no `wallust`. |
+| `Configs/.local/lib/hyde/wallpaper.sh` | Orchestrates wallpaper set/start/select operations. |
+| `Configs/.local/lib/hyde/wallpaper/cache.sh` | Builds thumbnails, blurred images, dcol cache per wallpaper hash. |
+| `Configs/.local/lib/hyde/theme.switch.sh` | Applies selected theme to GTK, Qt, Xresources, Hyprland theme files, wallpaper links. |
+| `Configs/.local/lib/hyde/color.set.sh` | Expands dcol templates into app config files. |
+| `Configs/.local/lib/hyde/color/hypr.sh` | Generates Hyprland theme/color files. |
+| `Configs/.local/lib/hyde/wallbashtoggle.sh` | Changes wallbash mode: theme, auto, dark, light. |
+| `Configs/.local/lib/hyde/globalcontrol.sh` | Resolves theme dirs, XDG dirs, runtime/cache/state dirs, helper functions. |
+
+## Runtime Flow
+
+```
+wallpaper image
+  -> wallpaper/cache.sh creates thumbnails and dcol cache
+  -> wallbash.sh extracts 4 primary colors and 9 shades per primary
+  -> theme.switch.sh applies theme metadata and GTK/Qt settings
+  -> color/hypr.sh writes hypr theme/color files
+  -> color.set.sh expands dcol templates into app config files
+  -> post-process scripts reload affected apps
+```
+
+The key startup trigger is `wallpaper.sh --start --global`, launched from Hyprland startup through `hyde-shell app`. Removing that service stops the wallpaper/theme refresh pipeline.
+
+## Wallbash Modes
+
+| Mode | Meaning | Migration value |
+|------|---------|-----------------|
+| `0` theme | Use static `theme.dcol` from theme dir. | Keep if you want deterministic theme colors. |
+| `1` auto | Use wallpaper colors and infer dark/light inversion. | Keep if you like wallpaper-driven colors. |
+| `2` dark | Force dark palette from wallpaper. | Easy to reimplement as a flag. |
+| `3` light | Force light palette from wallpaper. | Easy to reimplement as a flag. |
+
+State is stored under HyDE state/config through `globalcontrol.sh` and toggled by `wallbashtoggle.sh`.
+
+## Theme Directory Shape
+
+| File or dir | Purpose |
+|-------------|---------|
+| `hypr.theme` | Hyprland theme variables, window/border/gap/blur values. |
+| `kitty.theme` | Kitty color override. |
+| `rofi.theme` | Rofi color override. |
+| `waybar.theme` | Waybar color override. |
+| `theme.dcol` | Optional static dcol palette. |
+| `wall.set` | Symlink to current wallpaper. |
+| `wallpapers/` | Bundled wallpapers. |
+| `kvantum/` | Kvantum theme files. |
+| `.sort` | Theme order. |
+
+This structure is worth keeping. It is portable and simpler than most of HyDE's shell around it.
+
+## Dcol Template Contract
+
+| Part | Meaning |
+|------|---------|
+| Line 1 | `<target_file>|<post_process_command>` |
+| Body | File content with `<wallbash_*>` tokens. |
+| Tokens | `wallbash_pry1..4`, `wallbash_txt1..4`, `wallbash_1xa1..4xa9`, RGB/RGBA variants, `wallbash_mode`, `<<HOME>>`. |
+| Directories | `always/` always runs; `theme/` runs for theme/wallbash modes; `scripts/` holds post-process scripts. |
+
+The format is valuable. A replacement can keep it and replace only color extraction plus app reload hooks.
+
+## Generated And Partially Rewritten Files
+
+| File | Behavior |
+|------|----------|
+| `~/.config/hypr/themes/colors.conf` | Fully generated. |
+| `~/.config/hypr/themes/theme.conf` | Fully generated from theme. |
+| `~/.config/hypr/themes/wallbash.conf` | Fully generated; bridge read by `wallbash.lua`. |
+| `~/.config/kitty/theme.conf` | Fully generated. |
+| `~/.config/kitty/hyde.conf` | Fully generated. |
+| `~/.config/rofi/theme.rasi` | Generated from dcol templates. |
+| `~/.config/waybar/theme.css` | Generated from dcol templates. |
+| `~/.config/dunst/dunstrc` | Generated/merged by dcol and dunst script. |
+| `~/.config/gtk-3.0/settings.ini` | Partially rewritten. |
+| `~/.gtkrc-2.0` | Partially rewritten. |
+| `~/.config/qt5ct/qt5ct.conf` | Partially rewritten. |
+| `~/.config/qt6ct/qt6ct.conf` | Partially rewritten. |
+| `~/.config/Kvantum/` | Theme files/symlinks managed by theme switch. |
+| `~/.config/xsettingsd/xsettingsd.conf` | Partially rewritten. |
+| `~/.Xresources`, `~/.Xdefaults` | Partially rewritten. |
+| `~/.config/kdeglobals` | Partially rewritten. |
+| `~/.local/share/icons/default/index.theme` | Cursor theme target. |
+
+Do not move these into strict chezmoi ownership until HyDE no longer rewrites them, or split them into stable user files plus generated include files.
+
+## Useful To Keep
+
+| Piece | Why |
+|-------|-----|
+| Theme directory format | Simple, portable, good migration boundary. |
+| Dcol template format | Good separation between color data and target app config. |
+| `always/`, `theme/`, `scripts/` split | Clear behavior and easy to reproduce. |
+| `enableWallDcol` modes | Useful UX for static theme vs wallpaper-following colors. |
+| Animation presets | Can be kept as plain preset files with a custom selector. |
+
+## Replace Or Simplify
+
+| Piece | Replacement direction |
+|-------|-----------------------|
+| `wallbash.sh` | Own script using `magick`, `pywal`, `matugen`, or Python color extraction. |
+| `theme.switch.sh` | Split into small scripts: hypr, GTK, Qt, cursor, Xresources. |
+| post-process scripts | Inline app reloads or use small oneshot scripts. |
+| wallpaper backend router | Keep only the backend actually used, such as `swww` or `hyprpaper`. |
+| `hyde-shell themeselect` | Custom rofi/fzf selector listing owned theme dirs. |
+
+## Migration Stages
+
+| Stage | Action |
+|-------|--------|
+| 1 | Keep HyDE theme engine running while other areas are decoupled. |
+| 2 | Copy current generated outputs as reference snapshots. |
+| 3 | Own theme dirs and dcol templates first; do not rewrite generator yet. |
+| 4 | Replace wallpaper apply command with direct backend command. |
+| 5 | Replace color extraction while preserving dcol token names. |
+| 6 | Replace `theme.switch.sh` with smaller owned scripts. |
+| 7 | Remove generated files from `.chezmoiignore` only after your generator owns them. |

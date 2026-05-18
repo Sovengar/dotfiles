@@ -2,13 +2,16 @@
 
 > Target audience: someone who wants to understand HyDE deeply so they can own/replace it.
 
+> Migration docs: see `docs/hyde-migration/` for area-by-area decoupling notes. This file remains the compact Hyprland/theme reference.
+
 ## Core Architecture
 
-HyDE is a theming framework for Hyprland. Its config is split across three source directories, each with different ownership:
+HyDE is a theming framework for Hyprland. Its config/runtime is split across source directories with different ownership:
 
 | Directory | Owner | Contents |
 |-----------|-------|----------|
-| `~/.local/share/hyde/` | HyDE package (read-only) | Stock configs: env, variables, defaults, dynamic, startup, windowrules |
+| `~/.local/share/hyde/` | HyDE package (read-only) | Data/templates such as env-theme and rofi/theme assets |
+| `~/.local/lib/hyde/` | HyDE package (read-only) | Runtime scripts: `hyde-shell` delegates here for wallpaper, theme, app/service, rofi, screenshot, waybar |
 | `~/.config/hypr/hyprland/` | **User / chezmoi** | LUA-based config that replaces stock via `CONFIG_ALREADY_LOADED` |
 | `~/.config/hyde/themes/` | HyDE `hyde-shell` | Each theme is a subdir: `Rosé Pine/`, `Catppuccin Mocha/`, etc. |
 | `~/.config/hyde/wallbash/` | User templates | Dcol templates + post-processing scripts |
@@ -52,6 +55,8 @@ THEME SWITCH TRIGGERED
         ▼
 ┌─────────────────────────────────┐
 │ 1. WALLBASH: COLOR EXTRACTION    │
+│    ImageMagick extracts colors   │
+│    with HyDE custom shell logic  │
 │    Extract 4 dominant colors     │
 │    → Generate 9 accent shades    │
 │    → Write ~/.config/hypr/themes/ │
@@ -120,6 +125,13 @@ THEME SWITCH TRIGGERED
 | `~/.config/rofi/theme.rasi` | All color variables (bg/fg/br/ex/select) | Layout, font, border properties |
 | `~/.config/waybar/theme.css` | CSS `@define-color` values | All other CSS rules |
 | `~/.config/waybar/user-style.css` | Color values | CSS structure |
+| `~/.config/qt5ct/qt5ct.conf` | theme/font values | Existing config sections |
+| `~/.config/qt6ct/qt6ct.conf` | theme/font values | Existing config sections |
+| `~/.config/xsettingsd/xsettingsd.conf` | GTK/icon/cursor values | Other xsettingsd values |
+| `~/.gtkrc-2.0` | GTK/icon/cursor values | Other gtkrc values |
+| `~/.Xresources`, `~/.Xdefaults` | Xresources color/theme values | Other Xresources values |
+| `~/.config/kdeglobals` | KDE/Qt theme values | Other KDE settings |
+| `~/.local/share/icons/default/index.theme` | Cursor theme target | File structure |
 
 ### NOT regenerated (user-managed)
 
@@ -141,7 +153,7 @@ THEME SWITCH TRIGGERED
 wallpaper (image file)
     │
     ▼
-wallust (color extraction tool)
+ImageMagick `magick` + HyDE `wallbash.sh`
     │  → 4 dominant colors × 9 accent shades
     ▼
 colors.conf (hex values)
@@ -159,6 +171,8 @@ dunst/dunstrc     →  notification colors
 
 ### Application startup chain:
 
+**Without UWSM (direct Hyprland launch):**
+
 ```
 hyprland starts
     │
@@ -172,6 +186,61 @@ hyde/startup.lua
     ├── nm-applet / blueman-applet / udiskie
     └── hypridle / hyprsunset
 ```
+
+**With UWSM (bootstrapped via systemd user session):**
+
+```
+uwsm (systemd user session)
+    ├── Sets environment variables (overrides shell config)
+    ├── Imports env from PAM + systemd user manager
+    └── Starts Hyprland as a managed user unit
+            │
+            ▼
+    hyde/startup.lua
+        ├── Each service is a systemd unit with
+        │   implicit Wants=uwsm-mainston.service
+        ├── dbus-update-activation-environment
+        │   competes with uwsm's own env mgmt
+        └── (same app list as above)
+```
+
+## UWSM Integration
+
+[UWSM (Universal Wayland Session Manager)](https://github.com/Vladimir-csp/uwsm) bootstraps Hyprland as a systemd user unit. It sits between the display manager / TTY login and Hyprland itself.
+
+### What UWSM changes
+
+| Aspect | Without UWSM | With UWSM |
+|--------|-------------|-----------|
+| **Entry point** | `Hyprland` called from shell/login | `uwsm start hyprland` via systemd |
+| **Env vars** | Set by shell init + `hyde/startup.lua` | Set by UWSM (PAM → systemd); overrides shell config |
+| **Service lifecycle** | `hyde-shell app` creates scopes manually | Units implicitly `Wants=uwsm-mainston.service` |
+| **dbus activation** | `dbus-update-activation-environment` in startup.lua | UWSM handles dbus env propagation |
+
+### Environment variable conflict
+
+`~/.config/zsh/conf.d/hyde/env.zsh` sets XDG variables, but under UWSM:
+
+```
+login → PAM → uwsm sets env → shell init runs (overridden by uwsm) → hyprland starts
+```
+
+This means `env_if_unset()` in `hyde/env.lua` may receive values already locked by UWSM, making the zsh env file ineffective for Wayland session vars. The `env.zsh` comment acknowledges this explicitly.
+
+### Service unit implications
+
+Services started by `startup.lua` via `hyde-shell app -u <unit>` generate systemd units. Under UWSM:
+
+- Units should declare `Wants=uwsm-mainston.service` for proper ordering
+- `systemctl --user import-environment` may be redundant since UWSM already imports from the user manager
+- Units that depend on `$WAYLAND_DISPLAY` rely on UWSM propagating it correctly — if UWSM's env import order changes, those services may start before the compositor is ready
+
+### Migration notes
+
+- `hyde-shell app -t scope` → `uwsm app` (manages app lifecycle with UWSM awareness)
+- `hyde-shell app -t service` → systemd user unit with `Wants=uwsm-mainston.service`
+- `dbus-update-activation-environment` calls in `startup.lua` are partially redundant under UWSM but harmless
+- `HYPRLAND_CONFIG` env var behavior depends on whether UWSM imports it from the user environment
 
 ## hyde-shell: Central Orchestrator
 
@@ -198,7 +267,7 @@ You already own `~/.config/hypr/hyprland/` via chezmoi. The LUA config system IS
 
 To own theme switching without `hyde-shell`:
 
-1. **Color extraction**: Replace `wallust` with `pywal`, `matugen` (Material You), or your own script
+1. **Color extraction**: Replace HyDE's ImageMagick-based `wallbash.sh` with `pywal`, `matugen` (Material You), or your own script
 2. **Theme application**: Instead of wallbash templates, use your own scripts that write colors to target files
 3. **Variables**: Move theme settings from `wallbash.conf` into chezmoi data
 
@@ -208,7 +277,7 @@ Replace `hyde-shell` calls in `keybindings.lua` with direct commands or your own
 
 | hyde-shell call | Replace with |
 |----------------|-------------|
-| `hyde-shell app` | `systemd-run --user --scope` |
+| `hyde-shell app` | `systemd-run --user --scope` or `uwsm app` (UWSM-aware) |
 | `hyde-shell themeselect` | Your own theme picker script |
 | `hyde-shell wallpaper` | `hyprctl hyprpaper wallpaper`, `swaybg`, etc. |
 | `hyde-shell animations --select` | Your own animation preset loader |
@@ -219,7 +288,7 @@ Replace `hyde-shell` calls in `keybindings.lua` with direct commands or your own
 ### What's valuable in HyDE and hard to replicate
 
 - **Dcol template system**: The `<wallbash_pry1>` → hex replacement pipeline is elegant. You'd need to reimplement or simplify it.
-- **Systemd scope management**: `hyde-shell app` wraps daemons with proper lifecycle. You can do it with raw `systemctl --user`.
+- **Systemd scope management**: `hyde-shell app` wraps daemons with proper lifecycle. Under UWSM, `uwsm app` handles this natively. Raw `systemctl --user` also works but loses UWSM integration.
 - **Theme directory structure**: Each theme is a portable directory. You'd define your own format.
 - **Animation presets**: 18+ curated presets. You can keep the `.conf` files but replace the selection UI.
 
@@ -227,7 +296,7 @@ Replace `hyde-shell` calls in `keybindings.lua` with direct commands or your own
 
 - **Wallbash cache** (`~/.cache/hyde/`): Pure ephemera. Regenerate on demand.
 - **Dcol post-process scripts**: Most just call `pkill -USR2` or rewrite a JSON file.
-- **wallust**: Replace with any color extraction tool.
+- **HyDE color extractor**: Replace `wallbash.sh` with any color extraction tool if exact HyDE palette matching is not required.
 
 ## Current chezmoi strategy
 
