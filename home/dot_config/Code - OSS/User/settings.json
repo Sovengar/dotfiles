@@ -16,11 +16,12 @@
     "workbench.statusBar.visible": false,
     "workbench.layoutControl.enabled": false,
     "window.commandCenter": false,
+    "chat.agentsControl.enabled": false,
+    "chat.agentsControl.hidden": true,
     "terminal.external.linuxExec": "kitty",
     "terminal.explorerKind": "both",
     "terminal.sourceControlRepositoriesKind": "both",
     "telemetry.telemetryLevel": "off",
-    "window.customTitleBarVisibility": "never",
     "editor.minimap.enabled": false
   }
   

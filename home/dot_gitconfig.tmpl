@@ -18,6 +18,12 @@
 	editor = code --wait
 	excludesfile = ~/.gitignore_global
 	attributesfile = ~/.gitattributes_global
+[credential "https://github.com"]
+	helper =
+	helper = !/home/buble/.local/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/home/buble/.local/bin/gh auth git-credential
 {{ if eq .chezmoi.hostname "NTTD-1H8613110L" -}}
 [credential "https://umane.emeal.nttdata.com"]
 	provider = generic
