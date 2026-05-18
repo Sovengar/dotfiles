@@ -18,3 +18,30 @@ foreach ($var in $vars.GetEnumerator()) {
     Write-Host "[OK] $($var.Key) = $($var.Value)" -ForegroundColor Green
 }
 
+# ── OpenCode Go quota (from sops-encrypted secrets) ────────────
+
+$chezmoiSource = if ($env:CHEZMOI_SOURCE) { $env:CHEZMOI_SOURCE } else { "$env:USERPROFILE\.local\share\chezmoi" }
+$sopsFile = "$chezmoiSource\secrets\opencode-quota.sops.yaml"
+
+if (Test-Path $sopsFile) {
+    try {
+        $decrypted = sops -d $sopsFile 2>$null
+        if ($decrypted) {
+            $workspaceId = ($decrypted | Select-String '(?<=opencode_go_workspace_id: ).*').Matches.Value
+            $authCookie  = ($decrypted | Select-String '(?<=opencode_go_auth_cookie: ).*').Matches.Value
+
+            if ($workspaceId -and $authCookie) {
+                [System.Environment]::SetEnvironmentVariable("OPENCODE_GO_WORKSPACE_ID", $workspaceId, "User")
+                [System.Environment]::SetEnvironmentVariable("OPENCODE_GO_AUTH_COOKIE", $authCookie, "User")
+                Write-Host "[OK] OPENCODE_GO_WORKSPACE_ID set from sops" -ForegroundColor Green
+                Write-Host "[OK] OPENCODE_GO_AUTH_COOKIE set from sops" -ForegroundColor Green
+            } else {
+                Write-Host "[WARN] Could not extract opencode-go vars from sops" -ForegroundColor Yellow
+            }
+        }
+    } catch {
+        Write-Host "[WARN] Failed to decrypt opencode-quota secrets: $_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[WARN] opencode-quota.sops.yaml not found at $sopsFile" -ForegroundColor Yellow
+}

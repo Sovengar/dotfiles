@@ -1,0 +1,54 @@
+/* ==UserStyle==
+@name           YouTube Acrylic Background
+@namespace      sovengar.local
+@version        1.0.0
+@description    Replaces YouTube's solid dark backgrounds with transparent/acrylic panels.
+@author         buble
+@preprocessor   default
+@-moz-document  domain("youtube.com"), domain("www.youtube.com"), domain("music.youtube.com")
+==/UserStyle== */
+
+html,
+body,
+ytd-app,
+ytd-page-manager,
+#page-manager,
+ytd-watch-flexy,
+ytd-browse,
+ytd-two-column-browse-results-renderer,
+ytd-rich-grid-renderer,
+ytd-section-list-renderer,
+#content,
+#columns,
+#primary,
+#secondary,
+ytd-masthead,
+#container.ytd-masthead,
+tp-yt-app-drawer,
+#guide-content,
+ytd-guide-renderer {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+ytd-watch-metadata,
+#comments,
+#secondary-inner,
+ytd-playlist-panel-renderer,
+ytd-engagement-panel-section-list-renderer,
+ytd-rich-item-renderer,
+ytd-video-renderer,
+ytd-compact-video-renderer,
+ytmusic-player-page,
+ytmusic-queue-panel-renderer {
+    background: rgba(8, 10, 14, 0.34) !important;
+    backdrop-filter: blur(24px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+    border-radius: 14px !important;
+}
+
+#movie_player,
+.html5-video-player,
+video {
+    background: #000 !important;
+}
