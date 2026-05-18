@@ -1,5 +1,3 @@
-- This configuration runs on Windows. Use PowerShell commands (not Linux/Bash) for all terminal operations.
-
 ## (MANDATORY) AGENT & SKILL LOADING
 
 - You MUST read the appropriate agent file and its skills BEFORE performing any implementation. This is the highest priority rule.
