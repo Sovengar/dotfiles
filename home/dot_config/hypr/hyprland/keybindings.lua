@@ -58,11 +58,20 @@ bind(mainMod .. " + SHIFT + Up", hl.dsp.window.resize({ x = 0, y = -30, relative
 bind(mainMod .. " + SHIFT + Down", hl.dsp.window.resize({ x = 0, y = 30, relative = true }), "Resize window down", { repeating = true })
 
 -- Window Management / Move active window (swap in dwindle, move in floating)
-local move_active = [[sh -c 'grep -q "true" <<< $(hyprctl activewindow -j | jq -r .floating) && hyprctl dispatch moveactive]]
-exec(mainMod .. " + ALT + Left", move_active .. " -30 0 || hyprctl dispatch movewindow l\"", "Move window left")
-exec(mainMod .. " + ALT + Right", move_active .. " 30 0 || hyprctl dispatch movewindow r\"", "Move window right")
-exec(mainMod .. " + ALT + Up", move_active .. " 0 -30 || hyprctl dispatch movewindow u\"", "Move window up")
-exec(mainMod .. " + ALT + Down", move_active .. " 0 30 || hyprctl dispatch movewindow d\"", "Move window down")
+local function move_window(dx, dy, dir)
+    return function()
+        local win = hl.get_active_window()
+        if win and win.floating then
+            hl.dispatch(hl.dsp.window.move({ x = dx, y = dy }))
+        else
+            hl.dispatch(hl.dsp.window.move({ direction = dir }))
+        end
+    end
+end
+bind(mainMod .. " + ALT + Left", move_window(-30, 0, "l"), "Move window left", { repeating = true })
+bind(mainMod .. " + ALT + Right", move_window(30, 0, "r"), "Move window right", { repeating = true })
+bind(mainMod .. " + ALT + Up", move_window(0, -30, "u"), "Move window up", { repeating = true })
+bind(mainMod .. " + ALT + Down", move_window(0, 30, "d"), "Move window down", { repeating = true })
 
 -- Window Management / Move and Resize with mouse
 bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), "Drag window", { mouse = true })
