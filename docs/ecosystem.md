@@ -50,6 +50,27 @@ When adding a new tool/dependency/package to any install script, **must also add
 | VisualVM | JVM profiler | manual |
 | JD-GUI | Java decompiler | manual |
 
+### Gaming
+| Tool | Purpose | Install |
+|------|---------|---------|
+| steam | Game store | system |
+| heroic-games-launcher | Epic/GOG/Amazon launcher | CachyOS repo |
+| lutris | Open Gaming Platform | system |
+| wine | Windows compat layer | system |
+| proton-cachyos | Steam Play (CachyOS) | CachyOS repo |
+
+### Office
+| Tool | Purpose | Install |
+|------|---------|---------|
+| onlyoffice-bin | Office suite | CachyOS repo |
+
+### Network
+| Tool | Purpose | Install |
+|------|---------|---------|
+| qbittorrent | BitTorrent client | system |
+| hayase-desktop-bin | Anime torrent streaming | AUR |
+| jdownloader2 | Download manager (JDownloader) | CachyOS repo |
+
 ### Docker/Infra
 | Tool | Purpose | Install |
 |------|---------|---------|
@@ -73,16 +94,40 @@ When adding a new tool/dependency/package to any install script, **must also add
 | SOPS | Secrets mgr | winget |
 | Malwarebytes | AV | winget |
 
-### HyDE Dependencies
+### HyDE Dependencies — Core
 | Tool | Purpose | Notes |
 |------|---------|-------|
 | hyprland | WM (Linux) | CachyOS repo |
-| hyprpaper/hyprlock/hypridle | Hypr utils | CachyOS repo |
-| waybar | Bar | CachyOS repo |
-| rofi | Launcher | CachyOS repo |
-| dunst | Notifications | CachyOS repo |
-| kitty | Terminal (fallback) | CachyOS repo |
+| uwsm | Wayland session manager | system |
+| awww | Wallpaper daemon | CachyOS repo |
+| waybar | Status bar | CachyOS repo |
+| rofi | Application launcher | CachyOS repo |
+| dunst | Notification daemon | CachyOS repo |
+| swaync | Notification center | system |
+| hyprlock | Lock screen | CachyOS repo |
+| hypridle | Idle daemon | CachyOS repo |
+| hyprsunset | Blue-light filter | CachyOS repo |
 | wlogout | Logout menu | CachyOS repo |
 | pypr | Hyprland helper | aur/pip |
+
+### HyDE Dependencies — Theming & Display
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| nwg-look | GTK settings editor | CachyOS repo |
+| nwg-displays | Output management | system |
+| qt5ct/qt6ct | Qt config tool | system |
+| kvantum | Qt theme engine | system |
+| qt5-wayland/qt6-wayland | Qt Wayland support | system |
 | wallust | Color gen (wallbash) | aur/pip |
 | imagemagick | Image processing | system |
+
+### HyDE Dependencies — Utilities
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| hyprpolkitagent | Polkit auth agent | CachyOS repo |
+| xdg-desktop-portal-hyprland | Hyprland portal backend | CachyOS repo |
+| xdg-desktop-portal-gtk | GTK file picker portal | system |
+| hyprquery | Config query CLI | chaotic-aur |
+| swayosd-git | On-screen display | chaotic-aur |
+| wf-recorder | Wlroots screen recorder | system |
+| kitty | Terminal (fallback) | CachyOS repo |

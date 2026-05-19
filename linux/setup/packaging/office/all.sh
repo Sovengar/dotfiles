@@ -1,4 +1,4 @@
-# Gaming all.sh
+# Office all.sh
 
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,8 +7,4 @@ fi
 
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_PHASE_DIR/steam.sh"
-run_logged "$_PHASE_DIR/heroic.sh"
-run_logged "$_PHASE_DIR/lutris.sh"
-run_logged "$_PHASE_DIR/wine.sh"
-run_logged "$_PHASE_DIR/proton.sh"
+run_logged "$_PHASE_DIR/onlyoffice.sh"
