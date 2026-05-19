@@ -128,10 +128,10 @@ exec(mainMod .. " + K", "pkill -x rofi || hyde-shell keybinds_hint c", "Keybindi
 exec(mainMod .. " + ALT + G", "hyde-shell gamemode", "Game mode")
 exec(mainMod .. " + SHIFT + G", "hyde-shell gamelauncher", "Open game launcher")
 exec(mainMod .. " + SHIFT + P", "hyprpicker -an", "Color picker")
-exec(mainMod .. " + P", "hyde-shell screenshot s", "Snip screen")
+exec("Print", "grim -g \"$(slurp)\" - | swappy -f -", "Snip screen")
 exec(mainMod .. " + CONTROL + P", "hyde-shell screenshot sf", "Freeze and snip screen")
 exec(mainMod .. " + ALT + P", "hyde-shell screenshot m", "Print monitor", { locked = true })
-exec("Print", "hyde-shell screenshot p", "Print all monitors", { locked = true })
+exec(mainMod .. " + P", "hyde-shell screenshot p", "Print all monitors", { locked = true })
 
 -- Theming and Wallpaper
 exec(mainMod .. " + SHIFT + CONTROL + Right", "hyde-shell wallpaper -Gn", "Next global wallpaper")
@@ -163,6 +163,8 @@ bind(mainMod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:magic", 
 exec(mainMod .. " + CONTROL + ALT + Right", "hyprctl dispatch movetoworkspace r+1", "Move window to next workspace")
 exec(mainMod .. " + CONTROL + ALT + Left", "hyprctl dispatch movetoworkspace r-1", "Move window to previous workspace")
 
+exec(mainMod .. " + F10", "pkill -SIGUSR1 hyprexpose", "Workspace overview")
+exec(mainMod .. " + XF86AudioMute", "pkill -SIGUSR1 hyprexpose", "Workspace overview")
 exec(mainMod .. " + G", "pypr toggle lazygit", "LazyGit")
 exec(mainMod .. " + D", "pypr toggle lazydocker", "LazyDocker")
 exec(mainMod .. " + F", "pypr toggle gemini", "Gemini floating web app")
