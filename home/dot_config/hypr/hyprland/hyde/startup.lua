@@ -9,7 +9,6 @@ hl.on("hyprland.start", function()
     exec_once("dbus-update-activation-environment --systemd " .. vars.envList)
     exec_once("systemctl --user import-environment " .. vars.envList)
     exec_once("hyde-shell resetxdgportal.sh")
-    exec_once("hyde-shell app -t service -- polkitkdeauth.sh")
 
     exec_once("hyde-shell app -u " .. vars.unit .. "-bar.scope -t scope -- waybar.py --watch")
     exec_once("hyde-shell app -u " .. vars.unit .. "-notifications.service -t service -- dunst")

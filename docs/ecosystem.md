@@ -7,6 +7,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 ### Terminal & Shell
 | Tool | Purpose | Install |
 |------|---------|---------|
+| ghostty | Terminal emulator | system |
 | wezterm | Terminal emulator | nightly |
 | starship | Prompt | brew/curl |
 | zsh | Shell | system |
@@ -18,6 +19,8 @@ When adding a new tool/dependency/package to any install script, **must also add
 | lazydocker | TUI docker | brew/curl |
 | btm (bottom) | TUI process | brew/curl |
 | fastfetch | System info | brew/curl |
+| cava | Console audio visualizer | system |
+| pokego | Pokémon sprites in terminal | AUR |
 
 ### CLI Tools
 | Tool | Purpose | Install |
@@ -63,6 +66,11 @@ When adding a new tool/dependency/package to any install script, **must also add
 | Tool | Purpose | Install |
 |------|---------|---------|
 | onlyoffice-bin | Office suite | CachyOS repo |
+
+### Media & Entertainment
+| Tool | Purpose | Install |
+|------|---------|---------|
+| spotify-adblock | Spotify ad blocker | AUR |
 
 ### Network
 | Tool | Purpose | Install |

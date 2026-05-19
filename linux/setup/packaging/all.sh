@@ -40,6 +40,7 @@ run_logged "$_SELF_DIR/social/all.sh"
 run_logged "$_SELF_DIR/dev-tools/all.sh"
 run_logged "$_SELF_DIR/office/all.sh"
 run_logged "$_SELF_DIR/gaming/all.sh"
+run_logged "$_SELF_DIR/media/all.sh"
 run_logged "$_SELF_DIR/network/all.sh"
 
 print_phase_summary "Packaging"

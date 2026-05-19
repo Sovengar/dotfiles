@@ -1,5 +1,10 @@
 source /usr/share/cachyos-fish-config/cachyos-config.fish
 
+if set -q NO_FAST_FETCH
+    function fish_greeting
+    end
+end
+
 # overwrite greeting
 # potentially disabling fastfetch
 #function fish_greeting

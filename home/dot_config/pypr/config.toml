@@ -7,9 +7,9 @@ term_with_class = "kitty --class"
 [scratchpads.console]
 animation = "fromTop"
 class = "console-dropdown"
-command = "[term_with_class] console-dropdown"
-max_size = "90% 100%"
-size = "75% 60%"
+command = "env NO_FAST_FETCH=1 kitty --class console-dropdown --title console-dropdown --config ~/.config/kitty/lazyvim-command.conf"
+size = "600px 150px"
+margin = 180
 
 [scratchpads.lazygit]
 animation = "fromTop"
