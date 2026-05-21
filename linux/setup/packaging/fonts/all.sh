@@ -9,3 +9,5 @@ _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 run_logged "$_PHASE_DIR/jetbrains-mono-nerd-font.sh"
 run_logged "$_PHASE_DIR/hyde-fonts.sh"
+run_logged "$_PHASE_DIR/powerline-fonts.sh"
+run_logged "$_PHASE_DIR/ttf-fantasque-nerd.sh"
