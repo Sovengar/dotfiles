@@ -7,6 +7,8 @@ fi
 
 _PHASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-run_logged "$_PHASE_DIR/spotify.sh"
 run_logged "$_PHASE_DIR/spicetify-cli.sh"
 run_logged "$_PHASE_DIR/spotify-adblock.sh"
+run_logged "$_PHASE_DIR/spotify.sh"
+run_logged "$_PHASE_DIR/zbar.sh"
+run_logged "$_PHASE_DIR/webcamize.sh"
