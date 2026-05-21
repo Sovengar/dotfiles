@@ -9,9 +9,11 @@ hl.on("hyprland.start", function()
     exec_once("dbus-update-activation-environment --systemd " .. vars.envList)
     exec_once("systemctl --user import-environment " .. vars.envList)
     exec_once("hyde-shell resetxdgportal.sh")
+    exec_once("hyde-shell app -t service -- polkitkdeauth.sh")
 
     exec_once("hyde-shell app -u " .. vars.unit .. "-bar.scope -t scope -- waybar.py --watch")
     exec_once("hyde-shell app -u " .. vars.unit .. "-notifications.service -t service -- dunst")
+    exec_once("sh -c 'command -v swayosd-server >/dev/null 2>&1 && hyde-shell app -u " .. vars.unit .. "-swayosd.service -t service -- swayosd-server'")
     exec_once("hyde-shell app -u " .. vars.unit .. "-wallpaper.service -t service -- wallpaper.sh --start --global")
 
     exec_once("hyde-shell app -u " .. vars.unit .. "-text-clipboard.service -t service wl-paste --type text --watch cliphist store")

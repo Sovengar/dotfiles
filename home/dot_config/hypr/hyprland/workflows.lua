@@ -1,6 +1,8 @@
 local home = os.getenv("HOME") or ""
 local config_home = os.getenv("XDG_CONFIG_HOME") or (home .. "/.config")
+local state_home = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
 local base_dir = config_home .. "/hypr/hyprland"
+local hyde_state_dir = state_home .. "/hyde"
 
 local function read_file(path)
     local file = io.open(path, "r")
@@ -59,6 +61,48 @@ local function split_csv(value)
     return parts
 end
 
+local function selected_workflow_name()
+    local state = read_file(hyde_state_dir .. "/staterc")
+    local from_state = state:match("[%f[%w_]HYPR_WORKFLOW%s*=%s*\"?([^\"\r\n]+)\"?")
+    if from_state and from_state ~= "" then
+        return trim(from_state)
+    end
+
+    local conf = read_file(base_dir .. "/workflows.conf")
+    local from_conf = conf:match("$WORKFLOW%s*=%s*([^\r\n]+)")
+    if from_conf and from_conf ~= "" then
+        return trim(from_conf):gsub('^"', ""):gsub('"$', "")
+    end
+
+    return "default"
+end
+
+local function apply_lua_workflow(name)
+    if name:find("/", 1, true) or name:find("\\", 1, true) then
+        return false
+    end
+
+    local module = "hyprland.workflows." .. name
+    package.loaded[module] = nil
+
+    local ok, workflow = pcall(require, module)
+    if not ok then
+        return false
+    end
+
+    if type(workflow) == "function" then
+        workflow()
+        return true
+    end
+
+    if type(workflow) == "table" and type(workflow.apply) == "function" then
+        workflow.apply()
+        return true
+    end
+
+    return true
+end
+
 local function parse_window_rule(value, index)
     local rule = { name = "workflow_windowrule_" .. index }
     local match = {}
@@ -90,6 +134,10 @@ local function active_workflow_path()
     local path = conf:match("$WORKFLOWS_PATH%s*=%s*([^\r\n]+)") or "./workflows/default.conf"
     path = trim(path):gsub('^"', ""):gsub('"$', "")
     return path:gsub("^%./", base_dir .. "/")
+end
+
+if apply_lua_workflow(selected_workflow_name()) then
+    return
 end
 
 local config = {}

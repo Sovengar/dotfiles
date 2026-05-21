@@ -16,8 +16,8 @@
 # Subgroup1.. - The subgroup names can be use to avoid repeating the same description
 ]]
 
-local vars = require("hyprland.hypr_vars")
-local mainMod = vars.mainMod
+local primary_apps = require("hyprland.primary_apps")
+local mainMod = "SUPER"
 
 local function exec(keys, command, description, opts)
     opts = opts or {}
@@ -35,7 +35,7 @@ end
 bind(mainMod .. " + Backspace", hl.dsp.window.close(), "Close focused window")
 bind("ALT + F4", hl.dsp.window.close(), "Close focused window")
 exec(mainMod .. " + Delete", "hyde-shell logout", "Kill Hyprland session")
-bind(mainMod .. " + W", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
+bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
 bind("SHIFT + F11", hl.dsp.window.fullscreen(), "Toggle fullscreen")
 exec(mainMod .. " + L", "hyde-shell lock-session", "Lock screen")
 exec(mainMod .. " + SHIFT + F", "hyde-shell window.pin", "Toggle pin on focused window")
@@ -75,16 +75,24 @@ bind(mainMod .. " + ALT + Down", move_window(0, 30, "d"), "Move window down", { 
 
 -- Window Management / Move and Resize with mouse
 bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), "Drag window", { mouse = true })
+local function float_and_resize()
+    local win = hl.get_active_window()
+    if win and not win.floating then
+        hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+    end
+    hl.dispatch(hl.dsp.window.resize())
+end
+bind(mainMod .. " + mouse:273", float_and_resize, "Float and resize window", { mouse = true })
 bind(mainMod .. " + Z", hl.dsp.window.fullscreen(), "Toggle fullscreen")
-bind(mainMod .. " + X", hl.dsp.window.resize(), "Hold to resize window", { mouse = true })
+bind(mainMod .. " + X", hl.dsp.send_shortcut({ mods = "CTRL", key = "X" }), "Universal cut")
 bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), "Toggle split")
 
 -- Launcher / Apps
-exec(mainMod .. " + Return", vars.terminal, "Open terminal")
+exec(mainMod .. " + Return", primary_apps.terminal, "Open terminal")
 exec(mainMod .. " + ALT + Return", "hyde-shell pypr toggle console", "Open dropdown terminal")
-exec(mainMod .. " + E", vars.explorer, "Open file explorer")
-exec(mainMod .. " + T", vars.editor, "Open text editor")
-exec(mainMod .. " + B", vars.browser, "Open browser")
+exec(mainMod .. " + E", primary_apps.explorer, "Open file explorer")
+exec(mainMod .. " + T", primary_apps.editor, "Open text editor")
+exec(mainMod .. " + B", primary_apps.browser, "Open browser")
 exec("CONTROL + SHIFT + Escape", "hyde-shell system.monitor", "Open system monitor")
 
 -- Launcher / Rofi menus
@@ -167,4 +175,4 @@ exec(mainMod .. " + F10", "pkill -SIGUSR1 hyprexpose", "Workspace overview")
 exec(mainMod .. " + XF86AudioMute", "pkill -SIGUSR1 hyprexpose", "Workspace overview")
 exec(mainMod .. " + G", "pypr toggle lazygit", "LazyGit")
 exec(mainMod .. " + D", "pypr toggle lazydocker", "LazyDocker")
-exec(mainMod .. " + F", "pypr toggle gemini", "Gemini floating web app")
+exec(mainMod .. " + W", "pypr toggle ai-assistant", "AI assistant (ChatGPT + Gemini + Claude + Arena)")

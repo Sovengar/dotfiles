@@ -12,6 +12,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 | starship | Prompt | brew/curl |
 | zsh | Shell | system |
 | fish | Alt shell (HyDE) | system |
+| fisher | Fish plugin manager | curl |
 | PowerShell 7 | Windows shell | winget |
 | broot | TUI tree nav | brew/curl |
 | yazi | TUI file manager | cargo/brew |
@@ -21,10 +22,26 @@ When adding a new tool/dependency/package to any install script, **must also add
 | fastfetch | System info | brew/curl |
 | cava | Console audio visualizer | system |
 | pokego | Pokémon sprites in terminal | AUR |
+| sl | Steam locomotive ASCII animation | system |
+| cmatrix | Matrix-style rain animation | system |
+| cowsay | Talking cow ASCII text | system |
+| fortune-mod | Fortune cookie quotes (`fortune`) | system |
+| figlet | Large ASCII text banners | system |
+| toilet | Styled ASCII text banners | system |
+| lolcat | Rainbow terminal text filter | system |
+| asciiquarium | Animated ASCII aquarium | system |
+| nyancat | Nyan Cat terminal animation | system |
+| pipes.sh | Animated terminal pipes screensaver | AUR |
+| cbonsai | Procedural terminal bonsai | AUR |
+| ponysay | Pony-themed cowsay alternative | system |
+| hollywood | Fake hacker terminal dashboard | AUR |
+| aalib | ASCII fire demo (`aafire`) | system |
 
 ### CLI Tools
 | Tool | Purpose | Install |
 |------|---------|---------|
+| sed (GNU) | Stream editor | system |
+| gawk (GNU Awk) | Text processing | system |
 | fd | File search | brew/curl |
 | rg (ripgrep) | Text search | brew/curl |
 | fzf | Fuzzy finder | brew/curl |
@@ -37,6 +54,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 | pastel | Color swatches | brew/curl |
 | mise | Dev env manager | brew/curl |
 | jj | Git-compat VCS | brew/curl |
+| jqp | TUI playground for jq | go install |
 | snip | Token saver | go install |
 
 ### Dev Tools
@@ -52,6 +70,18 @@ When adding a new tool/dependency/package to any install script, **must also add
 | SoapUI | API testing | winget |
 | VisualVM | JVM profiler | manual |
 | JD-GUI | Java decompiler | manual |
+| depot_tools | Chromium/WebRTC development tooling | git clone |
+
+### Hardware & Diagnostics
+| Tool | Purpose | Install |
+|------|---------|---------|
+| nvtop | TUI GPU monitor | system |
+| vulkan-tools | Vulkan diagnostics (`vulkaninfo`) | system |
+| qpwgraph | PipeWire/JACK graph GUI | system |
+| lshw | Deep hardware inventory | system |
+| powertop | Power usage diagnostics | system |
+| libinput-tools | Input device diagnostics (`libinput`) | system |
+| nvme-cli | NVMe drive diagnostics (`nvme`) | system |
 
 ### Gaming
 | Tool | Purpose | Install |

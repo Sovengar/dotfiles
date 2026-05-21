@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+          __  __
+ ___      \ \/ /
+/ __|_____ >  <
+\__ \_____/ /\ \
+|___/    /_/  \_\
+
+show-x - indice de comandos show-* disponibles
+
+Uso:
+  show-x        Lista los indices disponibles
+  show-x --help Muestra esta ayuda
+EOF
+}
+
+print_banner() {
+  cat <<'EOF'
+          __  __
+ ___      \ \/ /
+/ __|_____ >  <
+\__ \_____/ /\ \
+|___/    /_/  \_\
+
+Show command index
+EOF
+}
+
+print_header() {
+  printf '\n+------------------------------+----------+------------------------------------------------------------------+\n'
+  printf '| %-28s | %-8s | %-64s |\n' "COMMAND" "STATUS" "DESCRIPTION"
+  printf '+------------------------------+----------+------------------------------------------------------------------+\n'
+}
+
+print_row() {
+  local command_name=$1
+  local status=$2
+  local description=$3
+
+  printf '| %-28s | %-8s | %-64s |\n' "$command_name" "$status" "$description"
+}
+
+print_footer() {
+  printf '+------------------------------+----------+------------------------------------------------------------------+\n'
+}
+
+case "${1:-}" in
+  "") ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    printf 'Uso invalido: %s\n\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+tools=(
+  "show-hw-x|Hardware, sistema, energia, GPU, audio, red y diagnostico."
+  "show-funny-x|Comandos visuales/divertidos de terminal."
+  "show-own-x|Comandos propios creados o customizados por mi."
+)
+
+print_banner
+print_header
+
+for entry in "${tools[@]}"; do
+  command_name=${entry%%|*}
+  description=${entry#*|}
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    print_row "$command_name" "ok" "$description"
+  else
+    print_row "$command_name" "missing" "$description"
+  fi
+done
+
+print_footer

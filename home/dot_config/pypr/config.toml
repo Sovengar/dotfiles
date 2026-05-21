@@ -7,7 +7,7 @@ term_with_class = "kitty --class"
 [scratchpads.console]
 animation = "fromTop"
 class = "console-dropdown"
-command = "env NO_FAST_FETCH=1 kitty --class console-dropdown --title console-dropdown --config ~/.config/kitty/quick-command.conf"
+command = "env NO_FAST_FETCH=1 xdg-terminal-exec --app-id=console-dropdown --title=console-dropdown"
 size = "600px 150px"
 margin = 180
 
@@ -26,9 +26,12 @@ command = "kitty --class pypr-lazydocker -e /home/linuxbrew/.linuxbrew/bin/lazyd
 size = "80% 80%"
 lazy = true
 
-[scratchpads.gemini]
+[scratchpads.ai-assistant]
 animation = "fromTop"
 class = "firefox"
-command = "pypr-gemini"
-size = "80% 90%"
+command = "pypr-ai-assistant"
+size = "55% 75%"
 lazy = true
+match_by = "class"
+multi = false
+process_tracking = false

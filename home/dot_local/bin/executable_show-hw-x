@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+show_all=false
+
+usage() {
+  cat <<'EOF'
+ _                  __  __
+| |____      __    \ \/ /
+| '_ \ \ /\ / /____ >  <
+| | | \ V  V /_____/ /\ \
+|_| |_|\_/\_/     /_/  \_\
+
+show-hw-x - lista herramientas locales para hardware/sistema
+
+Uso:
+  show-hw-x        Muestra solo comandos instalados
+  show-hw-x --all  Muestra instalados y faltantes
+  show-hw-x --help Muestra esta ayuda
+EOF
+}
+
+print_banner() {
+  cat <<'EOF'
+ _                  __  __
+| |____      __    \ \/ /
+| '_ \ \ /\ / /____ >  <
+| | | \ V  V /_____/ /\ \
+|_| |_|\_/\_/     /_/  \_\
+
+Hardware & system command index
+EOF
+
+  if [[ "$show_all" == true ]]; then
+    printf 'Mode: installed + missing commands\n\n'
+  else
+    printf 'Mode: installed commands only. Use show-hw-x --all to include missing tools.\n\n'
+  fi
+}
+
+print_category_header() {
+  local category=$1
+
+  printf '\n+------------------------------+----------+------------------------------------------------------------------+\n'
+  printf '| %-28s | %-8s | %-64s |\n' "$category" "STATUS" "DESCRIPTION"
+  printf '+------------------------------+----------+------------------------------------------------------------------+\n'
+}
+
+print_row() {
+  local command_name=$1
+  local status=$2
+  local description=$3
+
+  printf '| %-28s | %-8s | %-64s |\n' "$command_name" "$status" "$description"
+}
+
+print_category_footer() {
+  printf '+------------------------------+----------+------------------------------------------------------------------+\n'
+}
+
+case "${1:-}" in
+  "") ;;
+  --all | -a) show_all=true ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    printf 'Uso invalido: %s\n\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+tools=(
+  "Monitores|btop|TUI moderno: CPU, RAM, procesos, discos y red."
+  "Monitores|htop|TUI clasico de procesos, CPU y memoria."
+  "Monitores|btm|Bottom: CPU, memoria, discos, red y procesos."
+  "Monitores|top|Monitor basico incluido en casi cualquier sistema."
+  "Sistema base|fastfetch|Resumen de sistema, kernel, CPU, GPU, RAM y escritorio."
+  "Sistema base|inxi|Inventario detallado de hardware, drivers y sistema."
+  "Sistema base|lshw|Inventario profundo de hardware detectado por Linux."
+  "Sistema base|hwinfo|Inventario amplio de hardware y dispositivos."
+  "Sistema base|dmidecode|SMBIOS/firmware: placa base, BIOS, RAM y chasis."
+  "CPU y memoria|lscpu|CPU, nucleos, flags, caches y arquitectura."
+  "CPU y memoria|lsmem|Bloques de memoria fisica detectados."
+  "CPU y memoria|free|Uso de RAM y swap."
+  "CPU y memoria|uptime|Carga del sistema y tiempo encendido."
+  "Dispositivos|lspci|Dispositivos PCI: GPU, audio, red y controladoras."
+  "Dispositivos|lsusb|Dispositivos USB conectados."
+  "Discos|lsblk|Discos, particiones, puntos de montaje y tamanos."
+  "Discos|blkid|UUID, labels y tipos de filesystem."
+  "Discos|df|Uso de filesystems montados."
+  "Discos|duf|Uso de disco con salida clara y agrupada."
+  "Discos|smartctl|Estado SMART de discos SATA/NVMe."
+  "Discos|nvme|Gestion e informacion de discos NVMe."
+  "Energia y sensores|sensors|Temperaturas, voltajes y ventiladores."
+  "Energia y sensores|powertop|Consumo energetico y tunables."
+  "Energia y sensores|upower|Bateria y dispositivos de energia."
+  "Energia y sensores|acpi|Bateria, temperatura y AC en formato simple."
+  "Energia y sensores|tlp-stat|Estado y diagnostico de TLP en portatiles."
+  "GPU y graficos|nvidia-smi|GPU NVIDIA: uso, VRAM, procesos y driver."
+  "GPU y graficos|nvtop|Monitor TUI de GPUs NVIDIA/AMD/Intel."
+  "GPU y graficos|radeontop|Uso de GPU AMD Radeon."
+  "GPU y graficos|intel_gpu_top|Uso de GPU Intel."
+  "GPU y graficos|vulkaninfo|Capacidades Vulkan de GPU y drivers."
+  "GPU y graficos|glxinfo|Capacidades OpenGL/Mesa."
+  "GPU y graficos|clinfo|Capacidades OpenCL."
+  "Audio PipeWire|pw-top|Nodos, latencia y uso de PipeWire."
+  "Audio PipeWire|pw-cli|CLI de bajo nivel para inspeccionar/controlar PipeWire."
+  "Audio PipeWire|pw-dump|Dump JSON del grafo PipeWire."
+  "Audio PipeWire|wpctl|WirePlumber: volumen, mute, fuentes y sinks."
+  "Audio PipeWire|pactl|Pulse/PipeWire Pulse: sinks, sources y volumen."
+  "Audio PipeWire|pavucontrol|GUI para volumen y rutas de audio."
+  "Audio PipeWire|helvum|GUI patchbay para conexiones PipeWire."
+  "Audio PipeWire|qpwgraph|GUI avanzada para grafo PipeWire/JACK."
+  "Red y Bluetooth|nmcli|NetworkManager: Wi-Fi, Ethernet, VPN y estado."
+  "Red y Bluetooth|iwctl|CLI de iwd para Wi-Fi."
+  "Red y Bluetooth|iw|Diagnostico/control Wi-Fi de bajo nivel."
+  "Red y Bluetooth|rfkill|Bloqueo/desbloqueo de Wi-Fi y Bluetooth."
+  "Red y Bluetooth|bluetoothctl|Bluetooth: scan, pair, connect e info."
+  "Red y Bluetooth|ip|Interfaces, rutas y direcciones."
+  "Red y Bluetooth|ss|Sockets y puertos activos."
+  "Red y Bluetooth|ethtool|Info y diagnostico de interfaces Ethernet."
+  "Pantalla y desktop|xrandr|Pantallas en X11: resoluciones y layout."
+  "Pantalla y desktop|wlr-randr|Pantallas en Wayland/wlroots."
+  "Pantalla y desktop|hyprctl|Hyprland: monitores, dispositivos y clients."
+  "Pantalla y desktop|nwg-displays|GUI para monitores Wayland/wlroots."
+  "Pantalla y desktop|nwg-look|GUI para tema GTK, iconos y fuentes."
+  "Entrada|libinput|Teclado, mouse, touchpad y eventos de entrada."
+)
+
+print_banner
+
+found=0
+current_category=""
+category_has_rows=false
+
+for entry in "${tools[@]}"; do
+  category=${entry%%|*}
+  rest=${entry#*|}
+  command_name=${rest%%|*}
+  description=${rest#*|}
+
+  if [[ "$category" != "$current_category" ]]; then
+    if [[ -n "$current_category" && "$category_has_rows" == true ]]; then
+      print_category_footer
+    fi
+
+    current_category=$category
+    category_has_rows=false
+  fi
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "ok" "$description"
+    found=$((found + 1))
+  elif [[ "$show_all" == true ]]; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "missing" "$description"
+  fi
+done
+
+if [[ "$category_has_rows" == true ]]; then
+  print_category_footer
+fi
+
+if (( found == 0 )); then
+  printf '\nNo encontre ninguna herramienta de la lista en PATH. Usa show-hw-x --all para ver la lista completa.\n' >&2
+  exit 1
+fi

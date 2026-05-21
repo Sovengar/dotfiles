@@ -11,12 +11,12 @@ detect_pkg_manager >/dev/null
 
 case "$_pkg_manager" in
   pacman)
-    if _cmd_present grim && _cmd_present slurp && _cmd_present satty && _cmd_present hyprpicker; then
+    if _cmd_present grim && _cmd_present slurp && _cmd_present swappy && _cmd_present hyprpicker; then
       success "Screenshot tools already installed"
       return 0 2>/dev/null || exit 0
     fi
     _ensure_sudo
-    pkg_install grim slurp satty hyprpicker
+    pkg_install grim slurp swappy hyprpicker
     ;;
   apt|dnf|brew)
     if _cmd_present grim && _cmd_present slurp; then
@@ -25,7 +25,7 @@ case "$_pkg_manager" in
     fi
     _ensure_sudo
     pkg_install grim slurp
-    log "satty/hyprpicker package names vary outside Arch; install them manually if needed"
+    log "swappy/hyprpicker package names vary outside Arch; install them manually if needed"
     ;;
 esac
 

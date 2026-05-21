@@ -94,7 +94,6 @@ tools=(
   "Humor|fortune|Frases, citas y chistes aleatorios."
   "Humor|ponysay|Version pony de cowsay."
   "Caos controlado|aafire|Fuego ASCII desde aalib."
-  "Utilidades|clocktemp|Reloj TUI con hora, fecha y temperatura."
 )
 
 print_banner

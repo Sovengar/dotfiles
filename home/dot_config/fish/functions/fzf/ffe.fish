@@ -24,4 +24,3 @@ function ffe -d "Find file with fzf and open in Editor"
         return 1
     end
 end
-

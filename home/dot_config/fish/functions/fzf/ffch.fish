@@ -56,4 +56,3 @@ function ffch -d "Fuzzy search through command history"
 
     commandline -f repaint
 end
-

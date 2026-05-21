@@ -3,3 +3,9 @@ set -euo pipefail
 if [[ -z "${_GUARDS_LOADED:-}" ]]; then SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; source "$SCRIPT_DIR/../../helpers/all.sh"; fi
 log "Installing gotty..."
 go_install_latest "github.com/sorenisanerd/gotty@latest" gotty
+
+if ! command -v gotty &>/dev/null && [[ -f "$(go env GOBIN)/gotty" ]]; then
+  mkdir -p "$HOME/.local/bin"
+  mv -f "$(go env GOBIN)/gotty" "$HOME/.local/bin/gotty"
+  success "gotty moved to ~/.local/bin"
+fi
