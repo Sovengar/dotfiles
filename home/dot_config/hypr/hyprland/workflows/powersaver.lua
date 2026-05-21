@@ -1,0 +1,50 @@
+-- @workflow_icon 
+-- @workflow_description Saves as much power as possible by disabling all animations and effects, but preserving readability
+
+return {
+    icon = "",
+    description = "Saves as much power as possible by disabling all animations and effects, but preserving readability",
+
+    apply = function()
+        hl.config({
+            decoration = {
+                shadow = {
+                    enabled = false,
+                },
+                blur = {
+                    enabled = false,
+                    xray = true,
+                },
+                rounding = 0,
+                active_opacity = 1,
+                inactive_opacity = 1,
+                fullscreen_opacity = 1,
+            },
+            general = {
+                gaps_in = 0,
+                gaps_out = 0,
+                border_size = 1,
+            },
+            animations = {
+                enabled = false,
+            },
+        })
+
+        hl.window_rule({
+            name = "workflow_windowrule_1",
+            opaque = true,
+            match = {
+                class = ".*",
+            },
+        })
+
+        hl.layer_rule({
+            name = "workflows_powersaver",
+            no_anim = true,
+            blur = false,
+            match = {
+                namespace = "^(rofi|notifications|swaync-(notification-window|control-center)|logout_dialog|waybar)$",
+            },
+        })
+    end,
+}
