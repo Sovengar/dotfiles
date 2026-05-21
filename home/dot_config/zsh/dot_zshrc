@@ -35,14 +35,7 @@
 # # Always mkdir a path (this doesn't inhibit functionality to make a single dir)
 # alias mkdir='mkdir -p'
 
-#  This is your file 
-# Add your configurations here
-# export EDITOR=nvim
-export EDITOR=code
+# Custom configuration has been split into conf.d/NN-*.zsh files.
+# Keep this file for HyDE compatibility and one-off interactive overrides only.
 
 # unset -f command_not_found_handler # Uncomment to prevent searching for commands not found in package manager
-
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
-
-# mise (runtime version manager)
-export PATH="$HOME/.local/share/mise/shims:$HOME/go/bin:$PATH"

@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+# History configuration. Loaded after HyDE so local values win.
+HISTFILE=${HISTFILE:-$ZDOTDIR/.zsh_history}
+HISTSIZE=${HISTSIZE:-10000}
+SAVEHIST=${SAVEHIST:-10000}
+
+setopt EXTENDED_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+
+export HISTFILE HISTSIZE SAVEHIST

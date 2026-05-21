@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
+
+for arg in "$@"; do
+  case "$arg" in
+    -h|--help|-v|--version)
+      set +e
+      /usr/bin/nwg-displays "$@"
+      status=$?
+      rm -f "$config_home/hypr/monitors.conf"
+      exit "$status"
+      ;;
+  esac
+done
+
+tmp_dir=${XDG_RUNTIME_DIR:-/tmp}
+tmp_conf="$tmp_dir/nwg-displays-monitors.conf"
+target_lua="$config_home/hypr/hyprland/hardware/monitors.lua"
+
+/usr/bin/nwg-displays "$@" --monitors_path "$tmp_conf"
+
+if [[ ! -s "$tmp_conf" ]]; then
+  exit 0
+fi
+
+tmp_lua=$(mktemp "${tmp_dir%/}/nwg-displays-monitors.XXXXXX.lua")
+trap 'rm -f "$tmp_lua"' EXIT
+
+lua_escape() {
+  local value=$1
+  value=${value//\\/\\\\}
+  value=${value//"/\\"}
+  printf '%s' "$value"
+}
+
+write_monitor() {
+  local output=$1
+  local mode=$2
+  local position=$3
+  local scale=$4
+
+  {
+    printf 'hl.monitor({\n'
+    printf '    output = "%s",\n' "$(lua_escape "$output")"
+    printf '    mode = "%s",\n' "$(lua_escape "$mode")"
+    printf '    position = "%s",\n' "$(lua_escape "$position")"
+    if [[ "$scale" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+      printf '    scale = %s,\n' "$scale"
+    else
+      printf '    scale = "%s",\n' "$(lua_escape "$scale")"
+    fi
+    printf '})\n\n'
+  } >> "$tmp_lua"
+}
+
+{
+  printf '%s\n' '-- Generated from nwg-displays output. Do not edit manually.'
+  printf '%s\n\n' '-- Edit monitor layout through nwg-displays; this wrapper converts its Hyprland .conf output to Lua.'
+} > "$tmp_lua"
+
+monitor_count=0
+while IFS= read -r line; do
+  [[ "$line" == monitor=* ]] || continue
+  value=${line#monitor=}
+  IFS=',' read -r output mode position scale _ <<< "$value"
+  [[ -n "${output:-}" && -n "${mode:-}" && -n "${position:-}" && -n "${scale:-}" ]] || continue
+  write_monitor "$output" "$mode" "$position" "$scale"
+  monitor_count=$((monitor_count + 1))
+done < "$tmp_conf"
+
+if (( monitor_count == 0 )); then
+  exit 0
+fi
+
+install -Dm0644 "$tmp_lua" "$target_lua"
+rm -f "$tmp_conf"
+
+if command -v hyprctl >/dev/null 2>&1 && [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+  hyprctl reload >/dev/null 2>&1 || true
+fi

@@ -1,0 +1,3 @@
+# Main zsh configuration lives in ~/.config/zsh via ZDOTDIR.
+# ~/.zshenv sets ZDOTDIR and sources ~/.config/zsh/.zshenv.
+# Keep this file intentionally empty for compatibility with tools that inspect it.
