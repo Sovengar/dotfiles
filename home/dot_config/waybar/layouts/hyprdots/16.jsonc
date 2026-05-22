@@ -48,7 +48,7 @@
             "backlight",
             "tray",
             "network",
-            "custom/bluetooth",
+            "bluetooth",
             "pulseaudio",
             "pulseaudio#microphone",
             "battery",

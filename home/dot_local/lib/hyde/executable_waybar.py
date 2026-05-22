@@ -99,6 +99,31 @@ def get_file_hash(filepath):
     return sha256.hexdigest()
 
 
+def get_text_hash(text):
+    """Calculate the SHA256 hash of text content."""
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def render_config_file(source_filepath):
+    """Render a layout into the generated config file shape Waybar can load."""
+    with open(source_filepath, "r") as file:
+        content = file.read()
+
+    return content.replace('"includes/includes.json"', f'"{GENERATED_INCLUDES_JSON}"')
+
+
+def get_rendered_config_hash(source_filepath):
+    """Hash a layout after applying generated-config path rewrites."""
+    return get_text_hash(render_config_file(source_filepath))
+
+
+def write_config_file(source_filepath):
+    """Write the generated Waybar config with absolute include paths."""
+    CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
+    with open(CONFIG_JSONC, "w") as file:
+        file.write(render_config_file(source_filepath))
+
+
 def find_layout_files():
     """Recursively find all layout files in the specified directories."""
     layouts = []
@@ -203,7 +228,7 @@ def get_current_layout_from_config():
         set_state_value("WAYBAR_LAYOUT_PATH", layout)
         set_state_value("WAYBAR_LAYOUT_NAME", layout_name)
 
-        shutil.copyfile(layout, CONFIG_JSONC)
+        write_config_file(layout)
         logger.debug(f"Created config.jsonc with first layout: {layout}")
         return layout
 
@@ -212,7 +237,7 @@ def get_current_layout_from_config():
     layout = None
 
     for layout_file in layouts:
-        if get_file_hash(layout_file) == config_hash:
+        if get_rendered_config_hash(layout_file) == config_hash:
             logger.debug(f"Found current layout by hash: {layout_file}")
             layout_name = os.path.basename(layout_file).replace(".jsonc", "")
             set_state_value("WAYBAR_LAYOUT_PATH", layout_file)
@@ -231,7 +256,7 @@ def get_current_layout_from_config():
         set_state_value("WAYBAR_LAYOUT_PATH", layout)
         set_state_value("WAYBAR_LAYOUT_NAME", layout_name)
 
-        shutil.copyfile(layout, CONFIG_JSONC)
+        write_config_file(layout)
         logger.debug(f"Updated config.jsonc with layout: {layout}")
 
     return layout
@@ -344,8 +369,7 @@ def set_layout(layout):
     set_state_value("WAYBAR_STYLE_PATH", style_path)
 
     style_filepath = str(GENERATED_STYLE_CSS)
-    CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(layout_path, CONFIG_JSONC)
+    write_config_file(layout_path)
     write_style_file(style_filepath, style_path)
     update_icon_size()
     update_border_radius()
@@ -537,15 +561,10 @@ def run_waybar():
     if is_waybar_running_for_current_user():
         logger.debug(f"Waybar unit already active: {UNIT_NAME}")
         return
-    # Unit may already exist (inactive) from a previous --watch launch; try starting it first
-    result = subprocess.run(
-        ["systemctl", "--user", "start", UNIT_NAME],
-        capture_output=True,
-    )
-    if result.returncode == 0:
-        logger.debug(f"Started existing unit {UNIT_NAME}")
-        return
-    # Unit doesn't exist yet, create it via systemd-run
+    # Recreate the transient unit so stale ExecStart commands do not keep using
+    # Waybar's default ~/.config/waybar paths after generated files move.
+    subprocess.run(["systemctl", "--user", "stop", UNIT_NAME], capture_output=True)
+    subprocess.run(["systemctl", "--user", "reset-failed", UNIT_NAME], capture_output=True)
     subprocess.run(
         [
             "systemd-run",
@@ -574,14 +593,8 @@ def kill_waybar():
 
 def restart_waybar():
     """Restart Waybar systemd unit for current session desktop."""
-    # systemctl restart works on both active and inactive loaded units
-    result = subprocess.run(
-        ["systemctl", "--user", "restart", UNIT_NAME],
-        capture_output=True,
-    )
-    if result.returncode != 0:
-        # Unit not loaded at all, create it fresh
-        run_waybar()
+    kill_waybar()
+    run_waybar()
     logger.debug(f"Restarted Waybar systemd unit: {UNIT_NAME}")
 
 
@@ -765,7 +778,7 @@ def layout_selector():
                 break
         else:
             style_path = resolve_style_path(selected_layout)
-        shutil.copyfile(selected_layout, CONFIG_JSONC)
+        write_config_file(selected_layout)
         set_state_value("WAYBAR_LAYOUT_PATH", selected_layout)
         set_state_value(
             "WAYBAR_LAYOUT_NAME",
@@ -1241,8 +1254,7 @@ def generate_includes():
 
 
 def update_config(config_path):
-    CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(config_path, str(CONFIG_JSONC))
+    write_config_file(config_path)
     logger.debug(f"Successfully copied config from '{config_path}' to '{CONFIG_JSONC}'")
 
 
@@ -1281,6 +1293,8 @@ def watch_waybar():
     if is_waybar_running_for_current_user():
         logger.debug(f"Waybar unit already active: {UNIT_NAME}")
         return
+    subprocess.run(["systemctl", "--user", "stop", UNIT_NAME], capture_output=True)
+    subprocess.run(["systemctl", "--user", "reset-failed", UNIT_NAME], capture_output=True)
     subprocess.run(
         [
             "systemd-run",
@@ -1319,12 +1333,11 @@ def main():
             # If config.jsonc doesn't exist, create it from the layout
             if not CONFIG_JSONC.exists():
                 logger.debug("Config file missing, creating from layout path")
-                CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(layout_path, CONFIG_JSONC)
+                write_config_file(layout_path)
                 logger.debug("Created config.jsonc from state file layout")
             else:
                 config_hash = get_file_hash(CONFIG_JSONC)
-                layout_hash = get_file_hash(layout_path)
+                layout_hash = get_rendered_config_hash(layout_path)
 
                 if config_hash != layout_hash:
                     logger.debug("Config hash differs from layout hash, creating backup")
@@ -1332,7 +1345,7 @@ def main():
                     backup_layout(layout_name)
 
                 try:
-                    shutil.copyfile(layout_path, CONFIG_JSONC)
+                    write_config_file(layout_path)
                     logger.debug("Updated config.jsonc with layout from state file")
                 except Exception as e:
                     logger.error(f"Failed to update config.jsonc: {e}")
@@ -1353,15 +1366,13 @@ def main():
                 if found_layout:
                     # Update state and create/update config
                     set_state_value("WAYBAR_LAYOUT_PATH", found_layout)
-                    CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-
                     if CONFIG_JSONC.exists():
                         config_hash = get_file_hash(CONFIG_JSONC)
-                        layout_hash = get_file_hash(found_layout)
+                        layout_hash = get_rendered_config_hash(found_layout)
                         if config_hash != layout_hash:
                             backup_layout(layout_name)
 
-                    shutil.copyfile(found_layout, CONFIG_JSONC)
+                    write_config_file(found_layout)
                     logger.debug("Updated config.jsonc with layout by name")
                 else:
                     logger.error(f"Could not find layout by name: {layout_name}")
@@ -1372,16 +1383,14 @@ def main():
                         first_layout_name = os.path.basename(first_layout).replace(".jsonc", "")
                         set_state_value("WAYBAR_LAYOUT_PATH", first_layout)
                         set_state_value("WAYBAR_LAYOUT_NAME", first_layout_name)
-                        CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copyfile(first_layout, CONFIG_JSONC)
+                        write_config_file(first_layout)
                         logger.debug(f"Used first available layout: {first_layout}")
         else:
             # No layout path in state file or layout path is empty
             logger.debug("No valid layout path in state file, determining current layout")
             current_layout = get_current_layout_from_config()
             if current_layout:
-                CONFIG_JSONC.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(current_layout, CONFIG_JSONC)
+                write_config_file(current_layout)
                 logger.debug(f"Created config.jsonc from determined layout: {current_layout}")
     else:
         logger.debug("State file not found, creating it")
