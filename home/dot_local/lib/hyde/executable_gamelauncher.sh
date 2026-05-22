@@ -41,7 +41,7 @@ case ${style:-5} in
         monitor_scale="${monitor_info[2]//./}"
         monitor_width=$((monitor_info[0] * percent / monitor_scale))
         monitor_height=$((monitor_info[1] * percent / monitor_scale))
-        BG=$HOME/.local/share/hyde/rofi/assets/steamdeck_holographic.png
+        BG=${XDG_DATA_HOME:-$HOME/.local/share}/rofi/assets/steamdeck_holographic.png
         BGfx=$HOME/.cache/hyde/landing/steamdeck_holographic_${monitor_width}x$monitor_height.png
         if [ ! -e "$BGfx" ]; then
             magick "$BG" -resize ${monitor_width}x$monitor_height -background none -gravity center -extent ${monitor_width}x$monitor_height "$BGfx"

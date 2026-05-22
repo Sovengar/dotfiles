@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
-rofiAssetDir="$SHARE_DIR/hyde/rofi/assets"
+rofiAssetDir="${XDG_DATA_HOME:-$HOME/.local/share}/rofi/assets"
 hypr_border=${hypr_border:-"$(hyprctl -j getoption decoration:rounding | jq '.int')"}
 hypr_border=${hypr_border:-2}
 if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then

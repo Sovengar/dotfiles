@@ -5,7 +5,7 @@ if [[ $HYDE_SHELL_INIT -ne 1 ]]; then
 else
     export_hyde_config
 fi
-emoji_dir=${HYDE_DATA_HOME:-$HOME/.local/share/hyde}
+emoji_dir=${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hypr}
 emoji_data="$emoji_dir/emoji.db"
 cache_dir="${HYDE_CACHE_HOME:-$HOME/.cache/hyde}"
 recent_data="$cache_dir/landing/show_emoji.recent"

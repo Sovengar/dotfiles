@@ -12,7 +12,7 @@ source "${LIB_DIR}/hyde/shutils/argparse.sh"
 cached_search_dir="${XDG_CACHE_HOME:-$HOME/.cache}/hyde/landing/websearch"
 declare -A SITES SITES_ICON
 search_file=(
-    "$SHARE_DIR/hyde/websearch.lst"
+    "${XDG_DATA_HOME:-$HOME/.local/share}/rofi/websearch.lst"
     "$XDG_CONFIG_HOME/hyde/websearch.lst")
 load_search_engines() {
     local lst_files=()

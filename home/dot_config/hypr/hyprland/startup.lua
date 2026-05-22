@@ -1,4 +1,11 @@
 local vars = require("hyprland.variables")
+local home = os.getenv("HOME") or ""
+
+local xdg_runtime = os.getenv("XDG_RUNTIME_DIR") or ("/run/user/" .. (os.getenv("UID") or "1000"))
+local xdg_cache = os.getenv("XDG_CACHE_HOME") or (home .. "/.cache")
+local xdg_config = os.getenv("XDG_CONFIG_HOME") or (home .. "/.config")
+local xdg_data = os.getenv("XDG_DATA_HOME") or (home .. "/.local/share")
+local xdg_state = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
 
 local function exec_once(command)
     hl.exec_cmd(command)
@@ -33,4 +40,8 @@ hl.on("hyprland.start", function()
 
     -- Personal autostart.
     exec_once("keepassxc --minimized")
+
+    -- Directory setup and keybinds hint (from dynamic.lua)
+    exec_once("mkdir -p " .. xdg_runtime .. "/hyde " .. xdg_cache .. "/hyde/wallbash " .. xdg_config .. "/hyde " .. xdg_data .. "/hyde " .. xdg_state .. "/hyde")
+    exec_once("bash -c 'eval \"$(hyde-shell init)\" && " .. vars.scrPath .. "/hyde/keybinds/hint-hyprland.py --format rofi > " .. xdg_runtime .. "/hyde/keybinds_hint.rofi'")
 end)

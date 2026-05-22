@@ -84,7 +84,6 @@ fn_envar_cache() {
 	if command -v rofi &> /dev/null; then
 		if [[ ! $XDG_DATA_DIRS =~ share/hyde ]]; then
 			mkdir -p "$XDG_DATA_HOME/rofi/themes"
-			ln -snf "$XDG_DATA_HOME/hyde/rofi/themes"/* "$XDG_DATA_HOME/rofi/themes/"
 		fi
 	fi
 }

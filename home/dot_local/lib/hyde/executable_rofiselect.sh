@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
-rofiStyleDir="$SHARE_DIR/hyde/rofi/themes"
-rofiAssetDir="$SHARE_DIR/hyde/rofi/assets"
+rofiStyleDir="${XDG_DATA_HOME:-$HOME/.local/share}/rofi/themes"
+rofiAssetDir="${XDG_DATA_HOME:-$HOME/.local/share}/rofi/assets"
 font_scale=$ROFI_SELECT_SCALE
 [[ $font_scale =~ ^[0-9]+$ ]] || font_scale=${ROFI_SCALE:-10}
 font_name=${ROFI_SELECT_FONT:-$ROFI_FONT}
