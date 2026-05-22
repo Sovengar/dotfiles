@@ -1,8 +1,21 @@
 # HyDE Migration Map
 
-> Purpose: split HyDE into small, owned pieces so it can be replaced gradually without losing working desktop behavior.
+> Purpose: split HyDE into small, owned pieces so the stable config surface is controlled by chezmoi while HyDE can remain as the runtime/theme engine.
 
 This directory complements `docs/hyde-architecture.md`. That file remains the compact reference for Hyprland/theming. These files are area-by-area migration notes based on `/home/buble/dev/projects/HyDE`.
+
+## Ownership Boundary
+
+The goal is not to remove `~/.local/lib/hyde` or ban `hyde-shell` calls. HyDE can stay as an engine for runtime helpers, theme refresh, generated outputs, and app/service wrappers.
+
+The real boundary is ownership:
+
+| Surface | Desired owner | Rule |
+|---------|---------------|------|
+| `~/.config/hypr`, `~/.config/fish`, `~/.config/kitty`, `~/.config/zsh` | User / chezmoi | Stable config structure is authored here, not restored from HyDE. |
+| Generated theme outputs | HyDE engine for now | Acceptable while generated files are isolated and ignored by chezmoi. |
+| `~/.local/lib/hyde`, `hyde-shell` | Runtime engine to appropriate | Calls are acceptable if they are chosen by owned config. Rename/wrap later only if useful. |
+| HyDE install/restore scripts | Avoid in daily workflow | They can overwrite user-owned `.config` paths and are the main ownership risk. |
 
 ## Areas
 
@@ -16,18 +29,18 @@ This directory complements `docs/hyde-architecture.md`. That file remains the co
 
 ## Safe Migration Order
 
-| Stage | Goal | Main risk if skipped |
-|-------|------|----------------------|
-| 1 | Keep owning `~/.config/hypr/hyprland/` via chezmoi. | Stock HyDE `.conf` config can regain control. |
-| 2 | Own UWSM env files before removing HyDE packages. | Wrong `HYPRLAND_CONFIG`, missing GPU/Wayland vars. |
-| 3 | Replace startup service launches. | No waybar, dunst, wallpaper, clipboard, idle daemon, tray applets. |
-| 4 | Replace keybinding launch commands. | `$TERMINAL`, `$BROWSER`, screenshots, lock, rofi helpers break. |
-| 5 | Decouple zsh/fish. | `hyde-shell pm`, HyDE completions, OMZ setup, prompt setup remain coupled. |
-| 6 | Replace theme/wallpaper pipeline. | App colors and GTK/Qt settings stop updating. |
-| 7 | Remove install/restore coupling. | Future HyDE restore can overwrite user-owned configs. |
-| 8 | Remove HyDE binaries/cache/state. | Only safe after no runtime path calls `hyde-shell`, `hydectl`, `hyde-ipc`, or scripts under `~/.local/lib/hyde`. |
+| Stage | Goal | Current status | Main risk if skipped |
+|-------|------|----------------|----------------------|
+| 1 | Keep owning `~/.config/hypr/hyprland/` via chezmoi. | Done for Lua config. | Stock HyDE `.conf` config can regain control. |
+| 2 | Own UWSM env files. | Pending. | Wrong `HYPRLAND_CONFIG`, missing GPU/Wayland vars. |
+| 3 | Decide whether startup service launches stay on `hyde-shell app` or become owned units/wrappers. | Pending. | Service lifecycle stays implicit in HyDE conventions. |
+| 4 | Make keybinding launch commands intentional. | Pending. | Owned keybindings still delegate to HyDE commands without an explicit contract. |
+| 5 | Decouple zsh/fish config ownership. | Fish mostly done; zsh partial. | Shell startup can still be dictated by HyDE-owned loaders. |
+| 6 | Own theme/wallpaper config boundaries. | Kitty structure done; generated colors still HyDE. | App colors and GTK/Qt settings stop updating or overwrite stable config. |
+| 7 | Remove install/restore coupling. | Pending. | Future HyDE restore can overwrite user-owned configs. |
+| 8 | Appropriate or rename HyDE runtime surface. | Optional/later. | Names remain HyDE-branded even if the engine is effectively yours. |
 
-## Do Not Remove Until Replaced
+## Do Not Remove Until Replaced Or Appropriated
 
 | Dependency surface | Replaces |
 |--------------------|----------|
@@ -38,6 +51,8 @@ This directory complements `docs/hyde-architecture.md`. That file remains the co
 | `theme.switch.sh` and `color.set.sh` | GTK/Qt/Hyprland/app color propagation. |
 | `restore_cfg.psv` knowledge | Which files HyDE overwrites, preserves, or generates. |
 
+These surfaces may remain if they are treated as engine APIs. The migration task is to stop them from owning stable `.config` files by restore/sync side effects.
+
 ## Current Corrections To Previous Assumptions
 
 | Previous assumption | Verified behavior |
@@ -47,3 +62,14 @@ This directory complements `docs/hyde-architecture.md`. That file remains the co
 | UWSM only imports `HYPRLAND_CONFIG`. | HyDE ships `env-hyprland.d/00-hyde.sh`, which sets `HYPRLAND_CONFIG` directly. |
 | `hyde-shell app` is a large service manager. | It delegates to `app2unit.sh`, which wraps `systemd-run --user`. |
 | Shell config is mostly user-owned. | Many zsh/fish dirs are `S` sync entries in `restore_cfg.psv`, so HyDE restore overwrites them. |
+
+## Current Progress Snapshot
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Kitty | Mostly owned | `kitty.conf` and `defaults_from_hyde.conf` are chezmoi-managed; `autogenerated_theme.conf` remains HyDE-generated and ignored. |
+| Fish | Mostly owned | `conf.d/*.fish` are owned files; remaining `hyde-shell pm` aliases/completion are acceptable engine calls, not ownership blockers. |
+| Zsh | Partial | User-owned `conf.d` pieces exist, but `00-hyde.zsh` still loads `conf.d/hyde/terminal.zsh`. |
+| Hyprland Lua | Owned | `.config/hypr/hyprland/*.lua` is controlled by chezmoi. Runtime calls can still use HyDE intentionally. |
+| Startup/services | Engine-coupled | Still delegates heavily to `hyde-shell app`; acceptable short-term if treated as runtime API. |
+| Install/restore | Risk | HyDE restore/install remains the main threat to config ownership. |

@@ -11,7 +11,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 | wezterm | Terminal emulator | nightly |
 | starship | Prompt | brew/curl |
 | zsh | Shell | system |
-| fish | Alt shell (HyDE) | system |
+| fish | Alt shell | system |
 | fisher | Fish plugin manager | curl |
 | PowerShell 7 | Windows shell | winget |
 | broot | TUI tree nav | brew/curl |
@@ -168,4 +168,4 @@ When adding a new tool/dependency/package to any install script, **must also add
 | hyprquery | Config query CLI | chaotic-aur |
 | swayosd-git | On-screen display | chaotic-aur |
 | wf-recorder | Wlroots screen recorder | system |
-| kitty | Terminal (fallback) | CachyOS repo |
+| kitty | Terminal | CachyOS repo |

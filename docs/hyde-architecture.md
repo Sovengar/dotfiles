@@ -1,8 +1,10 @@
 # HyDE Theming Framework — Architecture Reference
 
-> Target audience: someone who wants to understand HyDE deeply so they can own/replace it.
+> Target audience: someone who wants to understand HyDE deeply so they can own, appropriate, or replace specific parts.
 
-> Migration docs: see `docs/hyde-migration/` for area-by-area decoupling notes. This file remains the compact Hyprland/theme reference.
+> Migration docs: see `docs/hyde-migration/` for area-by-area ownership notes. This file remains the compact Hyprland/theme reference.
+
+The current strategy is not to delete `~/.local/lib/hyde`. HyDE can remain as a runtime/theme engine. The important boundary is that stable files under `~/.config` are authored by this dotfiles repo, while generated outputs stay isolated.
 
 ## Core Architecture
 
@@ -275,33 +277,35 @@ All theme operations funnel through `hyde-shell`. It's a shell script at `~/.loc
 | `hyde-shell wbarconfgen n` | Regenerate waybar config for N monitors |
 | `hyde-shell app` | Run app with systemd scope management |
 
-## How to Replace HyDE
+## How to Own Or Replace HyDE
 
-### Phase 1: Config ownership (you're already here)
+### Phase 1: Config ownership
 
-You already own `~/.config/hypr/hyprland/` via chezmoi. The LUA config system IS the replacement mechanism. `CONFIG_ALREADY_LOADED` bypasses stock configs.
+You already own `~/.config/hypr/hyprland/` via chezmoi. The Lua config system is the ownership mechanism. `CONFIG_ALREADY_LOADED` bypasses stock configs.
 
-### Phase 2: Theme engine replacement
+Kitty and fish have also moved toward owned config structure: kitty keeps stable config in chezmoi and delegates generated colors to HyDE; fish uses owned `conf.d/*.fish` modules.
 
-To own theme switching without `hyde-shell`:
+### Phase 2: Theme engine ownership
 
-1. **Color extraction**: Replace HyDE's ImageMagick-based `wallbash.sh` with `pywal`, `matugen` (Material You), or your own script
-2. **Theme application**: Instead of wallbash templates, use your own scripts that write colors to target files
-3. **Variables**: Move theme settings from `wallbash.conf` into chezmoi data
+To own theme switching, either keep HyDE's engine intentionally or replace pieces gradually:
 
-### Phase 3: Hyde-shell replacement
+1. **Color extraction**: Keep HyDE's ImageMagick-based `wallbash.sh`, adopt it into your own engine contract, or replace it with `pywal`, `matugen`, or your own script
+2. **Theme application**: Keep dcol templates/generated includes, or split them into smaller owned scripts
+3. **Variables**: Keep generated values isolated from stable chezmoi-owned config
 
-Replace `hyde-shell` calls in `keybindings.lua` with direct commands or your own wrapper:
+### Phase 3: Hyde-shell API boundary
 
-| hyde-shell call | Replace with |
-|----------------|-------------|
-| `hyde-shell app` | `systemd-run --user --scope` or `uwsm app` (UWSM-aware) |
-| `hyde-shell themeselect` | Your own theme picker script |
-| `hyde-shell wallpaper` | `hyprctl hyprpaper wallpaper`, `swaybg`, etc. |
-| `hyde-shell animations --select` | Your own animation preset loader |
-| `hyde-shell lock-session` | `loginctl lock-session` |
-| `hyde-shell screenshot s` | `grim`, `slurp` |
-| `hyde-shell window.pin` | `hyprctl dispatch pin` |
+Calls in `keybindings.lua` do not need to disappear if `hyde-shell` remains the chosen engine. The decision is per command: keep, wrap/rename, or replace.
+
+| hyde-shell call | Ownership direction |
+|----------------|---------------------|
+| `hyde-shell app` | Keep as lifecycle engine, or wrap with `systemd-run --user --scope` / `uwsm app`. |
+| `hyde-shell themeselect` | Keep as theme engine selector, or wrap with your own picker. |
+| `hyde-shell wallpaper` | Keep as wallpaper engine, or wrap direct `hyprctl`, `swww`, `hyprpaper`, etc. |
+| `hyde-shell animations --select` | Keep if useful, or replace with your own animation preset loader. |
+| `hyde-shell lock-session` | Keep if it matches desired lock flow, or replace with `loginctl lock-session`. |
+| `hyde-shell screenshot s` | Keep if useful, or replace with `grim`, `slurp`, `swappy`/`satty`. |
+| `hyde-shell window.pin` | Low-risk direct replacement: `hyprctl dispatch pin`. |
 
 ### What's valuable in HyDE and hard to replicate
 
@@ -321,14 +325,16 @@ Replace `hyde-shell` calls in `keybindings.lua` with direct commands or your own
 | Category | Managing? | Why |
 |----------|-----------|-----|
 | `~/.config/hypr/hyprland/*.lua` | ✅ Yes | User owns these via LUA config |
-| `~/.config/kitty/kitty.conf` | ✅ Yes | User structure (includes hyde) |
+| `~/.config/kitty/kitty.conf` | ✅ Yes | User structure; generated colors stay in ignored include |
+| `~/.config/fish/**` | ✅ Yes | Fish startup is split into owned modules; HyDE aliases/completion are intentional engine calls |
+| `~/.config/zsh/**` | Partial | Owned modules exist, but `conf.d/hyde/terminal.zsh` still controls much of interactive startup |
 | `~/.config/dunst/dunstrc` | ❌ Ignored | Theme changes colors via Hyde |
 | `~/.config/gtk-3.0/settings.ini` | ❌ Ignored | Theme changes GTK/icon theme |
 | `~/.config/gtk-4.0` | ❌ Ignored | Theme changes symlink |
 | `~/.config/kitty/autogenerated_theme.conf` | ❌ Ignored | Entirely Hyde-regenerated |
-| `~/.config/kitty/defaults_from_hyde.conf` | ✅ Yes | User base config (fonts, padding) |
+| `~/.config/kitty/defaults_from_hyde.conf` | ✅ Yes | User base config (fonts, padding); name can be changed later |
 | `~/.config/rofi/theme.rasi` | ❌ Ignored | Theme changes colors |
 | `~/.config/waybar/theme.css` | ❌ Ignored | Theme changes colors |
 | `~/.config/rclone/rclone.conf` | ✅ Yes | Accept diff noise from token refresh |
 
-> NOTE: The "ignored" files are excluded from chezmoi via `.chezmoiignore`. On fresh install, HyDE's stock configs or `hyde-shell` commands will recreate them. If you plan to remove HyDE, you'll need to provide your own versions of these before removing `.chezmoiignore` entries.
+> NOTE: The "ignored" files are excluded from chezmoi via `.chezmoiignore`. On fresh install, HyDE's stock configs or `hyde-shell` commands will recreate them. Keep that boundary until your own generator or adopted HyDE engine contract owns those outputs.

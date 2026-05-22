@@ -1,6 +1,8 @@
 # Runtime Scripts And CLI Migration
 
-> Goal: know what `hyde-shell` actually does before replacing commands in keybindings and startup.
+> Goal: know what `hyde-shell` actually does so owned config can call it intentionally, wrap it, or rename it without letting HyDE dictate `.config` content.
+
+`hyde-shell` is allowed to remain as a runtime engine. Migration here means turning implicit HyDE ownership into an explicit API boundary.
 
 ## Entry Points
 
@@ -11,7 +13,7 @@
 | `hyde-ipc` | `Configs/.local/bin/hyde-ipc` | Precompiled ELF; likely IPC bridge. Treat as opaque until proven unused. |
 | `globalcontrol.sh` | `Configs/.local/lib/hyde/globalcontrol.sh` | Runtime source of XDG dirs, theme paths, helpers, package checks, notifications. |
 
-`HYDE_SCRIPTS_PATH` resolves scripts from user config and HyDE library paths. If replacing `hyde-shell`, either preserve that lookup temporarily or replace every call with direct commands.
+`HYDE_SCRIPTS_PATH` resolves scripts from user config and HyDE library paths. If appropriating `hyde-shell`, keep that lookup as part of the engine contract or wrap it behind your own command name.
 
 ## Script Groups
 
@@ -31,18 +33,18 @@
 
 ## Keybinding Command Surface
 
-These are the HyDE calls that must be removed or replaced before deleting `hyde-shell`.
+These are the HyDE calls that must be made intentional before changing or renaming `hyde-shell`. They do not need to disappear if `hyde-shell` remains the chosen engine.
 
 | Current call | Replacement direction |
 |--------------|-----------------------|
-| `hyde-shell app -T` | Terminal command, e.g. `kitty`, `wezterm`, `ghostty`, or `uwsm app -- terminal`. |
+| `hyde-shell app -T` | Keep as engine API, or replace with terminal command such as `kitty`, `wezterm`, `ghostty`, or `uwsm app -- terminal`. |
 | `hyde-shell open --fall ...` | Direct browser/editor/file-manager command. |
 | `hyde-shell logout` | `uwsm stop`, `hyprctl dispatch exit`, or session-specific script. |
 | `hyde-shell lock-session` | `loginctl lock-session` or `hyprlock`. |
 | `hyde-shell window.pin` | `hyprctl dispatch pin`. |
-| `hyde-shell wallpaper ...` | Owned wallpaper selector/backend. |
-| `hyde-shell themeselect` | Owned theme selector. |
-| `hyde-shell wallbashtoggle -m` | Owned mode toggle plus color refresh. |
+| `hyde-shell wallpaper ...` | Keep as HyDE engine call, or wrap with owned wallpaper selector/backend. |
+| `hyde-shell themeselect` | Keep as HyDE engine call, or wrap with owned theme selector. |
+| `hyde-shell wallbashtoggle -m` | Keep as HyDE engine call, or wrap with owned mode toggle plus color refresh. |
 | `hyde-shell animations --select` | Copy selected animation preset and reload Hyprland. |
 | `hyde-shell hyprlock --select` | Own lock preset selector. |
 | `hyde-shell wbarconfgen n/p` | Own waybar layout switch. |
@@ -63,23 +65,23 @@ These are the HyDE calls that must be removed or replaced before deleting `hyde-
 | Shell aliases | `in`, `un`, `up`, `pl`, `pa` call `hyde-shell pm`. |
 | Install scripts | `Scripts/global_fn.sh` uses `pm.sh` as `pacmanCmd`. |
 
-For this dotfiles repo, prefer direct `paru`/`pacman` or one owned wrapper. Keeping both `pm.sh` and `pm.py` adds unnecessary migration surface.
+For this dotfiles repo, `hyde-shell pm` may remain if it is treated as the package-manager engine. Prefer one explicit interface: either keep `hyde-shell pm`, wrap/rename it, or replace it with direct `paru`/`pacman`. The problem is ambiguous ownership, not the HyDE name alone.
 
 ## Opaque Binaries
 
 | Binary | Risk |
 |--------|------|
-| `hydectl` | Source not found in HyDE tree; do not depend on it in new code. |
-| `hyde-ipc` | Source not found in HyDE tree; verify runtime dependency before removal. |
-| `hyde-config` | Runs from startup; likely parses `~/.config/hyde/config.toml` into state. Drop only after theme/config pipeline is replaced. |
+| `hydectl` | Source not found in HyDE tree; treat as opaque engine surface unless replaced or wrapped. |
+| `hyde-ipc` | Source not found in HyDE tree; verify runtime dependency before changing it. |
+| `hyde-config` | Runs from startup; likely parses `~/.config/hyde/config.toml` into state. Keep while theme/config engine depends on it. |
 
 ## Migration Stages
 
-| Stage | Action |
-|-------|--------|
-| 1 | Grep all `hyde-shell` calls in chezmoi. |
-| 2 | Replace app/session/keybinding commands before theme commands. |
-| 3 | Replace shell aliases using `hyde-shell pm`. |
-| 4 | Keep theme/wallpaper subcommands until `theme-wallbash.md` stages are done. |
-| 5 | Remove `~/.local/lib/hyde` from PATH and fix anything that breaks. |
-| 6 | Remove `hydectl`, `hyde-ipc`, `hyde-config` only after no service/keybinding/script calls them. |
+| Stage | Action | Status |
+|-------|--------|--------|
+| 1 | Grep all `hyde-shell` calls in chezmoi. | Done: calls remain across Hyprland startup, keybindings, shell aliases, hypridle, wlogout, fastfetch, and Hyprlock. |
+| 2 | Classify each call as engine API, wrapper candidate, or replacement candidate. | Pending. |
+| 3 | Keep or rename shell aliases using `hyde-shell pm`. | Not blocking; aliases are acceptable if intentional. |
+| 4 | Keep theme/wallpaper subcommands until `theme-wallbash.md` ownership stages are done. | Active. |
+| 5 | Stop relying on `~/.local/lib/hyde` being injected into PATH by shell startup. | Pending; only do after explicit engine path/wrapper exists. |
+| 6 | Change `hydectl`, `hyde-ipc`, `hyde-config` only after their engine role is known. | Pending. |

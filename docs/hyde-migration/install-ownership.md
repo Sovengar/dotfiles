@@ -2,6 +2,8 @@
 
 > Goal: translate HyDE's installer/restore model into explicit chezmoi ownership.
 
+This is the critical migration area. Runtime use of `hyde-shell` is acceptable; HyDE restore/install scripts overwriting `.config` files is not.
+
 ## Install Pipeline
 
 | Script | Role |
@@ -38,13 +40,13 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 |-------|---------------|--------------------|
 | UWSM | `S` sync for `~/.config/uwsm/env*`. | Take ownership early; session-critical. |
 | Hyprland Lua/conf | Mixed `P` and `S`. | Already mostly chezmoi-owned; keep control. |
-| Shell | zsh/fish core dirs mostly `S`; user stubs `P`. | Take ownership and stop HyDE restore from touching them. |
-| Kitty | `kitty.conf` preserved; `hyde.conf`/`theme.conf` sync/generated. | Keep user config, generate/include theme separately. |
+| Shell | zsh/fish core dirs mostly `S`; user stubs `P`. | Fish mostly owned; zsh partial. Stop HyDE restore from touching both. |
+| Kitty | `kitty.conf` preserved; `hyde.conf`/`theme.conf` sync/generated. | Stable config owned; generated theme include stays ignored. |
 | Waybar | config/style mostly preserved; modules/shared scripts partly ignored/synced. | Own layout; leave color include generated until replacement. |
 | Dunst | `S` sync plus wallbash rewrite. | Split static config from generated colors. |
 | GTK/Qt/Kvantum | `S` sync and theme switch partial rewrites. | Own after theme replacement. |
 | Rofi/wlogout | Rofi preserved, wlogout synced. | Own when replacing launchers/theme. |
-| HyDE libs/bins | `O` overwrite for `~/.local/bin`, `~/.local/lib/hyde`, `~/.local/share/hyde`. | Remove last; many commands depend on them. |
+| HyDE libs/bins | `O` overwrite for `~/.local/bin`, `~/.local/lib/hyde`, `~/.local/share/hyde`. | Appropriate as engine surface; do not let restore overwrite owned configs. |
 
 ## Backup And Overwrite Risks
 
@@ -65,10 +67,10 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 | 2 | For each PSV `P` file you care about, decide if chezmoi should own it. |
 | 3 | For each PSV `S` file, decide whether it is truly source-owned or generated. |
 | 4 | Move generated app theme files into include-only files when possible. |
-| 5 | Stop running HyDE restore scripts once chezmoi owns the same paths. |
+| 5 | Stop running HyDE restore scripts once chezmoi owns the same paths. This matters more than removing `hyde-shell` calls. |
 | 6 | Record external packages in `docs/ecosystem.md` when adding install scripts. |
 
-## Files To Audit Before Removing HyDE
+## Files To Audit Before Changing HyDE Engine Ownership
 
 | Path | Why |
 |------|-----|
@@ -82,12 +84,12 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 
 ## Migration Stages
 
-| Stage | Action |
-|-------|--------|
-| 1 | Treat `restore_cfg.psv` as the authoritative map of HyDE ownership. |
-| 2 | Mark every target path as owned, generated, ignored, or obsolete. |
-| 3 | Move session-critical files to chezmoi first. |
-| 4 | Move shell files next; stop `restore_shl.sh`. |
-| 5 | Keep visual generated files ignored until `theme-wallbash.md` replacement is ready. |
-| 6 | Remove HyDE install/restore scripts from your workflow. |
-| 7 | Delete HyDE state/cache/libs only after runtime grep shows no calls. |
+| Stage | Action | Status |
+|-------|--------|--------|
+| 1 | Treat `restore_cfg.psv` as the authoritative map of HyDE ownership. | Reference established. |
+| 2 | Mark every target path as owned, generated, ignored, engine, or obsolete. | In progress. |
+| 3 | Move session-critical files to chezmoi first. | Pending for UWSM. |
+| 4 | Move shell files next; stop `restore_shl.sh`. | Fish mostly done; zsh partial; restore risk remains. |
+| 5 | Keep visual generated files ignored until stable config/generated include boundaries exist. | Active; kitty follows this pattern. |
+| 6 | Stop using HyDE install/restore scripts in the daily workflow. | Pending and high priority. |
+| 7 | Keep, rename, or wrap HyDE state/cache/libs according to engine needs. | Later; not a prerequisite for config ownership. |

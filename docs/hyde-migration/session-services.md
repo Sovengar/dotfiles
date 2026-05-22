@@ -1,6 +1,8 @@
 # Session And Services Migration
 
-> Goal: boot Hyprland, set the session env, and start desktop daemons without relying on `hyde-shell app`.
+> Goal: boot Hyprland, set the session env, and start desktop daemons through an explicit owned contract. `hyde-shell app` may remain if it is the chosen engine API.
+
+Current status: service startup still delegates heavily to `hyde-shell app`. That is acceptable short-term. The ownership issue is whether this behavior is intentional and documented, not whether the command name contains HyDE.
 
 ## Entry Chain
 
@@ -58,7 +60,7 @@ Actual startup is in `~/.config/hypr/hyprland/hyde/startup.lua` in the chezmoi-m
 | Wrapper | `Configs/.local/lib/hyde/app2unit.sh` | Converts command into `systemd-run --user` service/scope. |
 | Backend | systemd user | Units are tied to graphical session target/slices. |
 
-Use `uwsm app` where possible. If not, a small `systemd-run --user --scope` or user service is enough for most daemons.
+Use `uwsm app` where possible if replacing the engine call. If keeping `hyde-shell app`, document it as the app lifecycle engine and avoid also depending on HyDE restore to manage config files.
 
 ## Env Propagation
 
@@ -68,24 +70,24 @@ Use `uwsm app` where possible. If not, a small `systemd-run --user --scope` or u
 | `env.lua` | Uses `env_if_unset()` for most vars, but force-prepends `~/.local/bin` and `~/.local/lib/hyde` to `PATH`. |
 | `startup.lua` | Calls `dbus-update-activation-environment` and `systemctl --user import-environment` for Wayland/session vars. |
 
-When removing HyDE, preserve env propagation in UWSM or systemd user services can start with missing `WAYLAND_DISPLAY`/desktop variables.
+When changing or wrapping the HyDE engine, preserve env propagation in UWSM or systemd user services can start with missing `WAYLAND_DISPLAY`/desktop variables.
 
 ## Risks
 
 | Risk | Impact |
 |------|--------|
-| Remove `hyde-shell app` first. | Desktop daemons stop starting. |
+| Drop or rename `hyde-shell app` before defining its replacement. | Desktop daemons stop starting. |
 | Drop UWSM env files too early. | Hyprland may load wrong config path; GPU/Wayland vars missing. |
 | Replace `waybar.py` blindly. | Bar still works with `waybar`, but HyDE-specific watch/theme reload behavior is lost. |
 | Drop wallpaper service. | Theme/wallbash refresh no longer runs. |
-| Leave `PATH` depending on `~/.local/lib/hyde`. | Scripts work by accident until HyDE lib is removed. |
+| Leave `PATH` depending on `~/.local/lib/hyde` implicitly. | Scripts work by accident instead of through an explicit engine path/wrapper. |
 
 ## Migration Stages
 
-| Stage | Action |
-|-------|--------|
-| 1 | Copy UWSM env files into chezmoi and verify `HYPRLAND_CONFIG`. |
-| 2 | Replace each startup daemon with direct `systemd-run`, `uwsm app`, or real user units. |
-| 3 | Change `startup.lua` to call owned scripts/units only. |
-| 4 | Remove `~/.local/lib/hyde` from forced `PATH` only after no startup command needs it. |
-| 5 | Stop `hyde-config`/`hyde-ipc` only after checking no feature you use depends on them. |
+| Stage | Action | Status |
+|-------|--------|--------|
+| 1 | Copy UWSM env files into chezmoi and verify `HYPRLAND_CONFIG`. | Pending. |
+| 2 | Decide per daemon: keep `hyde-shell app`, wrap it, use `uwsm app`, or create user units. | Pending. |
+| 3 | Change `startup.lua` to call only owned decisions: direct commands, wrappers, or accepted HyDE engine calls. | Pending. |
+| 4 | Remove implicit `~/.local/lib/hyde` PATH reliance only after an explicit engine path/wrapper exists. | Pending. |
+| 5 | Keep `hyde-config`/`hyde-ipc` until checking which theme/config features depend on them. | Pending. |
