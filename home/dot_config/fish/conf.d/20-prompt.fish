@@ -14,9 +14,9 @@ function fish_greeting
     if test (random) -le 16384
         set -l tmp (mktemp)
         if type -q pokego
-            pokego --no-title -r 1,3,6 > $tmp
+            pokego --no-title -r 1,2,3,4,5 > $tmp
         else if type -q pokemon-colorscripts
-            pokemon-colorscripts --no-title -r 1,3,6 > $tmp
+            pokemon-colorscripts --no-title -r 1,2,3,4,5 > $tmp
         end
         if test -s $tmp
             type -q fastfetch; and fastfetch --file-raw $tmp; or cat $tmp

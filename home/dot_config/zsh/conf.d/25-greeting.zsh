@@ -6,12 +6,27 @@ if [[ $- == *i* && -z ${NO_FAST_FETCH:-} ]]; then
   terminal_lines=${LINES:-0}
 
   if (( terminal_columns >= 50 && terminal_lines >= 28 )); then
-    if command -v pokego >/dev/null 2>&1; then
-      pokego --no-title -r 1,3,6
-    elif command -v pokemon-colorscripts >/dev/null 2>&1; then
-      pokemon-colorscripts --no-title -r 1,3,6
-    elif command -v fastfetch >/dev/null 2>&1; then
-      if ! typeset -f do_render >/dev/null || do_render image; then
+    if (( RANDOM % 2 == 0 )); then
+      tmp=$(mktemp)
+      if command -v pokego >/dev/null 2>&1; then
+        pokego --no-title -r 1,2,3,4,5 > "$tmp"
+      elif command -v pokemon-colorscripts >/dev/null 2>&1; then
+        pokemon-colorscripts --no-title -r 1,2,3,4,5 > "$tmp"
+      fi
+      if [[ -s "$tmp" ]]; then
+        if command -v fastfetch >/dev/null 2>&1; then
+          fastfetch --file-raw "$tmp"
+        else
+          cat "$tmp"
+        fi
+      else
+        if command -v fastfetch >/dev/null 2>&1; then
+          fastfetch --logo-type kitty
+        fi
+      fi
+      rm -f "$tmp"
+    else
+      if command -v fastfetch >/dev/null 2>&1; then
         fastfetch --logo-type kitty
       fi
     fi
