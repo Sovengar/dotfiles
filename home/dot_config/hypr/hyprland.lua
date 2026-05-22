@@ -9,7 +9,7 @@ end
 load("hyprland.primary_apps") -- primary terminal, editor, file manager and browser
 load("hyprland.variables")   -- HyDE variables table (scrPath, envList, unit, cursor, fonts, etc.)
 load("hyprland.env")         -- hl.env(): Qt, Mozilla, Electron, XDG, PATH
-load("hyprland.hardware.nvidia")  -- hl.env()/cursor: controlled parse of nvidia.conf
+load("hyprland.hardware.nvidia")  -- Nvidia env and cursor settings
 load("hyprland.opacity")     -- baseline opacity and dimming
 load("hyprland.layout")      -- layout defaults: dwindle, master, snap
 load("hyprland.hardware.input")   -- keyboard, mouse, touchpad

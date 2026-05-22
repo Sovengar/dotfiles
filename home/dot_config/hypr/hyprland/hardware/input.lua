@@ -11,7 +11,7 @@ hl.config({
         -- ms to wait before a held key starts repeating.
         repeat_delay = 150,
         -- Repetitions per second while a key is held.
-        repeat_rate = 100,
+        repeat_rate = 80,
 
         -- Touchpad variables: https://wiki.hypr.land/Configuring/Variables/#touchpad
         touchpad = {
