@@ -20,7 +20,7 @@ end
 
 local function selected_workflow_name()
     local state = read_file(hyde_state_dir .. "/staterc")
-    local from_state = state:match("[%f[%w_]HYPR_WORKFLOW%s*=%s*\"?([^\"\r\n]+)\"?")
+    local from_state = state:match("%f[%w_]HYPR_WORKFLOW%f[^%w_]%s*=%s*\"?([^\"\r\n]+)\"?")
     if from_state and from_state ~= "" then
         local name = trim(from_state):gsub('^"', ""):gsub('"$', "")
         if name:match("^[%w_.%-]+$") then
