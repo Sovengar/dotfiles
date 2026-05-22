@@ -7,7 +7,7 @@ function fish_greeting
     set -q COLUMNS; and set terminal_columns $COLUMNS
     set -q LINES; and set terminal_lines $LINES
 
-    if set -q NO_FAST_FETCH; or not type -q fastfetch; or test "$terminal_columns" -lt 50; or test "$terminal_lines" -lt 28
+    if set -q NO_GREETING; or not type -q fastfetch; or test "$terminal_columns" -lt 50; or test "$terminal_lines" -lt 28
         return
     end
 

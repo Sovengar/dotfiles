@@ -9,51 +9,42 @@ Using `hyde-shell` from a shell alias is not automatically a problem. The blocke
 | Shell | Status | What is owned | What still needs a decision |
 |-------|--------|---------------|-----------------------------|
 | Fish | Mostly owned | `config.fish`, `conf.d/*.fish`, functions, plugins, and theme README live in chezmoi. | `90-hyde.fish` aliases and `hyde-shell.fish` completion can stay, be renamed, or be wrapped later. |
-| Zsh | Partial | Env/path/fzf/history/QoL/keybinding/greeting modules exist as owned `conf.d/*.zsh`. | `00-hyde.zsh` still sources `conf.d/hyde/env.zsh` and `conf.d/hyde/terminal.zsh`; this still lets HyDE define the main interactive startup flow. |
+| Zsh | Owned startup | Root `.zshenv`, ZDOTDIR `.zshenv`, `.zshrc`, prompt, plugins, completions, functions, and `conf.d/*.zsh` are owned. | Remaining HyDE use is intentional engine aliases/completions, not startup ownership. |
 
 ## Zsh Source Files
 
 | File | Role |
 |------|------|
-| `Configs/.zshenv` | Sets `ZDOTDIR=$XDG_CONFIG_HOME/zsh` and sources `$ZDOTDIR/.zshenv`. |
-| `Configs/.config/zsh/.zshenv` | Sources every `conf.d/*.zsh`. |
-| `home/dot_config/zsh/conf.d/00-env-hyprland.zsh` | Owned shell/session env baseline; avoids relying only on HyDE env for XDG/path values. |
+| `home/dot_zshenv` | Sets `ZDOTDIR=$XDG_CONFIG_HOME/zsh` and sources `$ZDOTDIR/.zshenv`. |
+| `home/dot_config/zsh/dot_zshenv` | Minimal non-interactive XDG env only. |
+| `home/dot_config/zsh/dot_zshrc` | Interactive loader for owned `conf.d/*.zsh`; loads `local.zsh` last. |
+| `home/dot_config/zsh/conf.d/00-env.zsh` | Owned shell/session env baseline; avoids relying on HyDE env for XDG/path values. |
 | `home/dot_config/zsh/conf.d/10-paths.zsh` | Owned PATH, Homebrew, mise, Go, depot_tools setup. |
-| `home/dot_config/zsh/conf.d/15-history.zsh` | Owned history behavior. |
-| `home/dot_config/zsh/conf.d/25-greeting.zsh` | Owned startup greeting. |
-| `home/dot_config/zsh/conf.d/35-fzf.zsh` | Owned fzf integration. |
-| `home/dot_config/zsh/conf.d/37-keybindings.zsh` | Owned interactive keybindings. |
-| `home/dot_config/zsh/conf.d/40-overrides.zsh` | Owned command overrides and aliases. |
-| `home/dot_config/zsh/conf.d/50-qol.zsh` | Owned quality-of-life aliases. |
-| `home/dot_config/zsh/conf.d/70-hyde.zsh` | Deliberate HyDE engine aliases (`hyde-shell pm`). Rename/wrap later if wanted. |
-| `home/dot_config/zsh/conf.d/00-hyde.zsh` | Transitional loader that still sources HyDE's zsh engine. |
-| `home/dot_config/zsh/conf.d/hyde/env.zsh` | Legacy HyDE env compatibility. Should shrink or disappear once owned env is sufficient. |
-| `home/dot_config/zsh/conf.d/hyde/terminal.zsh` | Remaining main coupling: compinit, OMZ/plugin loading, prompt, functions, completions, aliases. |
-| `Configs/.config/zsh/user.zsh` | User overrides for prompt/plugins/startup art. |
-| `Configs/.config/zsh/plugin.zsh` | Disabled by default; example zinit setup. |
-| `Configs/.config/zsh/prompt.zsh` | Disabled by default; custom prompt hook. |
-| `Configs/.config/zsh/functions/*.zsh` | bat, duf, eza, fzf, history bind, help keybind, error handlers. |
-| `Configs/.config/zsh/completions/*.zsh` | fzf, hydectl, hyde-shell completions. |
+| `home/dot_config/zsh/conf.d/20-plugins.zsh` | Owned OMZ loader and plugin list. |
+| `home/dot_config/zsh/conf.d/30-completions.zsh` | Owned compinit and completions loader. |
+| `home/dot_config/zsh/conf.d/31-functions.zsh` | Owned functions loader. |
+| `home/dot_config/zsh/conf.d/history.zsh` | Owned history behavior. |
+| `home/dot_config/zsh/conf.d/prompt.zsh` | Owned greeting, image capability detection, random fastfetch/pokego choice, and Starship prompt. |
+| `home/dot_config/zsh/conf.d/fzf.zsh` | Owned fzf integration. |
+| `home/dot_config/zsh/conf.d/keybindings.zsh` | Owned interactive keybindings. |
+| `home/dot_config/zsh/conf.d/overrides.zsh` | Owned command overrides and aliases. |
+| `home/dot_config/zsh/conf.d/qol.zsh` | Owned quality-of-life aliases. |
+| `home/dot_config/zsh/conf.d/hyde.zsh` | Deliberate HyDE engine aliases (`hyde-shell pm`). Rename/wrap later if wanted. |
+| `home/dot_config/zsh/conf.d/local.zsh` | Tracked local loader, sourced last by `.zshrc`. |
+| `home/dot_config/zsh/functions/*.zsh` | Owned helper functions. |
+| `home/dot_config/zsh/completions/*.zsh` | Owned completions. |
 
 ## Zsh Load Order
 
 ```
 ~/.zshenv
-  -> ~/.config/zsh/.zshenv
-    -> conf.d/*.zsh
-      -> 00-hyde.zsh
-        -> hyde/env.zsh
-        -> hyde/terminal.zsh for interactive shells
-          -> user.zsh
-          -> compinit
-          -> plugin.zsh or oh-my-zsh
-          -> prompt.zsh or hyde/prompt.zsh
-          -> functions/*.zsh
-          -> completions/*.zsh
-          -> .zshrc
+  -> ~/.config/zsh/.zshenv   # minimal non-interactive env
+  -> ~/.config/zsh/.zshrc    # interactive shell only
+    -> conf.d/*.zsh          # owned modules
+    -> conf.d/local.zsh      # explicit final override hook
 ```
 
-`~/.zshrc` is deliberately late and mostly empty. The remaining ownership problem is not that zsh can call `hyde-shell`; it is that `conf.d/hyde/terminal.zsh` still owns too much of the interactive startup flow.
+`~/.zshenv` is minimal and `.zshrc` owns the interactive startup. This matches fish's philosophy: the shell loads small owned modules, not a HyDE startup manager.
 
 ## Fish Source Files
 
@@ -98,7 +89,7 @@ Under UWSM, shell env does not control the compositor session. Treat shell env a
 | Alt+1..9 history insertion | `bind_M_n_history.zsh`, `bind_M_n_history.fish`. |
 | slow zsh load warning | `error-handlers.zsh`. |
 | `command_not_found_handler` | `error-handlers.zsh`; keep, wrap, or rename its `hyde-shell pm` integration deliberately. |
-| starship prompt | `conf.d/hyde/prompt.zsh`, `hyde.fish`, `starship.toml`. |
+| starship prompt | `conf.d/prompt.zsh`, fish `conf.d/20-prompt.fish`, `starship.toml`. |
 
 ## Coupled Pieces To Decide
 
@@ -106,10 +97,9 @@ Under UWSM, shell env does not control the compositor session. Treat shell env a
 |-------|----------|
 | `in`, `un`, `up`, `pl`, `pa` aliases | Acceptable if `hyde-shell pm` remains the chosen package-manager engine. Rename/wrap only for branding or control. |
 | `hyde-shell` / `hydectl` completions | Acceptable while those commands remain engine APIs. Remove only if the commands are dropped or renamed. |
-| OMZ install and plugin cloning | `restore_shl.sh` owns this and can mutate files outside chezmoi. |
+| OMZ install and plugin cloning | `restore_shl.sh` can mutate files outside chezmoi; zsh now only owns the loader/list. |
 | Powerlevel10k fallback | Optional; starship is cross-shell and already present. |
 | `pokego` / `pokemon-colorscripts` startup art | Not migration-critical. |
-| `conf.d/hyde/terminal.zsh` | Main remaining zsh ownership problem. Replace with a small owned loader or explicitly adopt it into this repo. |
 
 ## Install And Restore Risks
 
@@ -125,7 +115,7 @@ Shell entries in `restore_cfg.psv` show the real ownership model: `config.fish`,
 
 ## Current Chezmoi Note
 
-The dotfiles repo contains zsh/fish files under `home/dot_config/zsh` and `home/dot_config/fish`. Fish is already split into owned modules. Zsh is halfway there: many owned modules exist, but the HyDE terminal loader still controls important interactive behavior.
+The dotfiles repo contains zsh/fish files under `home/dot_config/zsh` and `home/dot_config/fish`. Both shells now use owned startup modules. Zsh still intentionally exposes HyDE package-manager aliases, but those are engine calls, not startup ownership.
 
 HyDE restore can still overwrite matching target files unless the restore pipeline is no longer used. This is more important than whether shell aliases call `hyde-shell`.
 
@@ -134,9 +124,9 @@ HyDE restore can still overwrite matching target files unless the restore pipeli
 | Stage | Action | Status |
 |-------|--------|--------|
 | 1 | Decide default shell ownership: zsh, fish, or both. | Done: both are tracked by chezmoi. |
-| 2 | Keep `ZDOTDIR`, but replace or adopt `conf.d/hyde/terminal.zsh`. | Partial: owned modules exist, HyDE terminal loader remains. |
+| 2 | Keep `ZDOTDIR`, but replace or adopt `conf.d/hyde/terminal.zsh`. | Done: HyDE terminal loader removed from zsh startup. |
 | 3 | Decide whether `hyde-shell pm` aliases stay, are renamed, or are wrapped. | Not blocking. Current aliases are acceptable. |
 | 4 | Decide whether HyDE completions stay, are renamed, or are removed. | Not blocking. Current completion is acceptable. |
-| 5 | Keep useful functions by copying/adopting them into owned paths. | Mostly done for fish; partial for zsh. |
+| 5 | Keep useful functions by copying/adopting them into owned paths. | Done for current shell startup needs. |
 | 6 | Move `HYPRLAND_CONFIG` and Wayland vars out of shell files and into UWSM env. | Pending. |
 | 7 | Stop running `restore_shl.sh` or any HyDE restore that syncs shell dirs. | Pending; highest-risk ownership item. |

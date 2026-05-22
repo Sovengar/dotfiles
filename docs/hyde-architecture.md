@@ -239,13 +239,13 @@ uwsm (systemd user session)
 
 ### Environment variable conflict
 
-`~/.config/zsh/conf.d/hyde/env.zsh` sets XDG variables, but under UWSM:
+Zsh shell env files may set XDG variables, but under UWSM:
 
 ```
 login → PAM → uwsm sets env → shell init runs (overridden by uwsm) → hyprland starts
 ```
 
-This means `env_if_unset()` in `hyde/env.lua` may receive values already locked by UWSM, making the zsh env file ineffective for Wayland session vars. The `env.zsh` comment acknowledges this explicitly.
+This means `env_if_unset()` in `hyde/env.lua` may receive values already locked by UWSM, making shell env files ineffective for Wayland session vars. Session-critical Wayland values belong in UWSM env, not zsh startup.
 
 ### Service unit implications
 
@@ -327,7 +327,7 @@ Calls in `keybindings.lua` do not need to disappear if `hyde-shell` remains the 
 | `~/.config/hypr/hyprland/*.lua` | ✅ Yes | User owns these via LUA config |
 | `~/.config/kitty/kitty.conf` | ✅ Yes | User structure; generated colors stay in ignored include |
 | `~/.config/fish/**` | ✅ Yes | Fish startup is split into owned modules; HyDE aliases/completion are intentional engine calls |
-| `~/.config/zsh/**` | Partial | Owned modules exist, but `conf.d/hyde/terminal.zsh` still controls much of interactive startup |
+| `~/.config/zsh/**` | ✅ Yes | Startup uses owned `.zshenv`, `.zshrc`, and `conf.d` modules; HyDE shell startup was removed |
 | `~/.config/dunst/dunstrc` | ❌ Ignored | Theme changes colors via Hyde |
 | `~/.config/gtk-3.0/settings.ini` | ❌ Ignored | Theme changes GTK/icon theme |
 | `~/.config/gtk-4.0` | ❌ Ignored | Theme changes symlink |

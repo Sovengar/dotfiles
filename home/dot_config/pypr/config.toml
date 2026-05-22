@@ -7,7 +7,7 @@ term_with_class = "kitty --class"
 [scratchpads.console]
 animation = "fromTop"
 class = "console-dropdown"
-command = "env NO_FAST_FETCH=1 xdg-terminal-exec --app-id=console-dropdown --title=console-dropdown"
+command = "env NO_GREETING=1 xdg-terminal-exec --app-id=console-dropdown --title=console-dropdown"
 size = "600px 150px"
 margin = 180
 
