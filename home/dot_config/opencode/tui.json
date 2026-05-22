@@ -13,7 +13,22 @@
     "scroll_half_down": "ctrl+d",
     "scroll_half_up": "ctrl+u",
     "scroll_top": "g",
-    "scroll_bottom": "G"
+    "scroll_bottom": "G",
+    "messages_line_up": "none",
+    "messages_line_down": "none",
+    "messages_half_page_up": "up",
+    "messages_half_page_down": "down",
+    "history_previous": "ctrl+up",
+    "history_next": "ctrl+down",
+    "input_move_up": "none",
+    "input_move_down": "none",
+    "command_list": "<leader>x",
+    "dialog.select.prev": "ctrl+p",
+    "dialog.select.next": "ctrl+n",
+    "prompt.autocomplete.prev": "none",
+    "prompt.autocomplete.next": "none",
+    "session_parent": "ctrl+up",
+    "session_child_first": "ctrl+down"
   },
   "scroll_speed": 5,
   "scroll_acceleration": {
