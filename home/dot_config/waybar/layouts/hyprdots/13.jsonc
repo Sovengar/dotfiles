@@ -11,24 +11,17 @@
     "reload_style_on_change": true,
     "include": [
         "$XDG_CONFIG_HOME/waybar/modules/*json*", 
-        "$XDG_CONFIG_HOME/waybar/includes/includes.json" 
+        "includes/includes.json" 
     ],
+    // positions generated based on config.ctl //
     "modules-left": [
-        "group/pill#left1",
-        "group/pill#left2"
+        "group/pill#left"
     ],
-    "group/pill#left1": {
+    "group/pill#left": {
         "orientation": "inherit",
         "modules": [
-            "cpu",
-            "memory"
-        ]
-    },
-    "group/pill#left2": {
-        "orientation": "inherit",
-        "modules": [
-            "idle_inhibitor",
-            "clock"
+            "wlr/taskbar",
+            "mpris"
         ]
     },
     "modules-center": [
@@ -37,14 +30,15 @@
     "group/pill#center": {
         "orientation": "inherit",
         "modules": [
-            "hyprland/workspaces",
-            "hyprland/window"
+            "idle_inhibitor",
+            "clock"
         ]
     },
     "modules-right": [
         "group/pill#right1",
         "group/pill#right2",
-        "group/pill#right3"
+        "group/pill#right3",
+        "group/pill#right4"
     ],
     "group/pill#right1": {
         "orientation": "inherit",
@@ -53,8 +47,7 @@
             "network",
             "pulseaudio",
             "pulseaudio#microphone",
-            "custom/updates",
-            "custom/keybindhint"
+            "custom/updates"
         ]
     },
     "group/pill#right2": {
@@ -70,7 +63,12 @@
         "modules": [
             "custom/wallchange",
             "custom/theme",
-            "custom/wbar",
+            "custom/wbar"
+        ]
+    },
+    "group/pill#right4": {
+        "orientation": "inherit",
+        "modules": [
             "custom/cliphist",
             "custom/hyde-menu",
             "custom/power"

@@ -5,6 +5,9 @@ local function load(module)
     return require(module)
 end
 
+local home = os.getenv("HOME") or ""
+package.path = home .. "/.local/lib/?.lua;" .. home .. "/.local/lib/?/init.lua;" .. package.path
+
 -- HyDE compatibility and owned baseline config
 load("hyprland.primary_apps") -- primary terminal, editor, file manager and browser
 load("hyprland.variables")   -- HyDE variables table (scrPath, envList, unit, cursor, fonts, etc.)
@@ -16,7 +19,7 @@ load("hyprland.hardware.input")   -- keyboard, mouse, touchpad
 load("hyprland.misc")        -- misc compositor defaults
 load("hyprland.hardware.gestures") -- touchpad gesture defaults
 load("hyprland.startup")     -- hl.on("hyprland.start"): dbus, polkit, bar, wallpaper, clipboard, applets, idle
-load("hyprland.scripts.wallbash") -- wallbash metadata from generated state
+load("hypr.scripts.wallbash_metadata_loader") -- wallbash metadata from generated state
 
 -- User personal configuration
 load("hyprland.hardware.monitors") -- monitor setup
@@ -25,10 +28,10 @@ load("hyprland.style.animations") -- animation config from HYPR_ANIMATION state
 load("hyprland.style.shaders")    -- screen shader config from generated state
 load("hyprland.windowrules")      -- window rules
 load("hyprland.style.windowrules") -- style-specific window rules
-load("workflows")                 -- HyDE workflow overrides from HYPR_WORKFLOW state
+load("hypr.selected_workflow_loader") -- HyDE workflow overrides from HYPR_WORKFLOW state
 load("hyprland.keybindings")      -- keyboard shortcuts
 
-load("hyprland.finale")           -- HyDE metadata snapshot for tooling
+load("hypr.finale")               -- HyDE metadata snapshot for tooling
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("pypr")

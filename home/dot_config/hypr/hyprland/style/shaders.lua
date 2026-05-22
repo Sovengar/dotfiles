@@ -1,4 +1,4 @@
-local shader_state = require("hyprland.scripts.shaders")
+local shader_state = require("hypr.scripts.shader_state_loader")
 
 if shader_state.enabled then
     hl.config({

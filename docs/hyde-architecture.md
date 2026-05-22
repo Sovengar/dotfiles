@@ -4,7 +4,7 @@
 
 > Migration docs: see `docs/hyde-migration/` for area-by-area ownership notes. This file remains the compact Hyprland/theme reference.
 
-The current strategy is not to delete `~/.local/lib/hyde`. HyDE can remain as a runtime/theme engine. The important boundary is that stable files under `~/.config` are authored by this dotfiles repo, while generated outputs stay isolated.
+The current strategy is not to delete `~/.local/lib/hyde`. HyDE can remain as a runtime/theme engine. The important boundary is that stable files under `~/.config` are authored by this dotfiles repo, while generated Hypr outputs live in `$XDG_STATE_HOME/hypr/generated`.
 
 ## Core Architecture
 
@@ -14,10 +14,10 @@ HyDE is a theming framework for Hyprland. Its config/runtime is split across sou
 |-----------|-------|----------|
 | `~/.local/share/hyde/` | HyDE package (read-only) | Data/templates such as env-theme and rofi/theme assets |
 | `~/.local/lib/hyde/` | HyDE package (read-only) | Runtime scripts: `hyde-shell` delegates here for wallpaper, theme, app/service, rofi, screenshot, waybar |
-| `~/.config/hypr/hyprland/` | **User / chezmoi** | LUA-based config that replaces stock via `CONFIG_ALREADY_LOADED` |
+| `~/.config/hypr/hyprland/` | **User / chezmoi** | Lua config; `scripts/` consumes generated state and `style/` applies Hypr config. |
 | `~/.config/hyde/themes/` | HyDE `hyde-shell` | Each theme is a subdir: `Rosé Pine/`, `Catppuccin Mocha/`, etc. |
-| `~/.config/hyde/wallbash/` | User templates | Dcol templates + post-processing scripts |
-| `~/.config/hypr/themes/` | **Auto-generated** | `colors.conf`, `wallbash.conf`, `theme.conf` — regenerated on EVERY theme switch |
+| `~/.local/share/wallbash/` | **User / chezmoi** | Dcol templates + post-processing scripts, including Hypr state targets. |
+| `$XDG_STATE_HOME/hypr/generated/` | HyDE engine state | `colors.conf`, `wallbash.conf`, `hyprland.theme.lua`, `shaders.conf`, `animations.theme.conf`, `waybar.theme.conf`, `hyprland.finale.conf`. |
 
 ## Config Load Order (Include Chain)
 
@@ -33,10 +33,11 @@ HyDE is a theming framework for Hyprland. Its config/runtime is split across sou
     if flag is set)                      │
                               ┌─────────┴──────────┐
                               ▼                    ▼
-                    hyde/variables.lua     hyde/wallbash.lua
-                    hyde/defaults.lua      hyde_theme.lua
+                    variables.lua          scripts/wallbash.lua
+                    scripts/theme.lua      style/theme.lua
+                    scripts/animations.lua style/animations.lua
+                    scripts/shaders.lua    style/shaders.lua
                     hyde/startup.lua       finale.lua
-                    hyde/*.lua             animations.lua
                     keybindings.lua        workflows.lua
                     userprefs.lua          monitors.lua
                               │
@@ -44,7 +45,7 @@ HyDE is a theming framework for Hyprland. Its config/runtime is split across sou
                     workflows.conf (USER editable)
                               │
                               ▼
-                    finale.conf (auto-generated snapshot)
+                    $XDG_STATE_HOME/hypr/generated/hyprland.finale.conf
 ```
 
 ## Theme Switch Pipeline
@@ -61,17 +62,17 @@ THEME SWITCH TRIGGERED
 │    with HyDE custom shell logic  │
 │    Extract 4 dominant colors     │
 │    → Generate 9 accent shades    │
-│    → Write ~/.config/hypr/themes/ │
+│    → Write generated Hypr state  │
 │      colors.conf (hex+rgba)      │
 │      wallbash.conf ($GTK_THEME…) │
-│      theme.conf (hypr sections)  │
+│      hyprland.theme.lua          │
 └─────────────────────────────────┘
         │
         ▼
 ┌─────────────────────────────────┐
 │ 2. DCONF TEMPLATE EXPANSION      │
 │    For each file in              │
-│    ~/.config/hyde/wallbash/      │
+│    ~/.local/share/wallbash/      │
 │      always/  (runs always)      │
 │      theme/   (runs on theme chg)│
 │    Replace <wallbash_pry1> with  │
@@ -83,8 +84,8 @@ THEME SWITCH TRIGGERED
         ▼
 ┌─────────────────────────────────┐
 │ 3. HYPRLAND RELOAD               │
-│    wallbash.lua reads overrides  │
-│    hyde_theme.lua reads theme    │
+│    scripts/* read generated state│
+│    style/* applies hl.config     │
 │    finale.lua writes snapshot    │
 │    → Colors apply to borders,    │
 │      gaps, blur, active/inactive │
@@ -124,12 +125,12 @@ kitty.conf  (chezmoi-managed)
 
 | File | Source | Risk of losing data |
 |------|--------|---------------------|
-| `~/.config/hypr/themes/colors.conf` | Wallbash | None (auto-gen) |
-| `~/.config/hypr/themes/wallbash.conf` | Wallbash | None (auto-gen) |
-| `~/.config/hypr/themes/theme.conf` | Theme dir | None (auto-gen) |
+| `$XDG_STATE_HOME/hypr/generated/colors.conf` | Wallbash template | None (state) |
+| `$XDG_STATE_HOME/hypr/generated/wallbash.conf` | `color/hypr.sh` | None (state) |
+| `$XDG_STATE_HOME/hypr/generated/hyprland.theme.lua` | Theme dir via `theme.switch.sh` | None (state) |
 | `~/.config/kitty/autogenerated_theme.conf` | `kitty.theme` / `kitty.dcol` | None (auto-gen) — see note below |
-| `~/.config/hypr/hyprland/hyde/finale.conf` | finale.lua | None (auto-gen) |
-| `~/.config/hypr/hyprland/animations/theme.conf` | `animations --select` | None (auto-gen) |
+| `$XDG_STATE_HOME/hypr/generated/hyprland.finale.conf` | finale.lua | None (state) |
+| `$XDG_STATE_HOME/hypr/generated/animations.theme.conf` | Wallbash animation dcol template | None (state) |
 | `~/.config/hypr/hyprlock/theme.conf` | Lock screen preset | None (auto-gen) |
 | `~/.cache/hyde/wallbash/*` | Dcol expansion | None (cache) |
 
@@ -141,7 +142,7 @@ kitty.conf  (chezmoi-managed)
 |------|-------------|------------|
 | `~/.config/dunst/dunstrc` | Urgency colors (bg/fg/frame) | corner_radius, icon_theme, dmenu, timeouts, icon path |
 | `~/.config/gtk-3.0/settings.ini` | icon-theme-name, gtk-theme-name | font, cursor, scaling, event sounds |
-| `~/.config/gtk-4.0` | Symlink target (theme name) | It's just a symlink |
+| `~/.config/gtk-4.0` | Theme directory/symlink target | Theme switch can replace it. |
 | `~/.config/rofi/theme.rasi` | All color variables (bg/fg/br/ex/select) | Layout, font, border properties |
 | `~/.config/waybar/theme.css` | CSS `@define-color` values | All other CSS rules |
 | `~/.config/waybar/user-style.css` | Color values | CSS structure |
@@ -163,7 +164,7 @@ kitty.conf  (chezmoi-managed)
 | `~/.config/hypr/hyprland/workflows.conf` | User-defined (workflow overlays) |
 | `~/.config/waybar/config.jsonc` | User-defined (bar layout) |
 | `~/.config/kitty/kitty.conf` | User-defined (includes defaults_from_hyde.conf) |
-| `~/.config/hyde/wallbash/always/*` | User templates (dcol) |
+| `~/.local/share/wallbash/**` | User-owned dcol templates and post-process scripts. |
 
 ## Dependency Chain
 
@@ -176,10 +177,10 @@ wallpaper (image file)
 ImageMagick `magick` + HyDE `wallbash.sh`
     │  → 4 dominant colors × 9 accent shades
     ▼
-colors.conf (hex values)
+colors.conf (hex values under `$XDG_STATE_HOME/hypr/generated`)
     │
-    ├──→ hyde_theme.lua  →  hyprland: borders, gaps, blur, active_window
-    ├──→ wallbash.lua    →  variables: GTK_THEME, ICON_THEME, cursor, fonts
+    ├──→ scripts/theme.lua      → style/theme.lua: borders, gaps, blur, groupbar
+    ├──→ scripts/wallbash.lua   → variables: GTK_THEME, ICON_THEME, cursor, fonts
     ├──→ dcol templates  →  VS Code theme, cava, Spotify, Discord, Chrome
     │
     ▼
@@ -324,17 +325,19 @@ Calls in `keybindings.lua` do not need to disappear if `hyde-shell` remains the 
 
 | Category | Managing? | Why |
 |----------|-----------|-----|
-| `~/.config/hypr/hyprland/*.lua` | ✅ Yes | User owns these via LUA config |
+| `~/.config/hypr/hyprland/*.lua` | ✅ Yes | User owns these via Lua config; `scripts/` consumes state, `style/` applies config. |
+| `$XDG_STATE_HOME/hypr/generated/*` | ❌ No | Runtime state generated by HyDE-compatible scripts; never track in chezmoi. |
+| `~/.local/share/wallbash/**` | ✅ Yes | Owned dcol template contract and post-process scripts. |
 | `~/.config/kitty/kitty.conf` | ✅ Yes | User structure; generated colors stay in ignored include |
 | `~/.config/fish/**` | ✅ Yes | Fish startup is split into owned modules; HyDE aliases/completion are intentional engine calls |
 | `~/.config/zsh/**` | ✅ Yes | Startup uses owned `.zshenv`, `.zshrc`, and `conf.d` modules; HyDE shell startup was removed |
-| `~/.config/dunst/dunstrc` | ❌ Ignored | Theme changes colors via Hyde |
-| `~/.config/gtk-3.0/settings.ini` | ❌ Ignored | Theme changes GTK/icon theme |
-| `~/.config/gtk-4.0` | ❌ Ignored | Theme changes symlink |
+| `~/.config/dunst/dunstrc` | ✅ Yes, volatile | Target truth is tracked even though theme changes color blocks. Re-add after intentional theme changes. |
+| `~/.config/gtk-3.0/settings.ini` | ✅ Yes, volatile | Target truth is tracked even though theme changes GTK/icon theme. |
+| `~/.config/gtk-4.0` | ✅ Yes, volatile | Target truth is tracked; theme switch can replace directory/symlink shape. |
 | `~/.config/kitty/autogenerated_theme.conf` | ❌ Ignored | Entirely Hyde-regenerated |
 | `~/.config/kitty/defaults_from_hyde.conf` | ✅ Yes | User base config (fonts, padding); name can be changed later |
-| `~/.config/rofi/theme.rasi` | ❌ Ignored | Theme changes colors |
-| `~/.config/waybar/theme.css` | ❌ Ignored | Theme changes colors |
+| `~/.config/rofi/theme.rasi` | ✅ Yes, volatile | Target truth is tracked; theme changes colors. |
+| `~/.config/waybar/theme.css` | ✅ Yes, volatile | Target truth is tracked; theme changes colors. |
 | `~/.config/rclone/rclone.conf` | ✅ Yes | Accept diff noise from token refresh |
 
-> NOTE: The "ignored" files are excluded from chezmoi via `.chezmoiignore`. On fresh install, HyDE's stock configs or `hyde-shell` commands will recreate them. Keep that boundary until your own generator or adopted HyDE engine contract owns those outputs.
+> NOTE: Volatile target-truth files are not hand-authored stable config. If a theme switch changes them intentionally, run `chezmoi re-add` before committing. Generated Hypr state remains outside chezmoi entirely.

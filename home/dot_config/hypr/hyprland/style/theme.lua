@@ -1,6 +1,6 @@
 local blur_override = require("hyprland.style.blur")
 local fonts = require("hyprland.style.fonts")
-local theme_state = require("hyprland.scripts.theme")
+local theme_state = require("hypr.scripts.generated_theme_loader")
 
 local function copy_table(values)
     local copy = {}

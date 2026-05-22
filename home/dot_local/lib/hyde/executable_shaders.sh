@@ -2,9 +2,13 @@
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
 [ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
-shaders_dir="$confDir/hypr/shaders"
-if [ ! -d "$shaders_dir" ]; then
-    send_notifs -i "preferences-desktop-display" "Error" "Shaders directory does not exist at $shaders_dir"
+dataDir="${XDG_DATA_HOME:-$HOME/.local/share}"
+cacheDir="${XDG_CACHE_HOME:-$HOME/.cache}"
+user_shaders_dir="$confDir/hypr/shaders"
+data_shaders_dir="$dataDir/hypr/shaders"
+cache_shaders_dir="$cacheDir/hypr/shaders"
+if [ ! -d "$user_shaders_dir" ] && [ ! -d "$data_shaders_dir" ]; then
+    send_notifs -i "preferences-desktop-display" "Error" "No shaders directory exists at $user_shaders_dir or $data_shaders_dir"
     exit 1
 fi
 show_help() {
@@ -34,12 +38,12 @@ if [ -z "$1" ]; then
     exit 1
 fi
 fn_select() {
-    shader_items=$(find -L "$shaders_dir" -maxdepth 1 -name "*.frag" ! -name "disable.frag" ! -name ".compiled.cache.glsl" -print0 2>/dev/null | xargs -0 -n1 basename | sed 's/\.frag$//')
-    if [ -f "$shaders_dir/disable.frag" ]; then
+    shader_items=$(find -L "$data_shaders_dir" "$user_shaders_dir" -maxdepth 1 -name "*.frag" ! -name "disable.frag" -print0 2>/dev/null | xargs -r -0 -n1 basename | sed 's/\.frag$//' | sort -u)
+    if [ -f "$user_shaders_dir/disable.frag" ] || [ -f "$data_shaders_dir/disable.frag" ]; then
         shader_items="disable\n$shader_items"
     fi
     if [ -z "$shader_items" ]; then
-        send_notifs -i "preferences-desktop-display" "Error" "No .frag files found in $shaders_dir"
+        send_notifs -i "preferences-desktop-display" "Error" "No .frag files found in $user_shaders_dir or $data_shaders_dir"
         exit 1
     fi
     font_scale="$ROFI_SHADER_SCALE"
@@ -64,7 +68,7 @@ fn_select() {
         exit 0
     fi
     set_conf "HYPR_SHADER" "$selected_shader"
-    fn_update "$selected_shader"
+    fn_update "$selected_shader" && hyprctl reload
     send_notifs -i "preferences-desktop-display" "Shader:" "$selected_shader"
 }
 fn_reload() {
@@ -72,13 +76,25 @@ fn_reload() {
         HYPR_SHADER="disable"
     fi
     set_conf "HYPR_SHADER" "$HYPR_SHADER"
-    fn_update "$HYPR_SHADER"
+    fn_update "$HYPR_SHADER" && hyprctl reload
     send_notifs -i "preferences-desktop-display" "Shader reloaded:" "$HYPR_SHADER"
+}
+shader_file() {
+    local selected_shader="$1"
+    if [ -f "$user_shaders_dir/$selected_shader.frag" ]; then
+        printf '%s\n' "$user_shaders_dir/$selected_shader.frag"
+        return 0
+    fi
+    if [ -f "$data_shaders_dir/$selected_shader.frag" ]; then
+        printf '%s\n' "$data_shaders_dir/$selected_shader.frag"
+        return 0
+    fi
+    return 1
 }
 concat_shader_files() {
     local files=("$@")
     local version_directive=""
-    local compiled_file="$shaders_dir/.compiled.cache.glsl"
+    local compiled_file="$cache_shaders_dir/.compiled.cache.glsl"
     local main_frag_file="${files[-1]}"
     if [ -f "$main_frag_file" ]; then
         version_directive=$(grep -E '^\s*#version\s+' "$main_frag_file" | head -n1)
@@ -89,6 +105,7 @@ concat_shader_files() {
             version_directive="#version 300 es"
         fi
     fi
+    mkdir -p "$cache_shaders_dir"
     echo "$version_directive" >"$compiled_file"
     echo "" >>"$compiled_file"
     for f in "${files[@]}"; do
@@ -102,8 +119,13 @@ concat_shader_files() {
 parse_includes_and_update() {
     local selected_shader="$1"
     local files=()
+    local main_frag_file
+    main_frag_file=$(shader_file "$selected_shader") || {
+        send_notifs -i "preferences-desktop-display" "Error" "Shader not found: $selected_shader"
+        return 1
+    }
     local source_var
-    source_var=$(grep -iE '^\s*//\s*!source\s*=\s*.*' "$shaders_dir/$selected_shader.frag" 2>/dev/null | head -n1 | sed -E 's/^\s*\/\/\s*!source\s*=\s*//I' | xargs)
+    source_var=$(grep -iE '^\s*//\s*!source\s*=\s*.*' "$main_frag_file" 2>/dev/null | head -n1 | sed -E 's/^\s*\/\/\s*!source\s*=\s*//I' | xargs)
     if [ -n "$source_var" ]; then
         source_var=$(eval echo "$source_var")
         if [ -f "$source_var" ]; then
@@ -113,12 +135,12 @@ parse_includes_and_update() {
             print_log -y "Warning" " Source file not found: $source_var"
         fi
     fi
-    local inc_file="$shaders_dir/$selected_shader.inc"
+    local inc_file="$user_shaders_dir/$selected_shader.inc"
     if [ -f "$inc_file" ]; then
         files+=("$inc_file")
         print_log -g "Found inc file" " $inc_file"
     fi
-    files+=("$shaders_dir/$selected_shader.frag")
+    files+=("$main_frag_file")
     if concat_shader_files "${files[@]}"; then
         print_log -g "Shader" " $selected_shader compiled successfully."
     else
@@ -138,10 +160,11 @@ parse_includes_and_update() {
 # *┌────────────────────────────────────────────────────────────────────────────┐
 # *│                                                                            |
 # *│ HyDE Controlled content DO NOT EDIT!                                      |
-# *│ Edit or add shaders in the ./shaders/ directory                           |
+# *│ Add custom shaders/overrides in \$XDG_CONFIG_HOME/hypr/shaders            |
+# *│ Built-in shaders live in \$XDG_DATA_HOME/hypr/shaders                     |
 # *│ and run the 'shaders.sh --select' command to update this file             |
 # *│ Modify ./shaders/shader-name.inc to add your own custom defines         |
-# *│ The 'shader.sh' script will automatically copy this file to the cache     |
+# *│ The 'shader.sh' script will automatically compile this file to the cache  |
 # *│ and the cache will be used in the shader                                  |
 # *│                                                                            |
 # *└────────────────────────────────────────────────────────────────────────────┘
@@ -149,9 +172,9 @@ parse_includes_and_update() {
 # name of the shader
 \$SCREEN_SHADER = "$selected_shader"
 # path to the shader
-\$SCREEN_SHADER_PATH = "$shaders_dir/$selected_shader.frag"
+\$SCREEN_SHADER_PATH = "$main_frag_file"
 # path to the compiled shader // override this in '../hyde/config.toml'
-\$SCREEN_SHADER_COMPILED = $XDG_CONFIG_HOME/hypr/shaders/.compiled.cache.glsl
+\$SCREEN_SHADER_COMPILED = $cache_shaders_dir/.compiled.cache.glsl
 
 
 EOF

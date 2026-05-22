@@ -72,8 +72,7 @@
         "modules": [
             "custom/wallchange",
             "custom/theme",
-            "custom/wbar",
-            "custom/btop"
+            "custom/wbar"
         ]
     },
     "group/pill#right4": {

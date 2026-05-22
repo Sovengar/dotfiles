@@ -1,4 +1,4 @@
-local animation_state = require("hyprland.scripts.animations")
+local animation_state = require("hypr.scripts.animation_state_loader")
 
 if animation_state.enabled ~= nil then
     hl.config({ animations = { enabled = animation_state.enabled } })
