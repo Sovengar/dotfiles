@@ -47,7 +47,7 @@ function _slow_load_warning {
                 configurations from your .zshrc file as HyDE will handle it for you.
             - Check the '.zshrc' file from the repo for a clean configuration.
                 https://github.com/HyDE-Project/HyDE/blob/master/Configs/.zshrc
-        3. Check '~/.config/zsh/conf.d/local.zsh' and other local startup scripts for slow initialization.
+        3. Check the '~/.user.zsh' file for any slow initialization scripts.
 
     For more information, on the possible causes of slow shell startup, see:
         🌐 https://github.com/HyDE-Project/HyDE/wiki

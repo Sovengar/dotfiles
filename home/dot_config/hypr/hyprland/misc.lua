@@ -15,4 +15,13 @@ hl.config({
         -- enable_swallow = true,
         -- swallow_regex = "(foot|kitty|allacritty|Alacritty|ghostty|Ghostty|org.wezfurlong.wezterm)",
     },
+
+    -- Do not show Hyprland update news on first launch.
+    ecosystem = {
+        -- no_update_news = true,
+    },
+
+    xwayland = {
+        force_zero_scaling = true,
+    },
 })

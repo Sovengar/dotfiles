@@ -6,22 +6,6 @@ function vop {
   kitty --detach --session "$session_file" >/tmp/vop3-kitty.log 2>&1
 }
 
-function cdx {
-  local result_file=/tmp/cdx-rs-result.txt
-  rm -f "$result_file"
-  cdx-rs "$@" >/dev/null 2>&1
-  if [[ $? -eq 0 && -f "$result_file" ]]; then
-    local target=$(<"$result_file")
-    target=${target%$'\n'}
-    target=${target#$'\n'}
-    rm -f "$result_file"
-    if [[ -n "$target" && -d "$target" ]]; then
-      builtin cd "$target"
-      command eza --icons --group-directories-first 2>/dev/null || ls --color=auto
-    fi
-  fi
-}
-
 function connect {
   case "$1" in
     jon)

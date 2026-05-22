@@ -10,7 +10,7 @@ fi
 source "${LIB_DIR}/hyde/shutils/argparse.sh"
 
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
-animations_dir="$confDir/hypr/animations"
+animations_dir="$confDir/hypr/hyprland/style/animations"
 if [ ! -d "$animations_dir" ]; then
     notify-send -i "preferences-desktop-display" "Error" "Animations directory does not exist at $animations_dir"
     exit 1
@@ -63,24 +63,7 @@ fn_update() {
     [ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
     current_animation=${HYPR_ANIMATION:-"theme"}
     echo "Animation updated to: $current_animation"
-    cat <<- EOF > "$confDir/hypr/animations.conf"
-
-		#! ▄▀█ █▄░█ █ █▀▄▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█
-		#! █▀█ █░▀█ █ █░▀░█ █▀█ ░█░ █ █▄█ █░▀█
-
-
-		#*┌────────────────────────────────────────────────────────────────────────────┐
-		#*│ # See https://wiki.hypr.land/Configuring/Animations/                    │
-		#*│ # HyDE Controlled content // DO NOT EDIT                                   │
-		#*│ # Edit or add animations in the ./hypr/animations/ directory               │
-		#*│ # and run the 'animations.sh --select' command to update this file         │
-		#*│                                                                            │
-		#*└────────────────────────────────────────────────────────────────────────────┘
-
-		\$ANIMATION=$current_animation
-		\$ANIMATION_PATH=./animations/$current_animation.conf
-		source = \$ANIMATION_PATH
-	EOF
+    hyprctl reload >/dev/null 2>&1 || true
 }
 
 # Initialize argparse

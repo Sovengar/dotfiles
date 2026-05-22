@@ -9,9 +9,7 @@ fi
 source "${LIB_DIR}/hyde/shutils/argparse.sh"
 
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
-hyprland_dir="$confDir/hypr/hyprland"
-workflows_dir="$hyprland_dir/workflows"
-legacy_workflows_dir="$confDir/hypr/workflows"
+workflows_dir="$confDir/hypr/workflows"
 if [ ! -d "$workflows_dir" ]; then
     notify-send -i "preferences-desktop-display" "Error" "Workflows directory does not exist at $workflows_dir"
     exit 1
@@ -21,10 +19,6 @@ workflow_file() {
     local workflow_name="$1"
     if [ -f "$workflows_dir/$workflow_name.lua" ]; then
         printf "%s\n" "$workflows_dir/$workflow_name.lua"
-    elif [ -f "$workflows_dir/$workflow_name.conf" ]; then
-        printf "%s\n" "$workflows_dir/$workflow_name.conf"
-    elif [ -f "$legacy_workflows_dir/$workflow_name.conf" ]; then
-        printf "%s\n" "$legacy_workflows_dir/$workflow_name.conf"
     fi
 }
 
@@ -36,15 +30,7 @@ workflow_meta() {
     local field="$1"
     local path="$2"
 
-    if [[ "$path" == *.lua ]]; then
-        awk -v key="@workflow_${field}" '$0 ~ "^--[[:space:]]*" key "[[:space:]]+" { sub("^--[[:space:]]*" key "[[:space:]]+", ""); print; exit }' "$path"
-        return
-    fi
-
-    case "$field" in
-    icon) get_hyprConf "WORKFLOW_ICON" "$path" ;;
-    description) get_hyprConf "WORKFLOW_DESCRIPTION" "$path" ;;
-    esac
+    awk -v key="@workflow_${field}" '$0 ~ "^--[[:space:]]*" key "[[:space:]]+" { sub("^--[[:space:]]*" key "[[:space:]]+", ""); print; exit }' "$path"
 }
 
 fn_select() {
@@ -59,14 +45,6 @@ fn_select() {
         workflow_icon=${workflow_icon:0:1}
         workflow_list="$workflow_list\n$workflow_icon\t $workflow_name"
     done < <(find -L "$workflows_dir" -type f -name "*.lua" 2>/dev/null | sort)
-    while IFS= read -r workflow_path; do
-        workflow_name=$(workflow_name_from_path "$workflow_path" | xargs)
-        [ "$workflow_name" = "default" ] && continue
-        [ -f "$workflows_dir/$workflow_name.lua" ] && continue
-        workflow_icon=$(workflow_meta "icon" "$workflow_path")
-        workflow_icon=${workflow_icon:0:1}
-        workflow_list="$workflow_list\n$workflow_icon\t $workflow_name"
-    done < <(find -L "$workflows_dir" "$legacy_workflows_dir" -type f -name "*.conf" 2>/dev/null | sort)
     font_scale="$ROFI_WORKFLOW_SCALE"
     [[ $font_scale =~ ^[0-9]+$ ]] || font_scale=${ROFI_SCALE:-10}
     font_name=${ROFI_WORKFLOW_FONT:-$ROFI_FONT}
@@ -106,31 +84,7 @@ get_info() {
 }
 fn_update() {
     get_info
-    cat <<EOF >"$hyprland_dir/workflows.conf"
-#! █░█░█ █▀█ █▀█ █▄▀ █▀▀ █░░ █▀█ █░█░█ █▀
-#! ▀▄▀▄▀ █▄█ █▀▄ █░█ █▀░ █▄▄ █▄█ ▀▄▀▄▀ ▄█
-
-
-#*┌────────────────────────────────────────────────────────────────────────────┐
-#*│ # HyDE Controlled content // DO NOT EDIT                                   │
-#*│ # This file sets the current workflow for Hyprland                         │
-#*│ # Edit or add workflows in the ./workflows/ directory                      │
-#*│ # and run the 'hyde-shell workflows --select' command to update this file          │
-#*│                                                                            │
-#*│ #  Workflows are a set of configurations that can be applied to Hyprland   │
-#*│ #   that suits the actual workflow you are doing.                          │
-#*│ # It can be gaming mode, work mode, or anything else you can think of.     │
-#*│ # you can also exec a command within the workflow                          │
-#*│                                                                            │
-#*└────────────────────────────────────────────────────────────────────────────┘
-
-\$WORKFLOW = $current_workflow
-\$WORKFLOW_ICON = $current_icon
-\$WORKFLOW_DESCRIPTION = $current_description
-\$WORKFLOWS_PATH = ./workflows/$current_workflow.conf
-source = \$WORKFLOWS_PATH
-
-EOF
+    hyprctl reload config-only -q >/dev/null 2>&1 || true
     printf "%s %s: %s\n" "$current_icon" "$current_workflow" "$current_description"
     notify-send -r 9 -i "preferences-desktop-display" "Workflow: $current_icon $current_workflow" "$current_description"
 }
