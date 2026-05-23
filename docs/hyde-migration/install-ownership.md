@@ -38,9 +38,9 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 
 | Group | HyDE behavior | Migration decision |
 |-------|---------------|--------------------|
-| UWSM | `S` sync for `~/.config/uwsm/env*`. | Take ownership early; session-critical. |
+| UWSM | `S` sync for `~/.config/uwsm/env*`. | Owned in chezmoi and split into semantic env/toolkit/compositor files. |
 | Hyprland Lua/conf | Mixed `P` and `S`. | Already mostly chezmoi-owned; keep control. |
-| Shell | zsh/fish core dirs mostly `S`; user stubs `P`. | Fish mostly owned; zsh partial. Stop HyDE restore from touching both. |
+| Shell | zsh/fish core dirs mostly `S`; user stubs `P`. | Zsh/fish startup is owned; stop HyDE restore from touching both. |
 | Kitty | `kitty.conf` preserved; `hyde.conf`/`theme.conf` sync/generated. | Stable config owned; generated theme include stays ignored. |
 | Waybar | config/style mostly preserved; modules/shared scripts partly ignored/synced. | Own layout; leave color include generated until replacement. |
 | Dunst | `S` sync plus wallbash rewrite. | Split static config from generated colors. |
@@ -88,8 +88,8 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 |-------|--------|--------|
 | 1 | Treat `restore_cfg.psv` as the authoritative map of HyDE ownership. | Reference established. |
 | 2 | Mark every target path as owned, generated, ignored, engine, or obsolete. | In progress. |
-| 3 | Move session-critical files to chezmoi first. | Pending for UWSM. |
-| 4 | Move shell files next; stop `restore_shl.sh`. | Fish mostly done; zsh partial; restore risk remains. |
+| 3 | Move session-critical files to chezmoi first. | Done for UWSM. |
+| 4 | Move shell files next; stop `restore_shl.sh`. | Done for zsh/fish startup ownership; restore risk remains if HyDE scripts are run. |
 | 5 | Keep visual generated files ignored until stable config/generated include boundaries exist. | Active; kitty follows this pattern. |
 | 6 | Stop using HyDE install/restore scripts in the daily workflow. | Pending and high priority. |
 | 7 | Keep, rename, or wrap HyDE state/cache/libs according to engine needs. | Later; not a prerequisite for config ownership. |

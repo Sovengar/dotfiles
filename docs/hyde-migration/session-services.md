@@ -2,7 +2,7 @@
 
 > Goal: boot Hyprland, set the session env, and start desktop daemons through an explicit owned contract. `hyde-shell app` may remain if it is the chosen engine API.
 
-Current status: service startup still delegates heavily to `hyde-shell app`. That is acceptable short-term. The ownership issue is whether this behavior is intentional and documented, not whether the command name contains HyDE.
+Current status: service startup still delegates heavily to `hyde-shell app`. This is intentional while `hyde-shell` and `~/.local/lib/hyde` are the accepted runtime boundary. The ownership issue is restore/install side effects, not the command name.
 
 ## Entry Chain
 
@@ -24,12 +24,14 @@ The Lua config path bypasses the older `.conf` `CONFIG_ALREADY_LOADED` branch. F
 | File | Important values |
 |------|------------------|
 | `Configs/.config/uwsm/env` | Sources `env.d/*.sh`; sets `APP2UNIT_SLICES`, `APP2UNIT_TYPE`. |
-| `Configs/.config/uwsm/env.d/00-hyde.sh` | `PATH`, `LESSHISTFILE`, `PARALLEL_HOME`, `SCREENRC`. |
+| `Configs/.config/uwsm/env.d/00-paths.sh` | User-local PATH setup. |
 | `Configs/.config/uwsm/env.d/01-gpu.sh` | Detects AMD/Intel/Nouveau/NVIDIA and sets GL/VAAPI vars. |
+| `Configs/.config/uwsm/env.d/10-tool-config.sh` | `LESSHISTFILE`, `PARALLEL_HOME`, `SCREENRC`. |
 | `Configs/.config/uwsm/env-hyprland` | Sources `env-hyprland.d/*.sh`. |
-| `Configs/.config/uwsm/env-hyprland.d/00-hyde.sh` | `QT_*`, `MOZ_ENABLE_WAYLAND`, `GDK_SCALE`, `ELECTRON_OZONE_PLATFORM_HINT`, stock `HYPRLAND_CONFIG`, `HYPRLAND_NO_SD_NOTIFY`, `HYPRLAND_NO_SD_VARS`. |
+| `Configs/.config/uwsm/env-hyprland.d/00-compositor.sh` | `HYPRLAND_CONFIG`, `HYPRLAND_NO_SD_NOTIFY`, `HYPRLAND_NO_SD_VARS`. |
+| `Configs/.config/uwsm/env-hyprland.d/10-toolkits.sh` | `QT_*`, `MOZ_ENABLE_WAYLAND`, `GDK_SCALE`, `ELECTRON_OZONE_PLATFORM_HINT`. |
 
-Take ownership of these before uninstalling HyDE. Rename them later if wanted, but preserve behavior first and override stock `HYPRLAND_CONFIG` to the Lua entrypoint used by this repo.
+These are owned by chezmoi and split by semantic responsibility. They preserve the required behavior and override stock `HYPRLAND_CONFIG` to the Lua entrypoint used by this repo.
 
 ## Startup Services
 
@@ -60,7 +62,7 @@ Actual startup is in `~/.config/hypr/hyprland/hyde/startup.lua` in the chezmoi-m
 | Wrapper | `Configs/.local/lib/hyde/app2unit.sh` | Converts command into `systemd-run --user` service/scope. |
 | Backend | systemd user | Units are tied to graphical session target/slices. |
 
-Use `uwsm app` where possible if replacing the engine call. If keeping `hyde-shell app`, document it as the app lifecycle engine and avoid also depending on HyDE restore to manage config files.
+`hyde-shell app` is the accepted app lifecycle engine for now. Avoid depending on HyDE restore to manage config files.
 
 ## Env Propagation
 
@@ -76,7 +78,7 @@ When changing or wrapping the HyDE engine, preserve env propagation in UWSM or s
 
 | Risk | Impact |
 |------|--------|
-| Drop or rename `hyde-shell app` before defining its replacement. | Desktop daemons stop starting. |
+| Drop or rename `hyde-shell app` while it is the accepted runtime boundary. | Desktop daemons stop starting. |
 | Drop UWSM env files too early. | Hyprland may load wrong config path; GPU/Wayland vars missing. |
 | Replace `waybar.py` blindly. | Bar still works with `waybar`, but HyDE-specific watch/theme reload behavior is lost. |
 | Drop wallpaper service. | Theme/wallbash refresh no longer runs. |
@@ -86,8 +88,8 @@ When changing or wrapping the HyDE engine, preserve env propagation in UWSM or s
 
 | Stage | Action | Status |
 |-------|--------|--------|
-| 1 | Copy UWSM env files into chezmoi and verify `HYPRLAND_CONFIG`. | Pending. |
-| 2 | Decide per daemon: keep `hyde-shell app`, wrap it, use `uwsm app`, or create user units. | Pending. |
-| 3 | Change `startup.lua` to call only owned decisions: direct commands, wrappers, or accepted HyDE engine calls. | Pending. |
-| 4 | Remove implicit `~/.local/lib/hyde` PATH reliance only after an explicit engine path/wrapper exists. | Pending. |
+| 1 | Copy UWSM env files into chezmoi and verify `HYPRLAND_CONFIG`. | Done: UWSM env is owned and split semantically. |
+| 2 | Decide per daemon: keep `hyde-shell app`, wrap it, use `uwsm app`, or create user units. | Done for now: keep `hyde-shell app` as runtime API. |
+| 3 | Change `startup.lua` to call only owned decisions: direct commands, wrappers, or accepted HyDE engine calls. | Done for now: startup uses accepted runtime calls. |
+| 4 | Remove implicit `~/.local/lib/hyde` PATH reliance only after an explicit engine path/wrapper exists. | Done enough: `hyde-shell` is tracked as explicit runtime entrypoint. |
 | 5 | Keep `hyde-config`/`hyde-ipc` until checking which theme/config features depend on them. | Pending. |

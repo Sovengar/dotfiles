@@ -8,7 +8,7 @@
 
 | Command | File | Migration note |
 |---------|------|----------------|
-| `hyde-shell` | `Configs/.local/bin/hyde-shell` | Bash dispatcher. Most subcommands delegate to scripts under `~/.local/lib/hyde`. |
+| `hyde-shell` | `Configs/.local/bin/hyde-shell` | Bash dispatcher tracked by chezmoi. Most subcommands delegate to scripts under `~/.local/lib/hyde`. |
 | `hydectl` | `Configs/.local/bin/hydectl` | Precompiled ELF in repo; source not visible in HyDE tree. Treat as opaque. |
 | `hyde-ipc` | `Configs/.local/bin/hyde-ipc` | Precompiled ELF; likely IPC bridge. Treat as opaque until proven unused. |
 | `globalcontrol.sh` | `Configs/.local/lib/hyde/globalcontrol.sh` | Runtime source of XDG dirs, theme paths, helpers, package checks, notifications. |
@@ -33,7 +33,7 @@
 
 ## Keybinding Command Surface
 
-These are the HyDE calls that must be made intentional before changing or renaming `hyde-shell`. They do not need to disappear if `hyde-shell` remains the chosen engine.
+These are the HyDE calls that are intentionally inside the runtime boundary. They do not need to disappear while `hyde-shell` remains the chosen engine.
 
 | Current call | Replacement direction |
 |--------------|-----------------------|
@@ -65,7 +65,7 @@ These are the HyDE calls that must be made intentional before changing or renami
 | Shell aliases | `in`, `un`, `up`, `pl`, `pa` call `hyde-shell pm`. |
 | Install scripts | `Scripts/global_fn.sh` uses `pm.sh` as `pacmanCmd`. |
 
-For this dotfiles repo, `hyde-shell pm` may remain if it is treated as the package-manager engine. Prefer one explicit interface: either keep `hyde-shell pm`, wrap/rename it, or replace it with direct `paru`/`pacman`. The problem is ambiguous ownership, not the HyDE name alone.
+For this dotfiles repo, `hyde-shell pm` remains because `hyde-shell` is the accepted runtime engine. The problem is ambiguous ownership, not the HyDE name alone.
 
 ## Opaque Binaries
 
@@ -80,8 +80,8 @@ For this dotfiles repo, `hyde-shell pm` may remain if it is treated as the packa
 | Stage | Action | Status |
 |-------|--------|--------|
 | 1 | Grep all `hyde-shell` calls in chezmoi. | Done: calls remain across Hyprland startup, keybindings, shell aliases, hypridle, wlogout, fastfetch, and Hyprlock. |
-| 2 | Classify each call as engine API, wrapper candidate, or replacement candidate. | Pending. |
-| 3 | Keep or rename shell aliases using `hyde-shell pm`. | Not blocking; aliases are acceptable if intentional. |
+| 2 | Classify each call as engine API, wrapper candidate, or replacement candidate. | Done for now: `hyde-shell` is the accepted runtime API. |
+| 3 | Keep or rename shell aliases using `hyde-shell pm`. | Done: keep aliases because they target the accepted runtime. |
 | 4 | Keep theme/wallpaper subcommands until `theme-wallbash.md` ownership stages are done. | Active. |
-| 5 | Stop relying on `~/.local/lib/hyde` being injected into PATH by shell startup. | Pending; only do after explicit engine path/wrapper exists. |
+| 5 | Stop relying on `~/.local/lib/hyde` being injected into PATH by shell startup. | Done enough: `hyde-shell` is tracked as explicit runtime entrypoint. |
 | 6 | Change `hydectl`, `hyde-ipc`, `hyde-config` only after their engine role is known. | Pending. |
