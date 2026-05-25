@@ -1,9 +1,5 @@
 # Flujo de Trabajo HyDE ↔ Hyprland — Resumen de Alto Nivel
 
-> **Migración reciente**: Los themes se movieron de `~/.config/hyde/` a `~/.local/share/hyde/themes/`.
-> El estado dinámico se movió a `~/.local/state/{hypr,waybar,rofi,kitty}/`.
-> `~/.config/hyde/` ya no se usa. Editar themes solo si sabés lo que hacés.
-
 ## Arquitectura en 3 Capas
 
 ```
@@ -89,47 +85,36 @@ Archivos **autogenerados**, NO editar manualmente (se sobreescriben en cada camb
 
 ### 3.0 Themes: `~/.local/share/hyde/themes/<name>/`
 
-Los **themes de HyDE** viven en `~/.local/share/hyde/themes/`, no en `.config/`. Cada theme es una carpeta con:
-
-| Archivo | Propósito |
-|---|---|
-| `wall.set` | Symlink al wallpaper activo del theme |
-| `wallpapers/` | Wallpapers incluidos en el theme (se copian al aplicar el theme) |
-| `theme.dcol` | Color dominante del theme para wallbash (override del wallpaper) |
-| `logo/` | Logo del theme para fastfetch |
-
-**¿Por qué en `share/` y no en `config/`?** Porque los themes son contenido (wallpapers + paletas), no configuración activa del usuario. Rara vez se necesita modificarlos manualmente. Si querés cambiar wallpapers, usá el selector de HyDE (`hyde-shell wallpaper --select`). Si querés editar un theme, podés, pero advertí que es inusual y los cambios se pierden si reinstalás el theme. Para personalización persistente, mejor crear un nuevo theme o sobreescribir `wall.set` con tu wallpaper.
+Los themes están acá (no en `.config/`). Cada theme tiene `wall.set`, `wallpapers/`, `theme.dcol`, `logo/`. Se pueden editar manualmente pero es inusual — mejor usar el selector de HyDE. Están en `share/` porque son contenido, no configuración activa.
 
 ### 3.1 Plantillas: `~/.local/share/hyde/wallbash/`
 
-Fuente canónica de plantillas Wallbash. Los templates antiguos de `~/.config/hyde/wallbash` ya no existen — migrados aquí.
+Plantillas con placeholders `<wallbash_*>` que wallbash rellena con los colores del wallpaper/theme activo. Dos categorías:
 
-Contiene **plantillas** con placeholders `<wallbash_*>` que wallbash rellena con los colores del wallpaper/theme activo. Dos categorías:
-
-### 3.2 `always/` — Se aplican SIEMPRE, independientemente del theme
+### 3.2 `always/` — Siempre, independientemente del theme
 
 | Plantilla | Salida | Formato |
 |---|---|---|
-| `hyprcolors.dcol` | `colors.conf` en state | Hyprlang (`$var = value`) |
-| `code.dcol` | `~/.cache/hyde/wallbash/code.json` | JSON (VSCode theme) |
-| `gtk-css.dcol` | `~/.cache/hyde/wallbash/gtk.css` | CSS (`@define-color`) |
-| `scss.dcol` | `~/.cache/hyde/wallbash/colors.scss` | SCSS variables |
+| `hyprcolors.dcol` | `colors.conf` en state | Hyprlang |
+| `code.dcol` | `~/.cache/hyde/wallbash/code.json` | JSON |
+| `gtk-css.dcol` | `~/.cache/hyde/wallbash/gtk.css` | CSS |
+| `scss.dcol` | `~/.cache/hyde/wallbash/colors.scss` | SCSS |
 | `shell-colors.dcol` | `~/.cache/hyde/wallbash/shell-colors` | Shell vars |
-| `pywal-colors.Xcol` | `~/.cache/wal/colors` | pywal format (16 colores) |
+| `pywal-colors.Xcol` | `~/.cache/wal/colors` | pywal |
 | `qtct.dcol` | `~/.cache/hyde/wallbash/qtct.conf` | Qt config |
 | `dunst.dcol` | `~/.cache/hyde/wallbash/dunst.conf` | dunst config |
-| `hyprshaders.dcol` | `~/.cache/hyde/wallbash/colors.inc` | GLSL `#define` |
+| `hyprshaders.dcol` | `~/.cache/hyde/wallbash/colors.inc` | GLSL |
 | `hyprlock_background.dcol` | Genera fondo de hyprlock | — |
-| `rasi.dcol` | Config rofi (estilos CSS) | rasi |
-| `cava.dcol` | Sección Wallbash en `~/.config/cava/config` | cava config |
-| `chrome.dcol` | Tema Chrome/Chromium en cache | Chrome theme |
-| `discord.dcol` | CSS para clientes Discord compatibles | CSS |
-| `spotify.dcol` | `~/.cache/hyde/wallbash/spotify-color.ini`, copied by `spotify.sh` into Spicetify Sleek | ini |
-| `vim.dcol` | `~/.config/vim/colors/wallbash.vim` | Vim colorscheme |
+| `rasi.dcol` | Config rofi | rasi |
+| `cava.dcol` | Sección en `~/.config/cava/config` | cava config |
+| `chrome.dcol` | Tema Chrome en cache | Chrome theme |
+| `discord.dcol` | CSS para Discord | CSS |
+| `spotify.dcol` | `~/.cache/hyde/wallbash/spotify-color.ini` | ini |
+| `vim.dcol` | `~/.config/vim/colors/wallbash.vim` | Vim |
 | `00-icons/*.dcol` | Iconos SVG con colores wallbash | SVG |
 | `00-palette/*.t2` | Paleta visual SVG | SVG |
 
-### 3.3 `theme/` — Se aplican según el THEME activo (Rosé Pine en este caso)
+### 3.3 `theme/` — Según el theme activo (ej: Rosé Pine)
 
 | Plantilla | Salida | Formato |
 |---|---|---|
@@ -332,16 +317,13 @@ El workflow activo se lee de `staterc` → `HYPR_WORKFLOW`.
 | `~/.config/gtk-3.0/` | Settings GTK |
 | `~/.config/waybar/` | Config waybar (layouts manuales, user-style.css para overrides) |
 | `~/.config/swaync/` | Config centro notificaciones (theme.css autogenerado) |
-| `~/.config/hyde/` | **Ya no se usa** — migrado a `~/.local/share/hyde/themes/` |
-| `~/.local/share/hyde/` | Temas (themes/<name>/), plantillas wallbash, scripts, recursos |
-| `~/.local/share/waybar/` | Módulos estáticos waybar (modules/*.jsonc, styles/defaults.css, layouts/hyprdots/) |
-| `~/.local/state/hypr/` | Estado dinámico Hyprland (colores, animaciones, shaders, metadata) — NO editar |
-| `~/.local/state/waybar/` | Estado waybar generado (config.jsonc, style.css, theme.css, includes/) — NO editar |
-| `~/.local/state/rofi/` | Estado rofi generado (colores wallbash en theme.rasi) — NO editar |
-| `~/.local/state/kitty/` | Estado kitty generado (autogenerated_theme.conf) — NO editar |
-| `~/.local/lib/hyde/` | API Lua + scripts shell (motor de HyDE) |
-| `~/.local/lib/hypr/` | Scripts Lua auxiliares de Hyprland (metadata_generator.lua) |
-| `~/.cache/hyde/wallbash/` | Cache de archivos generados temporales (code.json, gtk.css, etc.) |
+| `~/.config/hyde/` | Ya no se usa |
+| `~/.local/share/hyde/` | Themes, plantillas wallbash, scripts, recursos |
+| `~/.local/share/waybar/` | Módulos estáticos, layouts, estilos base |
+| `~/.local/state/{hypr,waybar,rofi,kitty}/` | Estado dinámico autogenerado según wallpaper/theme — NO editar |
+| `~/.local/lib/hyde/` | API Lua + scripts shell |
+| `~/.local/lib/hypr/` | Scripts Lua auxiliares |
+| `~/.cache/hyde/wallbash/` | Archivos generados temporales |
 | `~/.cache/wal/` | Cache pywal-compat |
 
 ---
