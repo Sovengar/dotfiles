@@ -5,7 +5,7 @@ if [[ $HYDE_SHELL_INIT -ne 1 ]]; then
 else
     export_hyde_config
 fi
-emoji_dir=${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hypr}
+emoji_dir=${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hyde}
 emoji_data="$emoji_dir/emoji.db"
 cache_dir="${HYDE_CACHE_HOME:-$HOME/.cache/hyde}"
 recent_data="$cache_dir/landing/show_emoji.recent"
@@ -87,7 +87,7 @@ parse_arguments() {
                 cat << HELP
 Usage:
 --style [1 | 2]         Change Emoji style
-                        Add 'emoji_style=[1|2]' variable in ~/.config/hyde/config.toml'
+                        Configure emoji style in this script or a domain-specific config.
                             1 = list
                             2 = grid
                         or select styles from 'rofi-theme-selector'

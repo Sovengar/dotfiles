@@ -5,7 +5,7 @@ dock=${BATTERY_NOTIFY_DOCK:-false}
 config_info() {
     cat << EOF
 
-Modify '$XDG_CONFIG_HOME/hyde/config.toml'  to set options.
+Modify the battery notification script or a battery-specific config to set options.
 
       STATUS      THRESHOLD    INTERVAL
       Full        $battery_full_threshold          $notify Minutes

@@ -26,22 +26,18 @@ fastfetch --config hyde/*.jsonc
       "type": "custom",
       "format": "┌──────────────────────────────────────────┐"
     },
+    /*
     {
       "type": "chassis",
       "key": "  󰇺 Chassis",
       "format": "{1} {2} {3}"
     },
+    */
     {
-      "type": "os",
-      "key": "  󰣇 OS",
-      "format": "{2}",
-      "keyColor": "red"
-    },
-    {
-      "type": "kernel",
-      "key": "   Kernel",
-      "format": "{2}",
-      "keyColor": "red"
+      "type": "command",
+      "key": "  󰣇 OS/Kernel",
+      "keyColor": "red",
+      "text": "echo \"$(grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\\\"') $(uname -r)\""
     },
     {
       "type": "packages",
@@ -102,6 +98,7 @@ fastfetch --config hyde/*.jsonc
       "key": "   Memory ",
       "keyColor": "magenta"
     },
+    /*
     {
       "type": "disk",
       "key": "  󱦟 OS Age ",
@@ -109,6 +106,7 @@ fastfetch --config hyde/*.jsonc
       "keyColor": "red",
       "format": "{days} days"
     },
+    */
     {
       "type": "uptime",
       "key": "  󱫐 Uptime ",
@@ -117,6 +115,12 @@ fastfetch --config hyde/*.jsonc
     {
       "type": "custom",
       "format": "└──────────────────────────────────────────┘"
+    },
+    {
+      "type": "command",
+      "key": "   Theme",
+      "keyColor": "yellow",
+      "text": "grep '^\\$HYDE_THEME=' ~/.local/state/hypr/wallbash.conf 2>/dev/null | cut -d= -f2 || echo 'N/A'"
     },
     {
       "type": "colors",

@@ -73,7 +73,7 @@ For this dotfiles repo, `hyde-shell pm` remains because `hyde-shell` is the acce
 |--------|------|
 | `hydectl` | Source not found in HyDE tree; treat as opaque engine surface unless replaced or wrapped. |
 | `hyde-ipc` | Source not found in HyDE tree; verify runtime dependency before changing it. |
-| `hyde-config` | Runs from startup; likely parses `~/.config/hyde/config.toml` into state. Keep while theme/config engine depends on it. |
+| `hyde-config` | No longer part of startup/config flow. Local values are defined in the domain file that consumes them. |
 
 ## Migration Stages
 
@@ -84,4 +84,4 @@ For this dotfiles repo, `hyde-shell pm` remains because `hyde-shell` is the acce
 | 3 | Keep or rename shell aliases using `hyde-shell pm`. | Done: keep aliases because they target the accepted runtime. |
 | 4 | Keep theme/wallpaper subcommands until `theme-wallbash.md` ownership stages are done. | Active. |
 | 5 | Stop relying on `~/.local/lib/hyde` being injected into PATH by shell startup. | Done enough: `hyde-shell` is tracked as explicit runtime entrypoint. |
-| 6 | Change `hydectl`, `hyde-ipc`, `hyde-config` only after their engine role is known. | Pending. |
+| 6 | Change `hydectl`/`hyde-ipc` only after their engine role is known; `hyde-config` usage has been removed from startup. | In progress. |

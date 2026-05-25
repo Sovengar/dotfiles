@@ -85,7 +85,8 @@ ocr_screenshot() {
     local extra_args=("$@")
     if "$LIB_DIR/hyde/screenshot/grimblast" "${extra_args[@]}" copysave "$mode" "$temp_screenshot"; then
         source "${LIB_DIR}/hyde/shutils/ocr.sh"
-        source ${XDG_STATE_HOME}/hyde/config
+        [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+        [ -f "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}" ] && source "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}"
         print_log -g "Performing OCR on $temp_screenshot"
         send_notifs "OCR" "Performing OCR on screenshot..." -i "document-scan" -r 9
         if ! ocr_extract "$temp_screenshot"; then

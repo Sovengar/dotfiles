@@ -365,7 +365,7 @@ def main():
     global artist_color, artist_weight, track_color, progress_color, empty_color, time_color
 
     # Load environment variables from your config file:
-    config_file = os.path.join(xdg_state_home(), "hyde", "config")
+    config_file = os.path.join(xdg_state_home(), "waybar", "staterc")
     colors_file = os.path.join(xdg_cache_home(), "hyde/wall.dcol")
     if os.path.exists(config_file):
         load_env_file(config_file)
@@ -373,7 +373,7 @@ def main():
         load_env_file(colors_file)
 
     # Pull values from environment variables
-    # You can configure these in ~/.config/hyde/config.toml
+    # Configure media player defaults in this module or the caller-specific config.
     prefix_playing = os.getenv("MEDIAPLAYER_PREFIX_PLAYING", "")
     prefix_paused = os.getenv("MEDIAPLAYER_PREFIX_PAUSED", "  ")
     max_length_module = int(os.getenv("MEDIAPLAYER_MAX_LENGTH", "70"))

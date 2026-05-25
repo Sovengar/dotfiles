@@ -31,7 +31,7 @@ load("hyprland.style.windowrules") -- style-specific window rules
 load("hypr.selected_workflow_loader") -- HyDE workflow overrides from HYPR_WORKFLOW state
 load("hyprland.keybindings")      -- keyboard shortcuts
 
-load("hypr.finale")               -- HyDE metadata snapshot for tooling
+load("hypr.metadata_generator")   -- metadata snapshot for tooling/debugging
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("pypr")

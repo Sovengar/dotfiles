@@ -63,20 +63,58 @@ preprocess_substitutions() {
     INVERTED_SED_SCRIPT=$(create_wallbash_substitutions true)
     export NORMAL_SED_SCRIPT INVERTED_SED_SCRIPT
 }
+wallbash_deploy_target() {
+    case "${1##*/}" in
+    kitty.theme | kitty.dcol)
+        printf '%s|%s\n' \
+            '${KITTY_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/kitty}/theme.conf' \
+            'killall -SIGUSR1 kitty'
+        ;;
+    waybar.theme | waybar.dcol)
+        printf '%s|%s\n' \
+            '${WAYBAR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar}/theme.css' \
+            'hyde-shell waybar --update'
+        ;;
+    rofi.theme | rofi.dcol)
+        printf '%s|%s\n' \
+            '${ROFI_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/rofi}/theme.rasi' \
+            ''
+        ;;
+    kvconfig.theme | kvconfig.dcol)
+        printf '%s|%s\n' \
+            '${KVANTUM_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/Kvantum/wallbash}/wallbash.kvconfig' \
+            ''
+        ;;
+    kvantum.theme | kvantum.dcol)
+        printf '%s|%s\n' \
+            '${KVANTUM_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/Kvantum/wallbash}/wallbash.svg' \
+            ''
+        ;;
+    esac
+}
 fn_wallbash() {
-    local temp_target_file exec_command template wallbash_dirs_array
+    local temp_target_file exec_command target_file template wallbash_dirs_array header has_deploy_header has_deploy_target
     template="$1"
     shift
+    has_deploy_header=0
+    has_deploy_target=0
     wallbash_dirs_array=("$@")
     WALLBASH_SCRIPTS="${template%%/wallbash/*}/wallbash/scripts"
-    if [[ $template == *.theme ]]; then
-        local template_name
+    if [[ -n $(wallbash_deploy_target "$template") ]]; then
+        eval target_file="$(wallbash_deploy_target "$template" | awk -F '|' '{print $1}')"
+        exec_command="$(wallbash_deploy_target "$template" | awk -F '|' '{print $2}')"
+        has_deploy_target=1
+        header="$(head -1 "$template")"
+        grep -q '|' <<< "$header" && has_deploy_header=1
+    elif [[ $template == *.theme ]]; then
+        local dcolTemplate template_name
         template_name="${template##*/}"
         template_name="${template_name%.*}"
         dcolTemplate=$(find -H "${wallbash_dirs_array[@]}" -type f -path "*/theme*" -name "$template_name.dcol" 2> /dev/null | awk '!seen[substr($0, match($0, /[^/]+$/))]++')
         if [[ -n $dcolTemplate ]]; then
             eval target_file="$(head -1 "$dcolTemplate" | awk -F '|' '{print $1}')"
             exec_command="$(head -1 "$dcolTemplate" | awk -F '|' '{print $2}')"
+            has_deploy_target=1
             WALLBASH_SCRIPTS="${dcolTemplate%%/wallbash/*}/wallbash/scripts"
         fi
     fi
@@ -85,8 +123,8 @@ fn_wallbash() {
         print_log -sec "wallbash" -stat "Wallbash Directories:" " ${wallbash_dirs_array[*]}"
         print_log -sec "wallbash" -stat "Wallbash Scripts:" " $WALLBASH_SCRIPTS"
     fi
-    [ -f "$HYDE_STATE_HOME/state" ] && source "$HYDE_STATE_HOME/state"
-    [ -f "$HYDE_STATE_HOME/config" ] && source "$HYDE_STATE_HOME/config"
+    [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+    [ -f "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}" ] && source "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}"
     if [[ -n ${WALLBASH_SKIP_TEMPLATE[*]} ]]; then
         for skip in "${WALLBASH_SKIP_TEMPLATE[@]}"; do
             if [[ $template =~ $skip ]]; then
@@ -95,14 +133,29 @@ fn_wallbash() {
             fi
         done
     fi
-    [ -z "$target_file" ] && eval target_file="$(head -1 "$template" | awk -F '|' '{print $1}')"
-    [ ! -d "$(dirname "$target_file")" ] && print_log -sec "wallbash" -warn "skip 'missing directory'" "$target_file // Do you have the dependency installed?" && return 0
+    header="$(head -1 "$template")"
+    grep -q '|' <<< "$header" && has_deploy_header=1
+    [ -z "$target_file" ] && eval target_file="$(awk -F '|' '{print $1}' <<< "$header")"
+    if [ -z "$target_file" ] || [[ $has_deploy_header -ne 1 && $has_deploy_target -ne 1 ]]; then
+        print_log -sec "wallbash" -warn "skip 'no deploy header'" "$template"
+        return 0
+    fi
+    if [[ -n $(wallbash_deploy_target "$template") ]]; then
+        mkdir -p "$(dirname "$target_file")"
+    elif [ ! -d "$(dirname "$target_file")" ]; then
+        print_log -sec "wallbash" -warn "skip 'missing directory'" "$target_file // Do you have the dependency installed?"
+        return 0
+    fi
     export wallbashScripts="$WALLBASH_SCRIPTS"
     export WALLBASH_SCRIPTS confDir hydeConfDir cacheDir thmbDir dcolDir iconsDir themesDir fontsDir wallbashDirs enableWallDcol HYDE_THEME_DIR HYDE_THEME GTK_ICON GTK_THEME CURSOR_THEME
     export -f pkg_installed print_log
     exec_command="${exec_command:-"$(head -1 "$template" | awk -F '|' '{print $2}')"}"
     temp_target_file="$(mktemp)"
-    sed '1d' "$template" > "$temp_target_file"
+    if [[ $has_deploy_header -eq 1 ]]; then
+        sed '1d' "$template" > "$temp_target_file"
+    else
+        cp "$template" "$temp_target_file"
+    fi
     if [[ ${revert_colors:-0} -eq 1 ]] || [[ ${enableWallDcol:-0} -eq 2 && ${dcol_mode:-} == "light" ]] || [[ ${enableWallDcol:-0} -eq 3 && ${dcol_mode:-} == "dark" ]]; then
         sed -i "$INVERTED_SED_SCRIPT" "$temp_target_file"
     else
@@ -142,7 +195,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --single)
-            [ -f "$wallbash_image" ] || wallbash_image="$cacheDir/wall.set"
+            [ -f "$wallbash_image" ] || wallbash_image="${HYPR_STATE_HOME:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr}/wallpaper"
             single_template="$2"
             printf "[wallbash] Single template: %s\n" "$single_template"
             printf "[wallbash] Wallpaper: %s\n" "$wallbash_image"
@@ -190,6 +243,7 @@ WALLBASH_DIRS="${WALLBASH_DIRS%:}"
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then PATH="$HOME/.local/bin:$PATH"; fi
 export WALLBASH_DIRS PATH
 export -f fn_wallbash print_log pkg_installed create_wallbash_substitutions preprocess_substitutions
+export -f wallbash_deploy_target
 if [ -n "$dcol_colors" ]; then
     set -a
     source "$dcol_colors"

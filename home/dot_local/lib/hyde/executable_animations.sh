@@ -59,8 +59,8 @@ $animation_items"
     notify-send -i "preferences-desktop-display" "Animation:" "$selected_animation"
 }
 fn_update() {
-    [ -f "$HYDE_STATE_HOME/config" ] && source "$HYDE_STATE_HOME/config"
-    [ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
+    [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+    [ -f "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}" ] && source "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}"
     current_animation=${HYPR_ANIMATION:-"theme"}
     echo "Animation updated to: $current_animation"
     hyprctl reload >/dev/null 2>&1 || true

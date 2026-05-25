@@ -9,7 +9,7 @@
 python_initialized() {
 
 	local python_script="${LIB_DIR}/hyde/pyutils/python_env.py"
-	local venv="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/python_env"
+	local venv="${LIB_DIR}/hyde/python_env"
 
 	if [[ -x "${venv}/bin/python" ]]; then
 		# shellcheck disable=SC1091
@@ -29,7 +29,7 @@ python_initialized() {
 
 python_activate() {
 
-	local python_env="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/python_env/bin/activate"
+	local python_env="${LIB_DIR}/hyde/python_env/bin/activate"
 	if [[ -r "${python_env}" ]]; then
 		# shellcheck disable=SC1090
 		source "${python_env}"
@@ -166,12 +166,12 @@ list_script() {
 
 get_version() {
 	# shellcheck source=/dev/null
-	if [[ ! -f "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/version" ]]; then
+	if [[ ! -f "${LIB_DIR}/hyde/version" ]]; then
 		echo "HyDE version file not found. Please update HyDE."
 		exit 1
 	fi
 	# shellcheck source=/dev/null
-	source "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/version"
+	source "${LIB_DIR}/hyde/version"
 	# Extract only the date part from HYDE_VERSION using Bash parameter expansion
 	# HYDE_VERSION_DATE="${HYDE_VERSION%%-*}"
 	cat <<VERSION
@@ -201,12 +201,12 @@ VERSION
 
 get_release_notes() {
 	# shellcheck source=/dev/null
-	if [[ ! -f "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/version" ]]; then
+	if [[ ! -f "${LIB_DIR}/hyde/version" ]]; then
 		echo "HyDE version file not found. Please update HyDE."
 		exit 1
 	fi
 	#shellcheck source=/dev/null
-	source "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/version"
+	source "${LIB_DIR}/hyde/version"
 	echo "HyDE Release Notes:"
 	echo "$HYDE_RELEASE_NOTES"
 }
@@ -443,8 +443,8 @@ run_command() {
 			exec bash "$dir/${1}.sh" "${@:2}"
 		# Try .lua extension second
 		elif [[ -f "$dir/${1}.lua" 	]]; then
-			lua_runtime="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/lua_env/bin/lua"
-			activate_script="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/lua_env/bin/activate_posix"
+			lua_runtime="${LIB_DIR}/hyde/lua_env/bin/lua"
+			activate_script="${LIB_DIR}/hyde/lua_env/bin/activate_posix"
 			if [[ -f "$activate_script" ]] && [[ -x "$lua_runtime" ]]; then
 			source "$activate_script"
 			else
@@ -454,10 +454,10 @@ run_command() {
 				send_notifs "Lua environment not found!" "Please run 'hyde-shell luainit' to set up the environment."
 				exit 1
 			fi
-			exec "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/lua_env/bin/lua" "$dir/${1}.lua" "${@:2}"
+			exec "${LIB_DIR}/hyde/lua_env/bin/lua" "$dir/${1}.lua" "${@:2}"
 		# Try .py extension third
 		elif [[ -f "$dir/${1}.py" ]]; then
-			exec "${XDG_STATE_HOME:-$HOME/.local/state}/hyde/python_env/bin/python" "$dir/${1}.py" "${@:2}"
+			exec "${LIB_DIR}/hyde/python_env/bin/python" "$dir/${1}.py" "${@:2}"
 		# Try exact name (executable)
 		elif [[ -f "$dir/${1}" && -x "$dir/${1}" ]]; then
 			exec "$dir/${1}" "${@:2}"
@@ -476,7 +476,7 @@ run_command() {
 
 run_uv() {
 	local project_dir="${LIB_DIR}/hyde"
-	local venv_path="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/python_env"
+	local venv_path="${LIB_DIR}/hyde/python_env"
 	shift
 	local subcmd="${1:-help}"
 	shift 2>/dev/null || true
@@ -502,9 +502,9 @@ run_uv() {
 # Run luarocks inside the LuaJIT environment
 run_luarocks() {
 	shift
-	local luarocks_bin="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/lua_env/bin/luarocks"
+	local luarocks_bin="${LIB_DIR}/hyde/lua_env/bin/luarocks"
 	if [[ -x "$luarocks_bin" ]]; then
-		source ${XDG_STATE_HOME:-$HOME/.local/state}/hyde/lua_env/bin/activate_posix
+		source "${LIB_DIR}/hyde/lua_env/bin/activate_posix"
 		"$luarocks_bin" "$@"
 	else
 		echo "luarocks not found in LuaJIT environment."
@@ -549,7 +549,7 @@ run_pypr() {
 		fi
 
 	else
-		UV_PROJECT_ENVIRONMENT="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/python_env" uv add "pyprland==3.3.1" --project "${LIB_DIR}/hyde"
+		UV_PROJECT_ENVIRONMENT="${LIB_DIR}/hyde/python_env" uv add "pyprland==3.3.1" --project "${LIB_DIR}/hyde"
 	fi
 }
 
@@ -763,11 +763,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 		;;
 	validate)
 		shift
-		if command -v hyde-config >/dev/null 2>&1; then
-			hyde-config -no-daemon "${@}"
-		else
-			echo "hyde-config not found. Please make sure it is in \$PATH."
-		fi
+		echo "hyde/config.toml support is disabled. Edit the domain-specific config or state file directly."
 		exit 0
 		;;
 	pyinit)

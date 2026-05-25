@@ -41,11 +41,7 @@ if [[ -z $1 || -z $2 ]]; then
     exit 1
 fi
 WALLBASH_DIRS=(
-    "${XDG_CONFIG_HOME:-$HOME/.config}/hyde/wallbash"
     "${XDG_DATA_HOME:-$HOME/.local/share}/hyde/wallbash"
-    "${XDG_DATA_HOME:-$HOME/.local/share}/wallbash"
-    "${XDG_DATA_HOME:-$HOME/.local/share}/hyde/wallbash"
-    "/usr/local/share/hyde/wallbash"
     "/usr/share/hyde/wallbash")
 THEME_NAME="$1"
 if [ -d "$2" ]; then
@@ -95,7 +91,7 @@ fi
 print_log "Patching" -g " --// $THEME_NAME //-- " "from " -b "$THEME_DIR\n"
 FAV_THEME_DIR="$THEME_DIR/Configs/.config/hyde/themes/$THEME_NAME"
 [ ! -d "$FAV_THEME_DIR" ] && print_log -r "[ERROR] " "'$FAV_THEME_DIR'" -y " Do not Exist" && exit 1
-config=$(find -H "${WALLBASH_DIRS[@]}" -type f -path "*/theme*" -name "*.dcol" 2>/dev/null | awk '!seen[substr($0, match($0, /[^/]+$/))]++' | awk -v favTheme="$THEME_NAME" -F 'theme/' '{gsub(/\.dcol$/, ".theme"); print ".config/hyde/themes/" favTheme "/" $2}')
+config=$(find -H "${WALLBASH_DIRS[@]}" -type f -path "*/theme*" -name "*.dcol" 2>/dev/null | awk '!seen[substr($0, match($0, /[^/]+$/))]++' | awk -v favTheme="$THEME_NAME" -F 'theme/' '{gsub(/\.dcol$/, ".theme"); print ".local/share/hyde/themes/" favTheme "/" $2}')
 restore_list=""
 while IFS= read -r fileCheck; do
     [[ $LOG_LEVEL == "debug" ]] && print_log -n "[debug] " "fileCheck: $fileCheck"
@@ -110,7 +106,7 @@ while IFS= read -r fileCheck; do
 done <<<"$config"
 if [ -f "$FAV_THEME_DIR/theme.dcol" ]; then
     print_log -n "[note] " "found theme.dcol to override wallpaper dominant colors"
-    restore_list+="Y|Y|\${HOME}/.config/hyde/themes/$THEME_NAME|theme.dcol|hyprland\n"
+    restore_list+="Y|Y|\${HOME}/.local/share/hyde/themes/$THEME_NAME|theme.dcol|hyprland\n"
 fi
 [[ $LOG_LEVEL == "debug" ]] && print_log -n "[debug] " "restore_list: $restore_list"
 readonly restore_list
@@ -236,13 +232,13 @@ for prefix in "${!archive_map[@]}"; do
         fi
     fi
 done
-confDir=${XDG_CONFIG_HOME:-"$HOME/.config"}
-theme_wallpapers="$confDir/hyde/themes/$THEME_NAME/wallpapers"
+dataDir=${XDG_DATA_HOME:-"$HOME/.local/share"}
+theme_wallpapers="$dataDir/hyde/themes/$THEME_NAME/wallpapers"
 [ ! -d "$theme_wallpapers" ] && mkdir -p "$theme_wallpapers"
 while IFS= read -r walls; do
     cp -f "$walls" "$theme_wallpapers"
 done <<<"$wallpapers"
-theme_logos="$confDir/hyde/themes/$THEME_NAME/logo"
+theme_logos="$dataDir/hyde/themes/$THEME_NAME/logo"
 if [ -n "$logos" ]; then
     [ ! -d "$theme_logos" ] && mkdir -p "$theme_logos"
     while IFS= read -r logo; do

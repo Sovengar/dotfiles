@@ -40,6 +40,7 @@ EOF
 }
 load_hypr_variables() {
     local hypr_file="$1"
+    [ -r "$hypr_file" ] || return 0
     eval "$(hyq "$hypr_file" \
         --export env \
         -Q '$GTK_THEME[string]' \
@@ -264,14 +265,13 @@ set_conf "HYDE_THEME" "$themeSet"
 print_log -sec "theme" -stat "apply" "$themeSet"
 export reload_flag=1
 source "$LIB_DIR/hyde/globalcontrol.sh"
-source "${XDG_DATA_HOME:-$HOME/.local/share}/hypr/env-theme"
+source "${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hyde}/env-theme"
 if [[ -r $HYPRLAND_CONFIG ]]; then
     [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]] && hyprctl keyword misc:disable_autoreload 1 -q
-    hypr_generated_dir="${HYPR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/generated}"
+    hypr_generated_dir="${HYPR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr}"
     mkdir -p "$hypr_generated_dir"
     [[ -r "$HYDE_THEME_DIR/hypr.theme" ]] && sanitize_hypr_theme "$HYDE_THEME_DIR/hypr.theme" "$hypr_generated_dir"
     load_hypr_variables "$HYDE_THEME_DIR/hypr.theme"
-    load_hypr_variables "${XDG_STATE_DIR:-$HOME/.local/state}/hyde/hyprland.conf"
 fi
 show_theme_status
 if ! dconf write /org/gnome/desktop/interface/icon-theme "'$ICON_THEME'"; then
@@ -378,7 +378,7 @@ export -f pkg_installed
     done
 ' sh {} + &
 if [ "$quiet" = true ]; then
-    "$LIB_DIR/hyde/wallpaper.sh" -s "$(readlink "$HYDE_THEME_DIR/wall.set")" --global >/dev/null 2>&1
+    "$LIB_DIR/hyde/wallpaper.sh" -s "$(readlink "$HYDE_THEME_WALL")" --global >/dev/null 2>&1
 else
-    "$LIB_DIR/hyde/wallpaper.sh" -s "$(readlink "$HYDE_THEME_DIR/wall.set")" --global
+    "$LIB_DIR/hyde/wallpaper.sh" -s "$(readlink "$HYDE_THEME_WALL")" --global
 fi

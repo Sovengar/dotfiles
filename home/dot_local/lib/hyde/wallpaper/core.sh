@@ -63,7 +63,7 @@ Wall_Cache() {
         export reload_flag=1
     fi
     ln -fs "${wallList[setIndex]}" "$wallSet"
-    ln -fs "${wallList[setIndex]}" "$wallCur"
+    [ -n "${wallCur:-}" ] && ln -fs "${wallList[setIndex]}" "$wallCur"
     if [ "$set_as_global" == "true" ]; then
         print_log -sec "wallpaper" "Setting Wallpaper as global"
         "$LIB_DIR/hyde/wallpaper/cache.sh" commence -w "${wallList[setIndex]}" &> /dev/null

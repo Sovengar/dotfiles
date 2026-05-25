@@ -1,6 +1,6 @@
 -- By default HyDE themes own decoration.blur.
 local blur = {
-    override_theme = true, -- Set override_theme = true to ignore the theme blur block and use this table instead.
+    override_theme = false, -- Set override_theme = true to ignore the theme blur block and use this table instead.
     enabled = true,
     size = 25,
     passes = 4,

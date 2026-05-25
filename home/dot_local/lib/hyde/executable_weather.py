@@ -331,8 +331,7 @@ def main() -> None:
     ### Variables ###
     def_lang, def_temp, def_time, def_wind = get_default_locale()  # default vals based on locale
     home = Path.home()
-    load_env_file(home / ".local" / "state" / "hyde" / "staterc")
-    load_env_file(home / ".local" / "state" / "hyde" / "config")
+    load_env_file(home / ".local" / "state" / "hypr" / "staterc")
 
     user_lang = os.getenv("WEATHER_LANG")
     weather_lang = user_lang.lower() if user_lang else def_lang

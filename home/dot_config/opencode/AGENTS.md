@@ -6,6 +6,8 @@ Search order: 1) Global AGENTS.md (this file), 2) Project AGENTS.md (if exists).
 
 - After receiving the request of the user, ALWAYS try to search for an skill that matches the context and load it. Multiple skills can apply simultaneously.
 
+- When asking for migrations or any file understanding, ignore the folder .local/share/chezmoi, the source of truth is the target, the changes should be applied, debugged, tested and curated on the target, when the user approves you can suggest to sync on chezmoi.
+
 ### Enforcement Protocol
 
 1. **When agent is activated:**

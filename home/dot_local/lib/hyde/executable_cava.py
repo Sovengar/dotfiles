@@ -29,9 +29,9 @@ class HydeConfig:
         self.config = self._load_config()
 
     def _load_config(self):
-        """Load Hyde configuration from $XDG_STATE_HOME/hyde/config"""
+        """Load Waybar-scoped configuration from $XDG_STATE_HOME/waybar/staterc"""
         state_dir = os.path.expanduser(os.getenv("XDG_STATE_HOME", "~/.local/state"))
-        config_file = os.path.join(state_dir, "hyde", "config")
+        config_file = os.path.join(state_dir, "waybar", "staterc")
 
         if not os.path.exists(config_file):
             return {}

@@ -5,11 +5,16 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export HYDE_CONFIG_HOME="$XDG_CONFIG_HOME/hyde"
-export HYDE_DATA_HOME="$XDG_DATA_HOME/hypr"
+export HYDE_DATA_HOME="$XDG_DATA_HOME/hyde"
+export HYPR_DATA_HOME="$XDG_DATA_HOME/hypr"
 export HYDE_CACHE_HOME="$XDG_CACHE_HOME/hyde"
-export HYDE_STATE_HOME="$XDG_STATE_HOME/hyde"
 export HYPR_STATE_HOME="$XDG_STATE_HOME/hypr"
-export HYPR_GENERATED_DIR="$HYPR_STATE_HOME/generated"
+export HYPR_GENERATED_DIR="$HYPR_STATE_HOME"
+export WAYBAR_STATE_HOME="$XDG_STATE_HOME/waybar"
+export HYPR_STATE_FILE="$HYPR_STATE_HOME/staterc"
+export WAYBAR_STATE_FILE="$WAYBAR_STATE_HOME/staterc"
+export HYDE_ENGINE_HOME="${LIB_DIR:-$HOME/.local/lib}/hyde"
+export HYDE_STATE_HOME="$HYPR_STATE_HOME"
 export HYDE_RUNTIME_DIR="$XDG_RUNTIME_DIR/hyde"
 export ICONS_DIR="$XDG_DATA_HOME/icons"
 export FONTS_DIR="$XDG_DATA_HOME/fonts"
@@ -24,6 +29,17 @@ export iconsDir="$ICONS_DIR"
 export themesDir="$THEMES_DIR"
 export fontsDir="$FONTS_DIR"
 export hashMech="sha1sum"
+
+source_if_exists() {
+    [ -f "$1" ] && source "$1"
+}
+
+state_file_for_var() {
+    case "$1" in
+    WAYBAR_*) echo "$WAYBAR_STATE_FILE" ;;
+    *) echo "$HYPR_STATE_FILE" ;;
+    esac
+}
 
 send_notifs() {
     local args=("$@")
@@ -185,17 +201,21 @@ get_themes() {
     unset thmList
     unset thmWall
     while read -r thmDir; do
-        local realWallPath
-        realWallPath="$(readlink "$thmDir/wall.set")"
+        local realWallPath thmName thmWallState
+        thmName="${thmDir##*/}"
+        thmWallState="$HYPR_STATE_HOME/themes/$thmName/wallpaper"
+        realWallPath="$(readlink "$thmWallState")"
         if [ ! -e "$realWallPath" ]; then
             get_hashmap "$thmDir" --skipstrays || continue
-            echo "fixing link :: $thmDir/wall.set"
-            ln -fs "${wallList[0]}" "$thmDir/wall.set"
+            echo "fixing link :: $thmWallState"
+            mkdir -p "$(dirname "$thmWallState")"
+            ln -fs "${wallList[0]}" "$thmWallState"
+            realWallPath="${wallList[0]}"
         fi
         [ -f "$thmDir/.sort" ] && thmSortS+=("$(head -1 "$thmDir/.sort")") || thmSortS+=("0")
         thmWallS+=("$realWallPath")
-        thmListS+=("${thmDir##*/}")
-    done < <(find -H "$HYDE_CONFIG_HOME/themes" -mindepth 1 -maxdepth 1 -type d)
+        thmListS+=("$thmName")
+    done < <(find -H "$HYDE_DATA_HOME/themes" -mindepth 1 -maxdepth 1 -type d)
     while IFS='|' read -r sort theme wall; do
         thmSort+=("$sort")
         thmList+=("$theme")
@@ -209,30 +229,25 @@ get_themes() {
     fi
 }
 export_hyde_config() {
-    local user_conf_state="$XDG_STATE_HOME/hyde/staterc"
-    local user_conf="$XDG_STATE_HOME/hyde/config"
-    [ -f "$user_conf_state" ] && source "$user_conf_state"
-    [ -f "$user_conf" ] && source "$user_conf"
+    source_if_exists "$HYPR_STATE_FILE"
+    source_if_exists "$WAYBAR_STATE_FILE"
 }
 export_hyde_config
 case "$enableWallDcol" in
 0 | 1 | 2 | 3) ;;
 *) enableWallDcol=0 ;;
 esac
-if [ -z "$HYDE_THEME" ] || [ ! -d "$HYDE_CONFIG_HOME/themes/$HYDE_THEME" ]; then
+if [ -z "$HYDE_THEME" ] || [ ! -d "$HYDE_DATA_HOME/themes/$HYDE_THEME" ]; then
     get_themes
     HYDE_THEME="${thmList[0]}"
 fi
-HYDE_THEME_DIR="$HYDE_CONFIG_HOME/themes/$HYDE_THEME"
+HYDE_THEME_DIR="$HYDE_DATA_HOME/themes/$HYDE_THEME"
+HYDE_THEME_WALL="$HYPR_STATE_HOME/themes/$HYDE_THEME/wallpaper"
 WALLBASH_DIRS=(
-    "$XDG_CONFIG_HOME/wallbash"
-    "$XDG_CONFIG_HOME/hyde/wallbash"
-    "$XDG_DATA_HOME/wallbash"
-    "$XDG_DATA_HOME/hypr/wallbash"
-    "/usr/local/share/hyde/wallbash"
+    "$XDG_DATA_HOME/hyde/wallbash"
     "/usr/share/hyde/wallbash")
 wallbashDirs=("${WALLBASH_DIRS[@]}")
-export HYDE_THEME HYDE_THEME_DIR WALLBASH_DIRS wallbashDirs enableWallDcol
+export HYDE_THEME HYDE_THEME_DIR HYDE_THEME_WALL WALLBASH_DIRS wallbashDirs enableWallDcol
 if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
     hypr_border="$(hyprctl -j getoption decoration:rounding | jq '.int')"
     hypr_width="$(hyprctl -j getoption general:border_size | jq '.int')"
@@ -261,11 +276,14 @@ get_aurhlpr() {
 set_conf() {
     local varName="$1"
     local varData="$2"
-    touch "$XDG_STATE_HOME/hyde/staterc"
-    if [ "$(grep -c "^$varName=" "$XDG_STATE_HOME/hyde/staterc")" -eq 1 ]; then
-        sed -i "/^$varName=/c$varName=\"$varData\"" "$XDG_STATE_HOME/hyde/staterc"
+    local state_file
+    state_file="$(state_file_for_var "$varName")"
+    mkdir -p "$(dirname "$state_file")"
+    touch "$state_file"
+    if [ "$(grep -c "^$varName=" "$state_file")" -eq 1 ]; then
+        sed -i "/^$varName=/c$varName=\"$varData\"" "$state_file"
     else
-        echo "$varName=\"$varData\"" >>"$XDG_STATE_HOME/hyde/staterc"
+        echo "$varName=\"$varData\"" >>"$state_file"
     fi
 }
 set_hash() {
@@ -335,8 +353,8 @@ get_hyprConf() {
         "CODE_THEME") echo "Wallbash" ;;
         "SDDM_THEME") echo "" ;;
         *) grep "^[[:space:]]*\$default.$hyVar\s*=" \
-            "$HYPR_GENERATED_DIR/hyprland.finale.conf" \
-            "$XDG_CONFIG_HOME/hypr/autogenerated_files/hyprland.finale.conf" \
+            "$HYPR_GENERATED_DIR/metadata.conf" \
+            "$XDG_CONFIG_HOME/hypr/autogenerated_files/metadata.conf" \
             "$XDG_DATA_HOME/hypr/hyprland.conf" \
             "/usr/local/share/hyde/hyde.conf" \
             "/usr/local/share/hyde/hyprland.conf" \
@@ -451,4 +469,4 @@ dconf_write() {
         print_log -sec "dconf" -warn "failed to set" "$key"
     fi
 }
-export -f get_hyprConf get_rofi_pos is_hovered toml_write get_hashmap get_aurhlpr set_conf set_hash check_package get_themes print_log pkg_installed paste_string extract_thumbnail accepted_mime_types dconf_write send_notifs export_hyde_config
+export -f source_if_exists state_file_for_var get_hyprConf get_rofi_pos is_hovered toml_write get_hashmap get_aurhlpr set_conf set_hash check_package get_themes print_log pkg_installed paste_string extract_thumbnail accepted_mime_types dconf_write send_notifs export_hyde_config

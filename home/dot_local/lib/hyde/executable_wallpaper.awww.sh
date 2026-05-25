@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-selected_wall="${1:-"$$HYDE_CACHE_HOME/wall.set"}"
+selected_wall="${1:-"${XDG_STATE_HOME:-$HOME/.local/state}/awww/wallpaper"}"
 lockFile="$XDG_RUNTIME_DIR/hyde/$(basename "$0").lock"
 if [ -e "$lockFile" ]; then
     cat << EOF

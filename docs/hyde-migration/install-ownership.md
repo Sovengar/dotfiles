@@ -74,13 +74,14 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 
 | Path | Why |
 |------|-----|
-| `~/.config/hyde/config.toml` | User-level HyDE config. |
-| `~/.local/state/hyde/staterc` | Runtime state such as wallbash mode/current theme. |
-| `~/.local/state/hyde/config` | Generated config state used by HyDE scripts. |
+| `~/.config/hyde/config.toml` | Removed from this dotfiles flow; define values in the domain-specific file that consumes them. |
+| `~/.local/state/hypr/staterc` | Hypr-scoped runtime selections such as current theme, animation, workflow, shader, and lock layout. |
+| `~/.local/state/waybar/staterc` | Waybar-scoped runtime selections such as current layout/style and local values such as `WAYBAR_SCALE`. |
 | `~/.cache/hyde/` | Wallpaper thumbnails, dcol cache, logs. |
 | `~/.config/cfg_backups/` | Installer backups that may contain old user edits. |
 | `~/.local/lib/hyde/` | Runtime scripts used by keybindings and startup. |
-| `~/.local/bin/hyde-shell`, `hydectl`, `hyde-ipc` | CLI/binary dependencies. |
+| `~/.local/bin/hyde-shell` | Tracked in chezmoi as `home/dot_local/bin/executable_hyde-shell`. |
+| `~/.local/bin/hydectl`, `~/.local/bin/hyde-ipc` | Opaque binaries — role still unknown. Pending investigation. |
 
 ## Migration Stages
 
@@ -91,5 +92,5 @@ The PSV file is the migration checklist. It tells which files HyDE considers use
 | 3 | Move session-critical files to chezmoi first. | Done for UWSM. |
 | 4 | Move shell files next; stop `restore_shl.sh`. | Done for zsh/fish startup ownership; restore risk remains if HyDE scripts are run. |
 | 5 | Keep visual generated files ignored until stable config/generated include boundaries exist. | Active; kitty follows this pattern. |
-| 6 | Stop using HyDE install/restore scripts in the daily workflow. | Pending and high priority. |
-| 7 | Keep, rename, or wrap HyDE state/cache/libs according to engine needs. | Later; not a prerequisite for config ownership. |
+| 6 | Stop using HyDE install/restore scripts in the daily workflow. | Pending and high priority. All stable config is now chezmoi-owned; HyDE restore remains the only mechanism that can overwrite `.config` files. |
+| 7 | Keep, rename, or wrap HyDE state/cache/libs according to engine needs. | In progress: `~/.local/state/hyde` and `~/.config/hyde/config.toml` were removed; runtime state now lives under `state/hypr` and `state/waybar`, while engine artifacts moved under `lib/hyde`. |

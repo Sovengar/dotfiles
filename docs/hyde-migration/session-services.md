@@ -52,7 +52,7 @@ Actual startup is in `~/.config/hypr/hyprland/hyde/startup.lua` in the chezmoi-m
 | Battery notify | `batterynotify.sh` | Replace if used; otherwise drop. |
 | Idle | `hypridle` | User systemd service. |
 | Blue light | `hyprsunset` | User systemd service. |
-| HyDE config | `hyde-config --no-startup` | Investigate before dropping; likely HyDE-specific. |
+| HyDE config | Removed | `~/.config/hyde/config.toml` is not used; values are defined in the domain-specific file that consumes them. |
 
 ## `hyde-shell app` Contract
 
@@ -92,4 +92,4 @@ When changing or wrapping the HyDE engine, preserve env propagation in UWSM or s
 | 2 | Decide per daemon: keep `hyde-shell app`, wrap it, use `uwsm app`, or create user units. | Done for now: keep `hyde-shell app` as runtime API. |
 | 3 | Change `startup.lua` to call only owned decisions: direct commands, wrappers, or accepted HyDE engine calls. | Done for now: startup uses accepted runtime calls. |
 | 4 | Remove implicit `~/.local/lib/hyde` PATH reliance only after an explicit engine path/wrapper exists. | Done enough: `hyde-shell` is tracked as explicit runtime entrypoint. |
-| 5 | Keep `hyde-config`/`hyde-ipc` until checking which theme/config features depend on them. | Pending. |
+| 5 | Keep `hyde-ipc` until checking which features depend on it; `hyde-config` startup usage has been removed. | In progress. |

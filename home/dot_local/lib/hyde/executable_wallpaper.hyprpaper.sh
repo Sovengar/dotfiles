@@ -5,7 +5,7 @@ if [[ ! -f "$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/hyprpaper.lock" ]
     systemctl --user start hyprpaper.service || setsid hyprpaper &
     sleep 1
 fi
-selected_wall="${1:-${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set}"
+selected_wall="${1:-${XDG_STATE_HOME:-$HOME/.local/state}/hyprpaper/wallpaper}"
 [ -z "$selected_wall" ] && echo "No input wallpaper" && exit 1
 selected_wall="$(readlink -f "$selected_wall")"
 is_video=$(file --mime-type -b "$selected_wall" | grep -c '^video/')
@@ -21,7 +21,8 @@ if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
     hyprctl hyprpaper wallpaper ",${selected_wall}" ||
         hyprctl hyprpaper reload ,"${selected_wall}" #TODO: I do not know when did they change this command but yeah will remove this line after some time
 else
-    cat <<EOF >"$XDG_STATE_HOME/hyde/hyprpaper.conf"
+    mkdir -p "${HYPR_STATE_HOME:-$XDG_STATE_HOME/hypr}"
+    cat <<EOF >"${HYPR_STATE_HOME:-$XDG_STATE_HOME/hypr}/hyprpaper.conf"
 splash = false
 wallpaper:path = "${selected_wall}"
 EOF
@@ -29,7 +30,7 @@ EOF
     if systemctl --user is-active --quiet hyprpaper.service; then
         systemctl --user restart hyprpaper.service
     else
-        app2unit.sh -- hyprpaper --config "$XDG_STATE_HOME/hyde/hyprpaper.conf"
+        app2unit.sh -- hyprpaper --config "${HYPR_STATE_HOME:-$XDG_STATE_HOME/hypr}/hyprpaper.conf"
     fi
 
 fi

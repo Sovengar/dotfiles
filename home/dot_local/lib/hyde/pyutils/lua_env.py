@@ -21,8 +21,9 @@ import argparse
 import json
 
 XDG_STATE_HOME = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
-HYDE_STATE_DIR = os.path.join(XDG_STATE_HOME, "hyde")
-LUA_ENV_DIR = os.path.join(XDG_STATE_HOME, "hyde", "lua_env")
+HYDE_LIB_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LUA_ENV_DIR = os.path.join(HYDE_LIB_DIR, "lua_env")
+HYDE_STATE_DIR = HYDE_LIB_DIR
 ACTIVATE_SCRIPT = os.path.join(LUA_ENV_DIR, "bin", "activate")
 LUAROCKS_BIN = os.path.join(LUA_ENV_DIR, "bin", "luarocks")
 HEREROCKS_ARGS = ["-r", "@v3.13.0", "-j", "@v2.1"]

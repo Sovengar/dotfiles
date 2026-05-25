@@ -4,7 +4,7 @@ if ! source "$(which hyde-shell)"; then
     echo "[wallbash] code :: Is HyDE installed?"
     exit 1
 fi
-selected_wall="${1:-${XDG_CACHE_HOME:-$HOME/.cache}/hyde/wall.set}"
+selected_wall="${1:-${XDG_STATE_HOME:-$HOME/.local/state}/mpvpaper/wallpaper}"
 [ -z "$selected_wall" ] && echo "No input wallpaper" && exit 1
 selected_wall="$(readlink -f "$selected_wall")"
 pkill -O -x mpvpaper || true

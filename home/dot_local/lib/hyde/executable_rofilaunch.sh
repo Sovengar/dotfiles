@@ -66,7 +66,8 @@ rofi_args+=("$@")
 hypr_border="${hypr_border:-10}"
 hypr_width="${hypr_width:-2}"
 wind_border=$((hypr_border * 3))
-if [[ -f "$HYDE_STATE_HOME/fullscreen_$r_mode" ]]; then
+fullscreen_state="${HYPR_STATE_HOME:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr}/fullscreen_$r_mode"
+if [[ -f "$fullscreen_state" ]]; then
     hypr_width="0"
     wind_border="0"
 fi
@@ -99,5 +100,5 @@ rofi -show "$r_mode" \
     -theme-str "$r_override" \
     -theme "$rofi_config" \
     -dump-theme | {
-    grep -q "fullscreen.*true" && touch "$HYDE_STATE_HOME/fullscreen_$r_mode"
-} || rm -f "$HYDE_STATE_HOME/fullscreen_$r_mode"
+    grep -q "fullscreen.*true" && touch "$fullscreen_state"
+} || rm -f "$fullscreen_state"

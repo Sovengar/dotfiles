@@ -72,8 +72,8 @@ fn_select() {
     fn_update
 }
 get_info() {
-    [ -f "$HYDE_STATE_HOME/config" ] && source "$HYDE_STATE_HOME/config"
-    [ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
+    [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+    [ -f "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}" ] && source "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}"
     current_workflow=${HYPR_WORKFLOW:-"default"}
     current_path=$(workflow_file "$current_workflow")
     current_icon=$(workflow_meta "icon" "$current_path")

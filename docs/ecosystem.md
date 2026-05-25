@@ -1,8 +1,6 @@
 # Ecosystem & Dependencies
 
-When adding a new tool/dependency/package to any install script, **must also add it to this file** under the appropriate category.
-
-## Tool Categories
+> Complemento a `docs/hyde-workflow.md`. Catálogo de herramientas instaladas.
 
 ### Terminal & Shell
 | Tool | Purpose | Install |
@@ -13,7 +11,6 @@ When adding a new tool/dependency/package to any install script, **must also add
 | zsh | Shell | system |
 | fish | Alt shell | system |
 | fisher | Fish plugin manager | curl |
-| PowerShell 7 | Windows shell | winget |
 | broot | TUI tree nav | brew/curl |
 | yazi | TUI file manager | cargo/brew |
 | lazygit | TUI git | brew/curl |
@@ -22,19 +19,19 @@ When adding a new tool/dependency/package to any install script, **must also add
 | fastfetch | System info | brew/curl |
 | cava | Console audio visualizer | system |
 | pokego | Pokémon sprites in terminal | AUR |
-| sl | Steam locomotive ASCII animation | system |
-| cmatrix | Matrix-style rain animation | system |
-| cowsay | Talking cow ASCII text | system |
-| fortune-mod | Fortune cookie quotes (`fortune`) | system |
-| figlet | Large ASCII text banners | system |
-| toilet | Styled ASCII text banners | system |
+| sl | Steam locomotive animation | system |
+| cmatrix | Matrix rain animation | system |
+| cowsay | Talking cow | system |
+| fortune-mod | Fortune cookie quotes | system |
+| figlet | ASCII text banners | system |
+| toilet | Styled ASCII banners | system |
 | lolcat | Rainbow terminal text filter | system |
-| asciiquarium | Animated ASCII aquarium | system |
+| asciiquarium | ASCII aquarium | system |
 | nyancat | Nyan Cat terminal animation | system |
-| pipes.sh | Animated terminal pipes screensaver | AUR |
-| cbonsai | Procedural terminal bonsai | AUR |
-| ponysay | Pony-themed cowsay alternative | system |
-| hollywood | Fake hacker terminal dashboard | AUR |
+| pipes.sh | Terminal pipes screensaver | AUR |
+| cbonsai | Procedural bonsai | AUR |
+| ponysay | Pony cowsay | system |
+| hollywood | Fake hacker dashboard | AUR |
 | aalib | ASCII fire demo (`aafire`) | system |
 
 ### CLI Tools
@@ -54,7 +51,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 | pastel | Color swatches | brew/curl |
 | mise | Dev env manager | brew/curl |
 | jj | Git-compat VCS | brew/curl |
-| jqp | TUI playground for jq | go install |
+| jqp | TUI jq playground | go install |
 | snip | Token saver | go install |
 
 ### Dev Tools
@@ -62,6 +59,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 |------|---------|---------|
 | neovim | Editor | brew/curl |
 | code (VS Code) | Editor | winget/brew |
+| TheHyDEProject.wallbash | VS Code/Code OSS dynamic Wallbash theme | code extension |
 | IntelliJ IDEA | Java IDE | winget |
 | Bruno | API client | winget |
 | DBeaver | DB client | winget |
@@ -70,18 +68,18 @@ When adding a new tool/dependency/package to any install script, **must also add
 | SoapUI | API testing | winget |
 | VisualVM | JVM profiler | manual |
 | JD-GUI | Java decompiler | manual |
-| depot_tools | Chromium/WebRTC development tooling | git clone |
+| depot_tools | Chromium/WebRTC tooling | git clone |
 
 ### Hardware & Diagnostics
 | Tool | Purpose | Install |
 |------|---------|---------|
 | nvtop | TUI GPU monitor | system |
-| vulkan-tools | Vulkan diagnostics (`vulkaninfo`) | system |
+| vulkan-tools | Vulkan diagnostics | system |
 | qpwgraph | PipeWire/JACK graph GUI | system |
 | lshw | Deep hardware inventory | system |
 | powertop | Power usage diagnostics | system |
-| libinput-tools | Input device diagnostics (`libinput`) | system |
-| nvme-cli | NVMe drive diagnostics (`nvme`) | system |
+| libinput-tools | Input device diagnostics | system |
+| nvme-cli | NVMe drive diagnostics | system |
 
 ### Gaming
 | Tool | Purpose | Install |
@@ -107,7 +105,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 |------|---------|---------|
 | qbittorrent | BitTorrent client | system |
 | hayase-desktop-bin | Anime torrent streaming | AUR |
-| jdownloader2 | Download manager (JDownloader) | CachyOS repo |
+| jdownloader2 | Download manager | CachyOS repo |
 
 ### Docker/Infra
 | Tool | Purpose | Install |
@@ -139,7 +137,7 @@ When adding a new tool/dependency/package to any install script, **must also add
 | uwsm | Wayland session manager | system |
 | awww | Wallpaper daemon | CachyOS repo |
 | waybar | Status bar | CachyOS repo |
-| rofi | Application launcher | CachyOS repo |
+| rofi | App launcher | CachyOS repo |
 | dunst | Notification daemon | CachyOS repo |
 | swaync | Notification center | system |
 | hyprlock | Lock screen | CachyOS repo |

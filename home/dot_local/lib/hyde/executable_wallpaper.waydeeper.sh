@@ -19,7 +19,7 @@ fi
 touch "$lockFile"
 trap 'rm -f "${lockFile}"' EXIT
 
-selected_wall="${1:-"$HYDE_CACHE_HOME/wall.set"}"
+selected_wall="${1:-"${XDG_STATE_HOME:-$HOME/.local/state}/waydeeper/wallpaper"}"
 selected_wall="$(readlink -f "$selected_wall")"
 
 is_video=$(file --mime-type -b "$selected_wall" | grep -c '^video/')

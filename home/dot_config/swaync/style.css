@@ -1,0 +1,107 @@
+@import url("theme.css");
+
+* {
+  all: unset;
+  font-size: 14px;
+  font-family: "Mononoki Nerd Font Mono", "JetBrainsMono Nerd Font", monospace;
+}
+
+.notification-row {
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+.floating-notifications {
+  background: transparent;
+}
+
+.control-center {
+  padding: 8px;
+}
+
+.control-center-list {
+  background: transparent;
+}
+
+.control-center-list-placeholder {
+  opacity: 0.5;
+}
+
+.notification-group,
+.notification-group .notification-group-headers,
+.notification-group .notification-group-headers .notification-group-icon {
+  margin: 0;
+}
+
+.notification-group.collapsed {
+  background: transparent;
+}
+
+.notification-group.collapsed .notification-row .notification {
+  background: alpha(currentColor, 0.05);
+}
+
+.notification-group.collapsed:hover .notification-row:not(:only-child) .notification {
+  background: alpha(currentColor, 0.1);
+}
+
+.notification-group .notification-group-headers .notification-group-close {
+  background: transparent;
+}
+
+.widget-title {
+  margin: 8px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.widget-title button {
+  font-size: 0.9em;
+}
+
+.widget-dnd {
+  margin: 8px;
+  font-size: 1.1em;
+}
+
+.widget-dnd > switch {
+  background: alpha(currentColor, 0.1);
+  border-radius: 12px;
+}
+
+.widget-dnd > switch:checked {
+  background: alpha(currentColor, 0.3);
+}
+
+.widget-mpris {
+  margin: 8px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.widget-volume {
+  margin: 8px;
+  padding: 8px;
+}
+
+.widget-volume scale trough {
+  min-height: 6px;
+}
+
+.widget-volume scale trough highlight {
+  background: currentColor;
+}
+
+.notification-row .notification-background .notification .notification-default-action {
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .text-box .summary {
+  font-weight: bold;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .text-box .time {
+  margin-right: 8px;
+}

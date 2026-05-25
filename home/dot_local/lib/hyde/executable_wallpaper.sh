@@ -73,20 +73,21 @@ setup_wallpaper_targets() {
         return 1
     fi
     if [ "$set_as_global" == "true" ]; then
-        wallSet="$HYDE_THEME_DIR/wall.set"
-        wallCur="$HYDE_CACHE_HOME/wall.set"
+        wallSet="$HYDE_THEME_WALL"
+        wallCur="$HYPR_STATE_HOME/wallpaper"
         wallSqr="$HYDE_CACHE_HOME/wall.sqre"
         wallTmb="$HYDE_CACHE_HOME/wall.thmb"
         wallBlr="$HYDE_CACHE_HOME/wall.blur"
         wallQad="$HYDE_CACHE_HOME/wall.quad"
         wallDcl="$HYDE_CACHE_HOME/wall.dcol"
     elif [ -n "$wallpaper_backend" ]; then
-        mkdir -p "$HYDE_CACHE_HOME/wallpapers"
-        wallCur="$HYDE_CACHE_HOME/wallpapers/$wallpaper_backend.png"
-        wallSet="$HYDE_THEME_DIR/wall.$wallpaper_backend.png"
+        wallCur="${XDG_STATE_HOME:-$HOME/.local/state}/$wallpaper_backend/wallpaper"
+        wallSet="$wallCur"
     else
-        wallSet="$HYDE_THEME_DIR/wall.set"
+        wallSet="$HYDE_THEME_WALL"
     fi
+    mkdir -p "$(dirname "$wallSet")"
+    [ -n "${wallCur:-}" ] && mkdir -p "$(dirname "$wallCur")"
     if [ ! -e "$wallSet" ]; then
         Wall_Hash
     fi

@@ -4,7 +4,8 @@ if ! source "$(which hyde-shell)"; then
     echo "[$0] :: Is HyDE installed?"
     exit 1
 fi
-sunsetConf="${XDG_STATE_HOME:-$HOME/.local/state}/hyde/hyprsunset"
+sunsetConf="${XDG_STATE_HOME:-$HOME/.local/state}/hypr/hyprsunset"
+mkdir -p "$(dirname "$sunsetConf")"
 default_temp=6000
 default_gamma=100
 temp_step=500

@@ -9,7 +9,7 @@ if [ "$1" == "--verbose" ] || [ "$1" == "-v" ]; then
         2) wallbashStatus="enabled // dark mode --forced" ;;
         3) wallbashStatus="enabled // light mode --forced" ;;
     esac
-    echo -e "\n\ncurrent theme :: \"$HYDE_THEME\" :: \"$(readlink "$HYDE_THEME_DIR/wall.set")\""
+    echo -e "\n\ncurrent theme :: \"$HYDE_THEME\" :: \"$(readlink "$HYDE_THEME_WALL")\""
     echo -e "wallbash status :: $enableWallDcol :: $wallbashStatus\n"
     get_themes
     for x in "${!thmList[@]}"; do

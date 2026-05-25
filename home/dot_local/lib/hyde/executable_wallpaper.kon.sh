@@ -41,7 +41,8 @@ if [ ! -z "$setTheme" ] && [ ! -z "$setWall" ]; then
         exit 0
     fi
     cp "$setWall" "$tgtPath/$setTheme/wallpapers"
-    ln -fs "$tgtPath/$setTheme/wallpapers/$(basename "$setWall")" "$tgtPath/$setTheme/wall.set"
+    mkdir -p "$HYPR_STATE_HOME/themes/$setTheme"
+    ln -fs "$tgtPath/$setTheme/wallpapers/$(basename "$setWall")" "$HYPR_STATE_HOME/themes/$setTheme/wallpaper"
     "$scrDir/themeswitch.sh" -s "$setTheme"
     notify-send -a "HyDE Alert" -i "$thmbDir/$inwallHash.sqre" "Wallpaper set in $setTheme"
 else

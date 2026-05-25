@@ -7,7 +7,7 @@ Usage: $(basename "$0") --[option]
     -h, --help  Display this help and exit
     -e, --execute   Explicit command to execute
 
-Config: ~/.config/hyde/config.toml
+Config: script/domain-specific settings
 
     [sysmonitor]
     execute = "btop"                    # Default command to execute // accepts executable or app.desktop

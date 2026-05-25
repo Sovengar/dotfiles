@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
-[ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
+[ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
 dataDir="${XDG_DATA_HOME:-$HOME/.local/share}"
 cacheDir="${XDG_CACHE_HOME:-$HOME/.cache}"
 user_shaders_dir="$confDir/hypr/shaders"
-data_shaders_dir="$dataDir/hypr/shaders"
+data_shaders_dir="${HYPR_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hypr}/shaders"
 cache_shaders_dir="$cacheDir/hypr/shaders"
 if [ ! -d "$user_shaders_dir" ] && [ ! -d "$data_shaders_dir" ]; then
     send_notifs -i "preferences-desktop-display" "Error" "No shaders directory exists at $user_shaders_dir or $data_shaders_dir"
@@ -147,7 +147,7 @@ parse_includes_and_update() {
         print_log -r "Error" " Failed to compile shader $selected_shader"
         return 1
     fi
-    hypr_generated_dir="${HYPR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/generated}"
+    hypr_generated_dir="${HYPR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr}"
     mkdir -p "$hypr_generated_dir"
     cat <<EOF >"$hypr_generated_dir/shaders.conf"
 
@@ -161,7 +161,7 @@ parse_includes_and_update() {
 # *│                                                                            |
 # *│ HyDE Controlled content DO NOT EDIT!                                      |
 # *│ Add custom shaders/overrides in \$XDG_CONFIG_HOME/hypr/shaders            |
-# *│ Built-in shaders live in \$XDG_DATA_HOME/hypr/shaders                     |
+# *│ Built-in shaders live in \$HYPR_DATA_HOME/shaders                        |
 # *│ and run the 'shaders.sh --select' command to update this file             |
 # *│ Modify ./shaders/shader-name.inc to add your own custom defines         |
 # *│ The 'shader.sh' script will automatically compile this file to the cache  |
@@ -173,7 +173,7 @@ parse_includes_and_update() {
 \$SCREEN_SHADER = "$selected_shader"
 # path to the shader
 \$SCREEN_SHADER_PATH = "$main_frag_file"
-# path to the compiled shader // override this in '../hyde/config.toml'
+# path to the compiled shader // override in the shader-specific config/state
 \$SCREEN_SHADER_COMPILED = $cache_shaders_dir/.compiled.cache.glsl
 
 

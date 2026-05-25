@@ -16,9 +16,10 @@ options:
 
 USAGE
 }
-[ -f "$HYDE_STATE_HOME/staterc" ] && source "$HYDE_STATE_HOME/staterc"
+[ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
 [ -f "/etc/os-release" ] && source "/etc/os-release"
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
+dataDir="${XDG_DATA_HOME:-$HOME/.local/share}"
 iconDir="${XDG_DATA_HOME:-$HOME/.local/share}/icons"
 cacheDir="${XDG_CACHE_HOME:-$HOME/.cache}/hyde"
 image_dirs=()
@@ -29,8 +30,8 @@ case $1 in
             (   
                 image_dirs+=("$confDir/fastfetch/logo")
                 image_dirs+=("$iconDir/Wallbash-Icon/fastfetch/")
-                if [ -n "$HYDE_THEME" ] && [ -d "$confDir/hyde/themes/$HYDE_THEME/logo" ]; then
-                    image_dirs+=("$confDir/hyde/themes/$HYDE_THEME/logo")
+                if [ -n "$HYDE_THEME" ] && [ -d "$dataDir/hyde/themes/$HYDE_THEME/logo" ]; then
+                    image_dirs+=("$dataDir/hyde/themes/$HYDE_THEME/logo")
                 fi
                 [ -f "$hyde_distro_logo" ] && echo "$hyde_distro_logo"
                 image_dirs+=("$cacheDir/wall.quad")
@@ -86,9 +87,9 @@ HELP
                         image_dirs+=("$iconDir/Wallbash-Icon/fastfetch/")
                         ;;
                     --theme) if
-                        [ -n "$HYDE_THEME" ] && [ -d "$confDir/hyde/themes/$HYDE_THEME/logo" ]
+                        [ -n "$HYDE_THEME" ] && [ -d "$dataDir/hyde/themes/$HYDE_THEME/logo" ]
                     then
-                        image_dirs+=("$confDir/hyde/themes/$HYDE_THEME/logo")
+                        image_dirs+=("$dataDir/hyde/themes/$HYDE_THEME/logo")
                     fi ;;
                 esac
             done

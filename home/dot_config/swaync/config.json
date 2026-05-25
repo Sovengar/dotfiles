@@ -1,0 +1,93 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "control-center-margin-top": 0,
+  "control-center-margin-bottom": 0,
+  "control-center-margin-right": 0,
+  "control-center-margin-left": 0,
+  "notification-remove-timeout": 5000,
+  "notification-remove-delay": 200,
+  "notification-error-timeout": 8000,
+  "notification-warning-timeout": 8000,
+  "notification-inline-replies": false,
+  "timeout-critical": 0,
+  "timeout-low": 10,
+  "timeout-normal": 5,
+  "keyboard-shortcuts": true,
+  "image-visibility": "when-available",
+  "image-max-size": 100,
+  "hide-on-clear": false,
+  "hide-on-action": true,
+  "script-filters": [],
+  "scripts": {
+    "example-script": {
+      "exec": "notify-send 'example-script' 'Some notification has an icon'",
+      "app-name": "Spotify"
+    }
+  },
+  "widgets": [
+    "inhibitors",
+    "title",
+    "dnd",
+    "notifications",
+    "mpris",
+    "volume"
+  ],
+  "widget-config": {
+    "inhibitors": {
+      "text": "Inhibitors",
+      "button-text": "Clear All",
+      "clear-all-button": true
+    },
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear All"
+    },
+    "dnd": {
+      "text": "Do Not Disturb"
+    },
+    "label": {
+      "max-lines": 1,
+      "text": "Notification Center"
+    },
+    "mpris": {
+      "image-size": 48,
+      "image-radius": 8
+    },
+    "volume": {
+      "label": "Volume"
+    },
+    "buttons-grid": {
+      "actions": [
+        {
+          "label": "󰐦",
+          "command": "systemctl poweroff"
+        },
+        {
+          "label": "",
+          "command": "systemctl reboot"
+        },
+        {
+          "label": "",
+          "command": "hyprlock"
+        },
+        {
+          "label": "",
+          "command": "hyprctl dispatch exit"
+        }
+      ]
+    }
+  },
+  "control-center-layer": "overlay",
+  "control-center-exclusive-zone": false,
+  "notification-visibility": {
+    "example-app-name": {
+      "state": "muted",
+      "urgency": "low",
+      "sound": false
+    }
+  },
+  "transition-duration": 200
+}

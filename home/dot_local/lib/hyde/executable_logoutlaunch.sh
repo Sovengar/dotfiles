@@ -42,7 +42,7 @@ dcol_mode="${dcol_mode:-dark}"
 [ -f "$cacheDir/wall.dcol" ] && source "$cacheDir/wall.dcol"
 enableWallDcol="${enableWallDcol:-1}"
 if [ "$enableWallDcol" -eq 0 ]; then
-    HYDE_THEME_DIR="${HYDE_THEME_DIR:-$confDir/hyde/themes/$HYDE_THEME}"
+    HYDE_THEME_DIR="${HYDE_THEME_DIR:-${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hyde}/themes/$HYDE_THEME}"
     dcol_mode=$(get_hyprConf "COLOR_SCHEME")
     dcol_mode=${dcol_mode#prefer-}
     [ -f "$HYDE_THEME_DIR/theme.dcol" ] && source "$HYDE_THEME_DIR/theme.dcol"

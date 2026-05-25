@@ -19,7 +19,8 @@ hl.on("hyprland.start", function()
     exec_once("hyde-shell app -t service -- polkitkdeauth.sh")
 
     exec_once("hyde-shell app -u " .. vars.unit .. "-bar.scope -t scope -- waybar.py --watch")
-    exec_once("hyde-shell app -u " .. vars.unit .. "-notifications.service -t service -- dunst")
+    -- exec_once("hyde-shell app -u " .. vars.unit .. "-notifications.service -t service -- dunst")
+    exec_once("hyde-shell app -u " .. vars.unit .. "-notifications.service -t service -- swaync")
     exec_once("sh -c 'command -v swayosd-server >/dev/null 2>&1 && hyde-shell app -u " .. vars.unit .. "-swayosd.service -t service -- swayosd-server'")
     exec_once("hyde-shell app -u " .. vars.unit .. "-wallpaper.service -t service -- wallpaper.sh --start --global")
 
@@ -34,7 +35,6 @@ hl.on("hyprland.start", function()
     exec_once("hyde-shell app -u " .. vars.unit .. "-idle.service -t service -- hypridle")
     exec_once("hyde-shell app -u " .. vars.unit .. "-blue-light-filter.service -t service -- hyprsunset")
 
-    exec_once("hyde-shell app -t service hyde-config --no-startup")
     exec_once("hyprctl setcursor " .. vars.CURSOR_THEME .. " " .. vars.CURSOR_SIZE)
     exec_once("hyde-shell app -u " .. vars.unit .. "-hyprexpose.service -t service -- hyprexpose")
 
