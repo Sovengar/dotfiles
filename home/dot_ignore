@@ -1,0 +1,36 @@
+# Keep OpenCode/ripgrep searches from walking large Linux home directories.
+.cache/
+.cargo/
+.local/
+.npm/
+.pnpm-store/
+.yarn/
+.bun/
+.rustup/
+.gradle/
+.m2/
+.vscode/
+.mozilla/
+.config/mozilla/
+.thunderbird/
+.dropbox-dist/
+
+# Large dependency/build trees.
+node_modules/
+target/
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.turbo/
+.venv/
+venv/
+__pycache__/
+
+# Large personal/synced archives; run OpenCode inside these dirs if needed.
+Dropbox/
+gdrive/
+onedrive/
+go/pkg/mod/
+Applications/

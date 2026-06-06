@@ -7,10 +7,12 @@ if [[ -z "${_GUARDS_LOADED:-}" ]]; then
 fi
 
 log "Installing LazyVim dependencies..."
-if tree-sitter --version &>/dev/null; then
+if _cmd_present tree-sitter; then
   success "tree-sitter-cli already installed"
+elif pkg_install tree-sitter-cli 2>/dev/null; then
+  success "tree-sitter-cli installed"
 else
-  log "Installing npm global: tree-sitter-cli"
+  warn "not in official repos, falling back to npm..."
   if command -v mise &>/dev/null; then
     mise exec node -- npm install -g tree-sitter-cli
   else

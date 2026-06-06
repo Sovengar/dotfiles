@@ -27,7 +27,7 @@ hl.on("hyprland.start", function()
     exec_once("hyde-shell app -u " .. vars.unit .. "-text-clipboard.service -t service wl-paste --type text --watch cliphist store")
     exec_once("hyde-shell app -u " .. vars.unit .. "-image-clipboard.service -t service wl-paste --type image --watch cliphist store")
 
-    exec_once("hyde-shell app -u " .. vars.unit .. "-network-manager-applet.service -t service -- nm-applet --indicator")
+    -- Waybar's network module is the single network entry point.
     exec_once("hyde-shell app -u " .. vars.unit .. "-removable-media-applet.service -t service -- udiskie --no-automount --smart-tray")
     exec_once("hyde-shell app -u " .. vars.unit .. "-bluetooth-applet.service -t service -- blueman-applet")
     exec_once("hyde-shell app -u " .. vars.unit .. "-battery-notify.service -t service -- batterynotify.sh")
@@ -39,6 +39,7 @@ hl.on("hyprland.start", function()
     exec_once("hyde-shell app -u " .. vars.unit .. "-hyprexpose.service -t service -- hyprexpose")
 
     -- Personal autostart.
+    exec_once("systemctl start sshd")
     exec_once("keepassxc --minimized")
 
     -- Directory setup and keybinds hint (from dynamic.lua)

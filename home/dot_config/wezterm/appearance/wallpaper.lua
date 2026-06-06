@@ -1,26 +1,23 @@
 local wezterm = require "wezterm"
 local appearance = require "appearance"
+local fs = require "scripts.fs"
 
 local M = {}
 local WALLPAPER_DIR = (wezterm.config_dir):gsub("\\", "/") .. '/appearance/wallpapers'
 local DEFAULT_BG_OPACITY = 0.95
 local OVERLAY_OPACITY = 0.55
 
-local function basename(s)
-  return string.gsub(s, '(.*[/\\])(.*)', '%2')
-end
-
 local function get_wallpapers()
   wezterm.log_info("wallpaper: reading dir " .. WALLPAPER_DIR)
-  local ok, entries = pcall(wezterm.read_dir, WALLPAPER_DIR)
-  if not ok then
+  local entries = fs.read_dir(WALLPAPER_DIR)
+  if not entries then
     wezterm.log_info("wallpaper: cant read dir, returning empty")
     return {}
   end
 
   local types = {}
   for _, path in ipairs(entries) do
-    local name = basename(path)
+    local name = fs.basename(path)
     if not name:match("^%.") then table.insert(types, name) end
   end
   wezterm.log_info("wallpaper: found types: " .. table.concat(types, ", "))
@@ -29,10 +26,10 @@ local function get_wallpapers()
   for _, t in ipairs(types) do
     wallpapers[t] = {}
     local sub = WALLPAPER_DIR .. '/' .. t
-    local ok2, files = pcall(wezterm.read_dir, sub)
-    if ok2 then
+    local files = fs.read_dir(sub)
+    if files then
       for _, path in ipairs(files) do
-        local filename = basename(path)
+        local filename = fs.basename(path)
         if not filename:match("^%.") then table.insert(wallpapers[t], filename) end
       end
     end
@@ -127,18 +124,6 @@ local function cycle_wallpaper(g, window)
   wezterm.log_info("wallpaper: next selected=" .. g.selected_wallpaper)
 end
 
-local function apply_gradient_background(window, colors)
-  local gradient_config = {}
-  appearance.setup_gradient(gradient_config, colors)
-
-  local overrides = window:get_config_overrides() or {}
-  overrides.background = gradient_config.background
-  overrides.window_background_opacity = gradient_config.window_background_opacity
-  overrides.win32_system_backdrop = gradient_config.win32_system_backdrop
-  overrides.win32_acrylic_accent_color = nil
-  window:set_config_overrides(overrides)
-end
-
 function M.setup(config, g, colors)
   wezterm.log_info("wallpaper: M.setup called, config_dir=" .. (wezterm.config_dir or "nil"))
 
@@ -169,12 +154,21 @@ function M.setup(config, g, colors)
 
   wezterm.on('no-wallpaper', function(window, _)
     wezterm.log_info("wallpaper: event 'no-wallpaper' fired")
-    apply_gradient_background(window, colors)
+    appearance.apply_base_background(window, colors)
   end)
 
-  -- Load immediately and apply first wallpaper on startup
+  wezterm.on('window-config-reloaded', function(window, _)
+    wezterm.log_info("wallpaper: config reloaded, restoring appearance background")
+    if not appearance.should_start_with_wallpaper() then
+      appearance.apply_base_background(window, colors)
+    end
+  end)
+
+  -- Load wallpapers for cycling; appearance decides whether startup uses one.
   ensure_loaded(g)
-  cycle_wallpaper_startup(config, g)
+  if appearance.should_start_with_wallpaper() then
+    cycle_wallpaper_startup(config, g)
+  end
 end
 
 return M

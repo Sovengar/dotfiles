@@ -121,6 +121,7 @@ window_rule("idle-inhibit-media", { class = "^(.*celluloid.*)$|^(.*mpv.*)$|^(.*v
 window_rule("idle-inhibit-spotify", { class = "^(.*[Ss]potify.*)$" }, { idle_inhibit = "fullscreen" })
 window_rule("idle-inhibit-browsers", { class = "^(.*LibreWolf.*)$|^(.*floorp.*)$|^(.*brave-browser.*)$|^(.*firefox.*)$|^(.*chromium.*)$|^(.*zen.*)$|^(.*vivaldi.*)$" }, { idle_inhibit = "fullscreen" })
 
+
 for _, spec in ipairs({
     { "signal", { class = "^(Signal)$" } },
     { "clapper", { class = "^(com.github.rafostar.Clapper)$" } },

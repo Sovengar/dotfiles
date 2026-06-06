@@ -9,9 +9,11 @@ fi
 log "Installing lazygit..."
 
 if _cmd_present lazygit; then
-  log "lazygit already installed"
+  success "lazygit already installed"
+elif pkg_install lazygit 2>/dev/null; then
+  success "lazygit installed"
 else
-  log "Installing lazygit from GitHub releases..."
+  warn "not in official repos, falling back to GitHub releases..."
   version="$(curl -fsL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep '"tag_name"' | cut -d'"' -f4)"
   curl -fsL "https://github.com/jesseduffield/lazygit/releases/download/$version/lazygit_${version#v}_Linux_x86_64.tar.gz" \
     | tar xz -C /tmp

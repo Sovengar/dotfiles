@@ -83,6 +83,7 @@ tools=(
   "Favoritos|cava|Visualizador de audio en terminal."
   "Visualizadores|cbonsai|Bonsai procedural en ASCII/ANSI."
   "Visualizadores|nyancat|Animacion Nyan Cat en terminal."
+  "Visualizadores|pastel|Muestra, convierte y explora colores en terminal."
   "ASCII y banners|fastfetch|Resumen del sistema con logo/arte ASCII."
   "Texto divertido|figlet|Necesita texto: figlet hola."
   "Texto divertido|toilet|Necesita texto: toilet hola."

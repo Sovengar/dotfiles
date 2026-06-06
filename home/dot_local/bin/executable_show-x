@@ -63,6 +63,8 @@ esac
 
 tools=(
   "show-hw-x|Hardware, sistema, energia, GPU, audio, red y diagnostico."
+  "show-linux-x|Comandos Linux utiles, categorias y reemplazos modernos."
+  "show-dev-x|CLI dev recurrente, utilidades puntuales y launchers/apps."
   "show-funny-x|Comandos visuales/divertidos de terminal."
   "show-own-x|Comandos propios creados o customizados por mi."
 )

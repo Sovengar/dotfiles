@@ -40,7 +40,7 @@ config.status_update_interval = 2000
 status.setup(theme.colors)
 
 -- Appearance configuration
-appearance.setup_wallpaper(config, theme.colors)
+appearance.setup(config, theme.colors)
 
 -- Dynamic modules
 wallpaper.setup(config, global, theme.colors)
@@ -66,6 +66,8 @@ Others
 ]] --
 
 config.enable_scroll_bar = false
+-- No afecta a Windows y Mac.
+config.enable_wayland = true
 config.warn_about_missing_glyphs = false
 -- SSH
 config.ssh_domains = {

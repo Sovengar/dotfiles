@@ -23,6 +23,7 @@
     "terminal.sourceControlRepositoriesKind": "both",
     "telemetry.telemetryLevel": "off",
     "editor.minimap.enabled": false,
-    "explorer.confirmDelete": false
+    "explorer.confirmDelete": false,
+    "workbench.secondarySideBar.defaultVisibility": "visible"
   }
   

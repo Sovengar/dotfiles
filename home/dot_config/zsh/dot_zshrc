@@ -1,3 +1,6 @@
+# Carapace completions
+source <(carapace _carapace)
+
 # Add user configurations here
 # For HyDE to not touch your beloved configurations,
 # we added a config file for you to customize HyDE before loading zshrc

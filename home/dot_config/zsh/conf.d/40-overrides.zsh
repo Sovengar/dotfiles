@@ -20,6 +20,12 @@ if command -v eza >/dev/null 2>&1; then
   alias lah='eza -lah --icons --group-directories-first'
   alias ld='eza -lhD --icons=auto'
   alias lt='eza -aT --color=always --group-directories-first --icons'
+
+  function cd {
+    builtin cd "$@" || return
+    [[ $PWD == "$HOME" ]] && return 0
+    command eza --icons --group-directories-first 2>/dev/null || true
+  }
 fi
 
 if command -v fastfetch >/dev/null 2>&1; then

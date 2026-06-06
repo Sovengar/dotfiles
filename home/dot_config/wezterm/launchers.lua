@@ -1,18 +1,20 @@
 local wezterm = require "wezterm"
+local platform = require "scripts.platform"
+local system = require "scripts.system"
 
 local M = {}
 
--- Helper: check if executable exists in Windows PATH
-local function exe_exists(name)
-  local ok, _stdout, _stderr = wezterm.run_child_process { 'where', name }
-  return ok
-end
-
 M.setup = function(config)
+  config.default_domain = 'local'
+
+  if not platform.is_windows() then
+    config.default_prog = { "fish" }
+    return
+  end
   
-  local has_pwsh = exe_exists('pwsh.exe')
-  local has_powershell = exe_exists('powershell.exe')
-  local has_cmd = exe_exists('cmd.exe')
+  local has_pwsh = system.exe_exists('pwsh.exe')
+  local has_powershell = system.exe_exists('powershell.exe')
+  local has_cmd = system.exe_exists('cmd.exe')
 
   -- Detect WSL distros and set default_cwd = "~" to start in Linux home
   local wsl_domains = wezterm.default_wsl_domains()
@@ -56,7 +58,6 @@ M.setup = function(config)
   --   config.default_domain = first_wsl_name
   -- end
 
-  config.default_domain = 'local'
   config.default_prog = { "pwsh.exe", "-NoLogo" }
 end
 

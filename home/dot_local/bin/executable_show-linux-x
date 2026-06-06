@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+show_all=false
+
+usage() {
+  cat <<'EOF'
+ _ _                  __  __
+| (_)_ __  _   ___  __\ \/ /
+| | | '_ \| | | \ \/ / >  <
+| | | | | | |_| |>  < / /\ \
+|_|_|_| |_|\__,_/_/\_\_/  \_\
+
+show-linux-x - lista comandos Linux utiles y reemplazos modernos
+
+Uso:
+  show-linux-x        Muestra solo comandos disponibles
+  show-linux-x --all  Muestra disponibles y faltantes
+  show-linux-x --help Muestra esta ayuda
+EOF
+}
+
+print_banner() {
+  cat <<'EOF'
+ _ _                  __  __
+| (_)_ __  _   ___  __\ \/ /
+| | | '_ \| | | \ \/ / >  <
+| | | | | | |_| |>  < / /\ \
+|_|_|_| |_|\__,_/_/\_\_/  \_\
+
+Linux command index
+EOF
+
+  if [[ "$show_all" == true ]]; then
+    printf 'Mode: available + missing commands\n\n'
+  else
+    printf 'Mode: available commands only. Use show-linux-x --all to include missing tools.\n\n'
+  fi
+}
+
+print_category_header() {
+  local category=$1
+
+  printf '\n+----------------------+----------+----------------------+------------------------------------------------------------------+\n'
+  printf '| %-20s | %-8s | %-20s | %-64s |\n' "$category" "STATUS" "MODERN" "DESCRIPTION"
+  printf '+----------------------+----------+----------------------+------------------------------------------------------------------+\n'
+}
+
+print_row() {
+  local command_name=$1
+  local status=$2
+  local modern=$3
+  local description=$4
+
+  printf '| %-20s | %-8s | %-20s | %-64s |\n' "$command_name" "$status" "$modern" "$description"
+}
+
+print_category_footer() {
+  printf '+----------------------+----------+----------------------+------------------------------------------------------------------+\n'
+}
+
+case "${1:-}" in
+  "") ;;
+  --all | -a) show_all=true ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    printf 'Uso invalido: %s\n\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+tools=(
+  "Archivos|cd|-|Cambia el directorio actual de la shell."
+  "Archivos|pwd|-|Muestra el directorio actual."
+  "Archivos|ls|eza|Lista archivos y directorios."
+  "Archivos|mkdir|-|Crea directorios."
+  "Archivos|touch|-|Crea archivos vacios o actualiza timestamps."
+  "Archivos|cp|-|Copia archivos o directorios."
+  "Archivos|mv|-|Mueve o renombra archivos y directorios."
+  "Archivos|rm|-|Elimina archivos o directorios."
+  "Archivos|ln|-|Crea enlaces duros o simbolicos."
+  "Archivos|chmod|-|Cambia permisos."
+  "Archivos|chown|-|Cambia propietario o grupo."
+  "Busqueda|find|fd|Busca archivos por nombre, tipo, fecha o permisos."
+  "Busqueda|grep|rg|Busca texto en archivos o streams."
+  "Busqueda|which|type|Muestra que ejecutable se resolveria en PATH."
+  "Busqueda|whereis|-|Busca binarios, fuentes y paginas man."
+  "Busqueda|locate|-|Busca archivos desde una base de datos indexada."
+  "Texto|cat|bat|Imprime o concatena archivos."
+  "Texto|less|-|Pagina salida larga o archivos."
+  "Texto|head|-|Muestra el inicio de una salida o archivo."
+  "Texto|tail|-|Muestra el final de una salida o archivo."
+  "Texto|sed|sd|Edita streams con sustituciones y transformaciones."
+  "Texto|awk|-|Procesa texto por columnas, patrones y acciones."
+  "Texto|cut|-|Extrae columnas o rangos de texto."
+  "Texto|tr|-|Traduce o elimina caracteres."
+  "Texto|sort|-|Ordena lineas de texto."
+  "Texto|uniq|-|Filtra lineas repetidas contiguas."
+  "Texto|wc|-|Cuenta lineas, palabras y bytes."
+  "Pipelines|xargs|-|Construye comandos desde stdin."
+  "Pipelines|tee|-|Escribe salida a archivo y stdout a la vez."
+  "Pipelines|echo|-|Imprime texto o variables."
+  "Pipelines|printf|-|Imprime texto con formato estable."
+  "Disco|df|duf|Muestra uso de filesystems montados."
+  "Disco|du|dust|Mide uso de disco por archivos o directorios."
+  "Disco|lsblk|-|Lista discos, particiones y puntos de montaje."
+  "Disco|mount|-|Monta filesystems o muestra montajes."
+  "Disco|umount|-|Desmonta filesystems."
+  "Procesos|ps|btop|Lista procesos en ejecucion."
+  "Procesos|top|btop|Monitor de procesos basico."
+  "Procesos|htop|btop|Monitor TUI de procesos."
+  "Procesos|kill|-|Envia senales a procesos por PID."
+  "Procesos|pkill|-|Envia senales a procesos por nombre/patron."
+  "Procesos|jobs|-|Lista jobs de la shell actual."
+  "Sistema|uname|-|Muestra kernel y arquitectura."
+  "Sistema|whoami|-|Muestra el usuario actual."
+  "Sistema|id|-|Muestra UID, GID y grupos."
+  "Sistema|date|-|Muestra o ajusta fecha y hora."
+  "Sistema|uptime|-|Muestra tiempo encendido y carga del sistema."
+  "Sistema|env|-|Muestra variables de entorno."
+  "Sistema|export|-|Exporta variables para procesos hijos."
+  "Red|ip|-|Gestiona interfaces, direcciones y rutas."
+  "Red|ss|-|Lista sockets y puertos activos."
+  "Red|ping|-|Prueba conectividad ICMP."
+  "Red|curl|xh|Cliente HTTP base."
+  "Red|ssh|-|Acceso remoto por SSH."
+  "Archivos comprimidos|tar|-|Empaqueta o extrae archivos tar."
+  "Archivos comprimidos|gzip|-|Comprime archivos con gzip."
+  "Archivos comprimidos|unzip|-|Extrae archivos zip."
+  "Ayuda|man|tldr|Manual local de comandos."
+  "Ayuda|help|-|Ayuda de builtins de shell."
+)
+
+print_banner
+
+found=0
+current_category=""
+category_has_rows=false
+
+for entry in "${tools[@]}"; do
+  category=${entry%%|*}
+  rest=${entry#*|}
+  command_name=${rest%%|*}
+  rest=${rest#*|}
+  modern=${rest%%|*}
+  description=${rest#*|}
+
+  if [[ "$category" != "$current_category" ]]; then
+    if [[ -n "$current_category" && "$category_has_rows" == true ]]; then
+      print_category_footer
+    fi
+
+    current_category=$category
+    category_has_rows=false
+  fi
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "ok" "$modern" "$description"
+    found=$((found + 1))
+  elif [[ "$show_all" == true ]]; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "missing" "$modern" "$description"
+  fi
+done
+
+if [[ "$category_has_rows" == true ]]; then
+  print_category_footer
+fi
+
+if (( found == 0 )); then
+  printf '\nNo encontre ningun comando Linux de la lista en PATH. Usa show-linux-x --all para ver la lista completa.\n' >&2
+  exit 1
+fi

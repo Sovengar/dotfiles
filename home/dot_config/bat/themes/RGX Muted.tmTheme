@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>name</key>
+  <string>RGX Muted</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>settings</key>
+      <dict>
+        <key>background</key>
+        <string>#1E1E2E</string>
+        <key>foreground</key>
+        <string>#A6ADC8</string>
+        <key>lineHighlight</key>
+        <string>#242636</string>
+        <key>selection</key>
+        <string>#2A2D3D</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Comments</string>
+      <key>scope</key>
+      <string>comment, punctuation.definition.comment</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#3F4654</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Function and Method Calls</string>
+      <key>scope</key>
+      <string>meta.function-call entity.name.function, meta.function-call variable.function, meta.function-call support.function, variable.function</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#B8C0D8</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Objects and Properties</string>
+      <key>scope</key>
+      <string>variable.other.object, variable.other.property, meta.property.object, meta.member.access variable.other, meta.function-call variable.other.object, meta.function-call variable.other.property</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#AEB6CC</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Call Arguments</string>
+      <key>scope</key>
+      <string>meta.function-call.arguments variable.other, meta.function-call.arguments variable.parameter, meta.function-call.arguments constant.other, meta.arguments variable.other, meta.arguments variable.parameter</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#C0C7DD</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Keywords</string>
+      <key>scope</key>
+      <string>keyword, storage, storage.type, storage.modifier</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#8790A6</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Strings</string>
+      <key>scope</key>
+      <string>string, constant.other.symbol</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#9AA39A</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Numbers and Constants</string>
+      <key>scope</key>
+      <string>constant.numeric, constant.language, constant.character, variable.language</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#A99D87</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Types</string>
+      <key>scope</key>
+      <string>entity.name.type, entity.name.class, support.type, support.class</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#8F9AA8</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Punctuation and Operators</string>
+      <key>scope</key>
+      <string>punctuation, keyword.operator</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#7C8494</string>
+      </dict>
+    </dict>
+  </array>
+  <key>uuid</key>
+  <string>f0306c9b-0cc5-4b06-8f4-4a8d03e9c1d2</string>
+</dict>
+</plist>

@@ -3,6 +3,7 @@ local wezterm = require "wezterm"
 local M = {}
 
 M.font = wezterm.font_with_fallback({
+  { family = 'CaskaydiaCove Nerd Font Mono', weight = 'Regular' },
   { family = 'JetBrainsMono Nerd Font', weight = 'Regular' },
   { family = 'JetBrainsMono Nerd Font Mono', weight = 'Regular' },
   { family = 'SauceCodePro Nerd Font Mono', weight = 'Regular' },
@@ -11,8 +12,8 @@ M.font = wezterm.font_with_fallback({
   { family = 'Symbols Nerd Font Mono', weight = 'Regular' },
 })
 
-M.font_size = 16
-M.line_height = 1.2
+M.font_size = 12
+M.line_height = 1.0
 M.foreground_text_hsb = {
   hue = 1.0,
   saturation = 1.2,

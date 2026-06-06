@@ -33,6 +33,14 @@ for i in "${!codeVsix[@]}"; do
             ;;
         esac
     fi
+    if [ -n "$file" ] && [ -f "${cacheDir}/wallbash/code.json" ]; then
+        cp -f "${cacheDir}/wallbash/code.json" "$file"
+    fi
+done
+
+for i in "${!codeVsix[@]}"; do
+    [[ -z "${codeVsix[i]}" ]] && continue
+    find -L "${codeVsix[i]}" -type f -path "*extensions/thehydeproject*" -name "wallbash.json" -exec cp -f "${cacheDir}/wallbash/code.json" {} \;
 done
 
 #// apply theme

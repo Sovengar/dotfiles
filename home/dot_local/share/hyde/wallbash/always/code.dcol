@@ -1,4 +1,4 @@
-${cacheDir}/wallbash/code.json
+${cacheDir}/wallbash/code.json|${WALLBASH_SCRIPTS}/code.sh
 {
   "colors": {
     "focusBorder": "#<wallbash_1xa1>",

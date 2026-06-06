@@ -149,6 +149,29 @@ go_install_latest() {
 
 # ── Helper commands ────────────────────────────────────────────
 
+pip_install() {
+  local package="$1"
+  local command_name="${2:-$1}"
+
+  if command -v mise &>/dev/null; then
+    local mise_bin_paths
+    mise_bin_paths="$(mise bin-paths 2>/dev/null || true)"
+    while IFS= read -r bin_path; do
+      if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+        export PATH="$bin_path:$PATH"
+      fi
+    done <<< "$mise_bin_paths"
+  fi
+
+  if command -v "$command_name" &>/dev/null; then
+    log "$command_name already installed"
+  else
+    log "Installing pip package: $package"
+    pip install "$package"
+    success "$package installed"
+  fi
+}
+
 _cmd_present() { command -v "$1" &>/dev/null; }
 _cmd_missing() { ! command -v "$1" &>/dev/null; }
 

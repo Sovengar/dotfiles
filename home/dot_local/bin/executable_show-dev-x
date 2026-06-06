@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+show_all=false
+
+usage() {
+  cat <<'EOF'
+     _            __  __
+  __| | _____   __\ \/ /
+ / _` |/ _ \ \ / / >  <
+| (_| |  __/\ V / / /\ \
+ \__,_|\___| \_/ /_/  \_\
+
+show-dev-x - lista herramientas locales para desarrollo
+
+Uso:
+  show-dev-x        Muestra solo comandos instalados
+  show-dev-x --all  Muestra instalados y faltantes
+  show-dev-x --help Muestra esta ayuda
+EOF
+}
+
+print_banner() {
+  cat <<'EOF'
+     _            __  __
+  __| | _____   __\ \/ /
+ / _` |/ _ \ \ / / >  <
+| (_| |  __/\ V / / /\ \
+ \__,_|\___| \_/ /_/  \_\
+
+Developer command index
+EOF
+
+  if [[ "$show_all" == true ]]; then
+    printf 'Mode: installed + missing commands\n\n'
+  else
+    printf 'Mode: installed commands only. Use show-dev-x --all to include missing tools.\n\n'
+  fi
+}
+
+print_category_header() {
+  local category=$1
+
+  printf '\n+------------------------------+--------------------+------------------------------------------------------------------+\n'
+  printf '| %-28s | %-18s | %-64s |\n' "$category" "HELP" "DESCRIPTION"
+  printf '+------------------------------+--------------------+------------------------------------------------------------------+\n'
+}
+
+print_row() {
+  local command_name=$1
+  local help_command=$2
+  local description=$3
+
+  printf '| %-28s | %-18s | %-64s |\n' "$command_name" "$help_command" "$description"
+}
+
+print_category_footer() {
+  printf '+------------------------------+--------------------+------------------------------------------------------------------+\n'
+}
+
+get_help_command() {
+  local command_name=$1
+
+  case "$command_name" in
+    gh-dash) printf 'dash --help' ;;
+    git-flow) printf 'help' ;;
+    ssh) printf '%s' '-h / usage' ;;
+    *) printf -- '--help' ;;
+  esac
+}
+
+case "${1:-}" in
+  "") ;;
+  --all | -a) show_all=true ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    printf 'Uso invalido: %s\n\n' "$1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+tools=(
+  "TUI|lazygit|TUI para Git."
+  "TUI|lazydocker|TUI para Docker y Compose."
+  "TUI|fzf|Fuzzy finder para pipelines y seleccion interactiva."
+  "TUI|gh-dash|Dashboard TUI para issues y PRs de GitHub."
+  "TUI|yazi|File manager TUI."
+  "TUI|broot|Explorador TUI de arboles de directorios."
+  "TUI|jqp|Playground TUI para jq."
+  "Dev recurrente|rg|Ripgrep: busqueda rapida en contenido."
+  "Dev recurrente|fd|Busqueda rapida de archivos."
+  "Dev recurrente|jq|Procesador JSON para scripts y pipelines."
+  "Dev recurrente|yq|Procesador YAML para scripts y pipelines."
+  "Dev recurrente|sd|Find & replace moderno."
+  "Dev recurrente|awk|GNU Awk para procesamiento de texto."
+  "Dev recurrente|sort|Ordena lineas en pipelines."
+  "Dev recurrente|wc|Cuenta lineas, palabras y bytes en pipelines."
+  "Dev recurrente|echo|Imprime texto o variables en scripts y pipelines."
+  "Dev recurrente|man|Manual local de comandos."
+  "Git recurrente|git|Control de versiones base."
+  "Git recurrente|gh|GitHub CLI para issues, PRs, repos y Actions."
+  "Git recurrente|jj|VCS moderno compatible con repos Git."
+  "Git recurrente|wt|Worktrunk: gestor de git worktrees."
+  "Git recurrente|git-flow|Flujo Git Flow AVH."
+  "Git recurrente|git-lfs|Soporte Git LFS para binarios grandes."
+  "Git recurrente|chezmoi|Gestion de dotfiles."
+  "Network recurrente|dog|Cliente DNS moderno."
+  "Network recurrente|xh|Cliente HTTP ergonomico tipo HTTPie."
+  "Network recurrente|curl|Cliente HTTP base."
+  "Network recurrente|hurl|HTTP + assertions para APIs."
+  "Network recurrente|bruno|Cliente API Bruno."
+  "Network recurrente|bru|CLI de Bruno."
+  "Network recurrente|ssh|Cliente SSH para acceso remoto."
+  "Dev puntual|kill-port|Mata procesos que ocupan un puerto."
+  "Dev puntual|atuin|Historial de shell sincronizable y buscable."
+  "Dev puntual|portless|Dominios .localhost estables sin recordar puertos."
+  "Dev puntual|http-server|Servidor estatico rapido."
+  "Dev puntual|pm2|Gestor de procesos Node."
+  "Dev puntual|snyk|Escaneo de vulnerabilidades de dependencias."
+  "Others|snip|Usado indirectamente por opencode para sintetizar salida larga."
+  "Others|tree-sitter|Parser CLI usado por LazyVim."
+  "Others|bat|Usado indirectamente por wrappers/aliases como cat y --help."
+  "Others|eza|Usado indirectamente por wrappers/aliases de ls."
+  "Others|zoxide|Usado indirectamente por cd/cdx."
+  "Programas|nvim|Neovim."
+  "Programas|code|Visual Studio Code."
+  "Programas|dbeaver|Cliente de bases de datos."
+  "Programas|beekeeper-studio|Cliente SQL moderno."
+  "Programas|visualvm|Profiler y monitor JVM."
+  "Programas|jd-gui|Decompiler Java."
+  "Programas|jmeter|Pruebas de carga."
+  "Programas|soapui|Testing SOAP/REST."
+  "Programas|docker|Docker CLI/app launcher."
+  "Programas|podman|Podman CLI/app launcher."
+  "Programas|devcontainer|CLI de Dev Containers."
+  "Programas|testcontainers-desktop|App local para Testcontainers."
+  "Terminales|kitty|Terminal GPU usada por HyDE."
+  "Terminales|wezterm|Terminal emulator configurable en Lua."
+  "Terminales|ghostty|Terminal emulator moderno."
+  "Terminales|konsole|Terminal de KDE."
+  "Terminales|zellij|Multiplexor de terminal y workspace TUI."
+  "Runtimes|mise|Gestor de runtimes y herramientas por proyecto."
+  "Runtimes|nvm|Node Version Manager."
+  "Runtimes|node|Runtime JavaScript."
+  "Runtimes|npm|Gestor de paquetes Node."
+  "Runtimes|pip|Gestor de paquetes Python."
+  "Runtimes|pip3|Gestor de paquetes Python 3."
+  "Runtimes|java|Runtime Java."
+  "Runtimes|mvn|Apache Maven: build y dependencias Java."
+  "Runtimes|go|Toolchain Go."
+  "Runtimes|cargo|Gestor de paquetes y builds Rust."
+)
+
+print_banner
+
+found=0
+current_category=""
+category_has_rows=false
+
+for entry in "${tools[@]}"; do
+  category=${entry%%|*}
+  rest=${entry#*|}
+  command_name=${rest%%|*}
+  description=${rest#*|}
+  help_command=$(get_help_command "$command_name")
+
+  if [[ "$category" != "$current_category" ]]; then
+    if [[ -n "$current_category" && "$category_has_rows" == true ]]; then
+      print_category_footer
+    fi
+
+    current_category=$category
+    category_has_rows=false
+  fi
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "$help_command" "$description"
+    found=$((found + 1))
+  elif [[ "$show_all" == true ]]; then
+    if [[ "$category_has_rows" == false ]]; then
+      print_category_header "$category"
+      category_has_rows=true
+    fi
+
+    print_row "$command_name" "$help_command" "$description"
+  fi
+done
+
+if [[ "$category_has_rows" == true ]]; then
+  print_category_footer
+fi
+
+if (( found == 0 )); then
+  printf '\nNo encontre ninguna herramienta de la lista en PATH. Usa show-dev-x --all para ver la lista completa.\n' >&2
+  exit 1
+fi

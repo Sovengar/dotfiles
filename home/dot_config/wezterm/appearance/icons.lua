@@ -24,6 +24,7 @@ local M = {
   docker = wezterm.nerdfonts.md_docker or utf8.char(0xe7a1),
   ssh = wezterm.nerdfonts.md_ssh or utf8.char(0xf49e),
   git = wezterm.nerdfonts.md_git or utf8.char(0xe7a3),
+  shell = wezterm.nerdfonts.dev_terminal or utf8.char(0xf120),
   lambda = wezterm.nerdfonts.md_lambda or utf8.char(0xfb26),
   windows = wezterm.nerdfonts.md_windows or utf8.char(0xe70f),
 }

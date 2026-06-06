@@ -24,6 +24,14 @@ if type -q eza
     alias lah='eza -lah --icons --group-directories-first'
     alias ld='eza -lhD --icons=auto'
     alias lt='eza -aT --color=always --group-directories-first --icons'
+
+    function cd --description "Change directory and list contents"
+        if not builtin cd $argv
+            return 1
+        end
+        test "$PWD" = "$HOME" && return 0
+        eza --icons --group-directories-first 2>/dev/null
+    end
 end
 
 if type -q fastfetch

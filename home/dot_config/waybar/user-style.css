@@ -1,1 +1,243 @@
 /* User custom styles */
+
+window#waybar.top #leaf-inverse,
+window#waybar.bottom #leaf-inverse {
+    background: alpha(@main-bg, 0.62);
+    border: 1px solid alpha(@main-fg, 0.12);
+    border-radius: 999px;
+    box-shadow: 0 8px 26px alpha(@main-bg, 0.28);
+    margin: 0.34em 0.8em 0.34em 0.2em;
+    padding: 0.12em 0.24em;
+}
+
+#workspaces {
+    background: transparent;
+    border-radius: 999px;
+    padding: 0;
+}
+
+#workspaces button {
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+    color: alpha(@main-fg, 0.52);
+    margin: 0.16em 0.08em;
+    min-height: 0;
+    min-width: 1.55em;
+    padding: 0.22em 0.44em;
+    text-shadow: none;
+    transition: all 180ms ease;
+}
+
+#workspaces button.active {
+    background: alpha(@main-fg, 0.16);
+    border-radius: 0.45em;
+    color: @main-fg;
+    margin: 0.16em 0.14em;
+    min-width: 1.6em;
+    padding: 0.22em 0.38em;
+}
+
+window#waybar.top #leaf-inverse #workspaces button.active,
+window#waybar.bottom #leaf-inverse #workspaces button.active {
+    border-radius: 0.45em;
+}
+
+#workspaces button:hover {
+    background: alpha(@main-fg, 0.10);
+    color: @main-fg;
+}
+
+#workspaces button.urgent {
+    background: alpha(@wb-hvr-bg, 0.24);
+    color: @wb-hvr-fg;
+}
+
+window#waybar {
+    background: alpha(@main-bg, 0.72);
+    border-bottom: 1px solid alpha(@main-fg, 0.10);
+    box-shadow: 0 10px 34px alpha(@main-bg, 0.24);
+}
+
+window#waybar label.module,
+window#waybar button {
+    font-size: 1.08em;
+}
+
+window#waybar.top .modules-left,
+window#waybar.top .modules-center,
+window#waybar.top .modules-right,
+window#waybar.bottom .modules-left,
+window#waybar.bottom .modules-center,
+window#waybar.bottom .modules-right {
+    margin: 0;
+    padding: 0 0.72em;
+}
+
+window#waybar.top #leaf-inverse,
+window#waybar.bottom #leaf-inverse,
+window#waybar.top #pill-in,
+window#waybar.bottom #pill-in,
+window#waybar.top #leaf,
+window#waybar.bottom #leaf {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 0 0.42em;
+}
+
+window#waybar.top #pill-in,
+window#waybar.bottom #pill-in {
+    border-left: 1px solid alpha(@main-fg, 0.08);
+    border-right: 1px solid alpha(@main-fg, 0.08);
+}
+
+window#waybar.top #leaf,
+window#waybar.bottom #leaf {
+    border-left: 1px solid alpha(@main-fg, 0.08);
+}
+
+window#waybar.top label.module,
+window#waybar.bottom label.module,
+window#waybar.top button,
+window#waybar.bottom button {
+    margin: 0.24em 0.08em;
+}
+
+window#waybar.top label.module,
+window#waybar.bottom label.module {
+    border-radius: 0.45em;
+    min-width: 1.35em;
+    padding: 0.16em 0.32em;
+}
+
+#khing-mediaplayer {
+    margin: 0 0 0 25em;
+    padding: 0 0.28em;
+}
+
+#custom-media-gap-left,
+#custom-media-gap-right {
+    margin: 0;
+    padding: 0;
+}
+
+#custom-media-gap-left {
+    min-width: 0;
+}
+
+#custom-media-gap-right {
+    min-width: 1.2em;
+}
+
+#custom-media-now-playing {
+    margin-left: 0.2em;
+    min-width: 12em;
+}
+
+#custom-media-state {
+    min-width: 1.4em;
+    padding-left: 0.26em;
+    padding-right: 0.26em;
+}
+
+#custom-media-progress {
+    color: alpha(@main-fg, 0.72);
+    font-size: 0.96em;
+    min-width: 7.6em;
+}
+
+#custom-media-time {
+    color: alpha(@main-fg, 0.62);
+    font-size: 0.9em;
+    min-width: 5.8em;
+}
+
+#custom-media-animation {
+    color: @main-fg;
+    font-size: 0.88em;
+    margin: 0.24em 0.18em;
+    min-width: 2em;
+}
+
+#custom-cava {
+    color: @main-fg;
+    opacity: 1;
+    margin: 0.24em 0.42em;
+    min-width: 3.8em;
+}
+
+#hardware {
+    margin: 0 0.08em;
+}
+
+#custom-hardware {
+    min-width: 1.45em;
+}
+
+window#waybar.top label.module:hover,
+window#waybar.bottom label.module:hover {
+    background: alpha(@main-fg, 0.06);
+}
+
+#pulseaudio.microphone,
+#pulseaudio.source-muted {
+    min-width: 1.35em;
+    padding-left: 0.28em;
+    padding-right: 0.28em;
+}
+
+#thermals {
+    margin: 0 0.08em;
+}
+
+#custom-thermals {
+    min-width: 1.35em;
+}
+
+#audio {
+    margin: 0 0.12em;
+    padding: 0 0.1em;
+}
+
+#pulseaudio {
+    min-width: 3.8em;
+}
+
+#pulseaudio.muted {
+    color: alpha(@main-fg, 0.45);
+}
+
+#pulseaudio-slider {
+    margin: 0.28em 0.28em 0.28em 0;
+    min-width: 4.8em;
+}
+
+#pulseaudio-slider slider {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    min-height: 0;
+    min-width: 0;
+    opacity: 0;
+}
+
+#pulseaudio-slider trough {
+    background: alpha(@main-fg, 0.12);
+    border-radius: 999px;
+    min-height: 0.34em;
+    min-width: 4.8em;
+}
+
+#pulseaudio-slider highlight {
+    background: alpha(@main-fg, 0.55);
+    border-radius: 999px;
+    min-height: 0.34em;
+}
+
+#pulseaudio-slider:hover highlight {
+    background: @main-fg;
+}

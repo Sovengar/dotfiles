@@ -1,8 +1,8 @@
 hl.config({
     decoration = {
         dim_special = 0.3,
-        active_opacity = 0.90,
-        inactive_opacity = 0.75,
+        active_opacity = 0.96,
+        inactive_opacity = 0.96,
         fullscreen_opacity = 1,
     },
 })
@@ -25,7 +25,7 @@ local function opacity_rule(name, class, active, inactive, extra, fullscreen)
 end
 
 opacity_rule("opacity-firefox", "^(firefox)$", 0.90, 0.85)
-opacity_rule("opacity-zen", "^(zen)$", 0.90, 0.85)
+opacity_rule("opacity-zen", "^(zen)$", 0.95, 0.95)
 opacity_rule("opacity-brave", "^(brave-browser)$", 0.97, 0.90)
 opacity_rule("opacity-code-oss", "^(code-oss)$", 0.80, 0.80)
 opacity_rule("opacity-code", "^([Cc]ode)$", 0.80, 0.80)

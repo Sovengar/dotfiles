@@ -6,7 +6,9 @@
 | Tool | Purpose | Install |
 |------|---------|---------|
 | ghostty | Terminal emulator | system |
-| wezterm | Terminal emulator | nightly |
+| wezterm | Terminal emulator | AUR (nightly bin) |
+| kitty | Terminal emulator | system |
+| zellij | Terminal multiplexer/workspace | system/cargo |
 | starship | Prompt | brew/curl |
 | zsh | Shell | system |
 | fish | Alt shell | system |
@@ -14,8 +16,10 @@
 | broot | TUI tree nav | brew/curl |
 | yazi | TUI file manager | cargo/brew |
 | lazygit | TUI git | brew/curl |
+| lazynpm | TUI npm | brew (tap: jesseduffield/lazynpm) |
 | lazydocker | TUI docker | brew/curl |
 | btm (bottom) | TUI process | brew/curl |
+| carapace | Multi-shell completion framework | AUR |
 | fastfetch | System info | brew/curl |
 | cava | Console audio visualizer | system |
 | pokego | Pokémon sprites in terminal | AUR |
@@ -51,8 +55,19 @@
 | pastel | Color swatches | brew/curl |
 | mise | Dev env manager | brew/curl |
 | jj | Git-compat VCS | brew/curl |
+| worktrunk | Git worktree manager (`wt`) | system |
 | jqp | TUI jq playground | go install |
 | snip | Token saver | go install |
+| dust | Intuitive du (`du-dust`) | cargo |
+| sd | Find & replace (s/foo/bar) | cargo |
+| dog | DNS client (`dog-dns`) | cargo |
+| xh | HTTPie-style HTTP client | cargo |
+| atuin | Shell history with search | cargo |
+| kill-port | Kill process bound to a port | npm |
+| portless | Stable `.localhost` dev domains without ports | npm |
+| http-server | Static development server | npm |
+| pm2 | Node process manager | npm |
+| snyk | Dependency vulnerability scanner | npm |
 
 ### Dev Tools
 | Tool | Purpose | Install |
@@ -69,6 +84,7 @@
 | VisualVM | JVM profiler | manual |
 | JD-GUI | Java decompiler | manual |
 | depot_tools | Chromium/WebRTC tooling | git clone |
+| tree-sitter-cli | Parser generator CLI for editor tooling | npm |
 
 ### Hardware & Diagnostics
 | Tool | Purpose | Install |
@@ -94,11 +110,14 @@
 | Tool | Purpose | Install |
 |------|---------|---------|
 | onlyoffice-bin | Office suite | CachyOS repo |
+| poppler | PDF utilities (pdftotext, pdfimages) | system |
 
 ### Media & Entertainment
 | Tool | Purpose | Install |
 |------|---------|---------|
 | spotify-adblock | Spotify ad blocker | AUR |
+| ffmpeg | Video/audio processing | system |
+| resvg | SVG rendering | cargo |
 
 ### Network
 | Tool | Purpose | Install |
@@ -114,6 +133,8 @@
 | Podman | Rootless containers | winget |
 | kubectl | K8s CLI | brew/curl |
 | lazydocker | TUI docker | brew/curl |
+| devcontainer | Dev Containers CLI | npm |
+| Testcontainers Desktop | Local Testcontainers app | manual |
 
 ### AI/ML
 | Tool | Purpose | Install |
@@ -121,6 +142,7 @@
 | opencode | AI CLI | curl |
 | codex | AI CLI | npm |
 | gh-copilot | GitHub AI | gh ext |
+| gh-dash | GitHub PR/issue dashboard | gh ext |
 
 ### Security
 | Tool | Purpose | Install |

@@ -1,5 +1,6 @@
 local wezterm = require "wezterm"
 local icons = require "appearance.icons"
+local fs = require "scripts.fs"
 
 local M = {}
 
@@ -24,6 +25,12 @@ local function get_process_name(tab)
 
   if name:find('pwsh') or name:find('powershell') then
     return icons.pwsh, 'Pwsh'
+  elseif name:find('fish') then
+    return icons.shell, 'Fish'
+  elseif name:find('bash') then
+    return icons.shell, 'Bash'
+  elseif name:find('zsh') then
+    return icons.shell, 'Zsh'
   elseif name:find('cmd') then
     return icons.cmd, 'Cmd'
   elseif name:find('wsl') or name:find('wslhost') or name:find('ubuntu') or name:find('debian') or name:find('fedora') then
@@ -65,29 +72,11 @@ local function get_process_name(tab)
   return nil, nil
 end
 
-local function basename(s)
-  return string.gsub(s, "(.*[/\\])(.*)", "%2")
-end
-
-local function normalize_path(path)
-  if not path then return nil end
-  -- Convert to string and handle URL format (file:///C:/Users/buble)
-  local s = tostring(path)
-  s = s:gsub("^file://", "")
-  -- Normalize separators to forward slashes
-  s = s:gsub("\\", "/")
-  -- Remove leading slash (e.g., /C:/Users/buble -> C:/Users/buble)
-  s = s:gsub("^/", "")
-  -- Remove trailing slash
-  s = s:gsub("/$", "")
-  return s
-end
-
 local function get_cwd_name(tab, full)
   local cwd = tab.active_pane.current_working_dir
   if cwd then
-    local cwd_str = normalize_path(cwd)
-    local home = normalize_path(os.getenv("USERPROFILE") or os.getenv("HOME"))
+    local cwd_str = fs.normalize_path(cwd)
+    local home = fs.normalize_path(os.getenv("USERPROFILE") or os.getenv("HOME"))
     
     if cwd_str and home then
       if cwd_str:lower() == home:lower() then
@@ -100,7 +89,7 @@ local function get_cwd_name(tab, full)
         return cwd_str
       end
     end
-    return basename(cwd_str)
+    return fs.basename(cwd_str)
   end
   return nil
 end
@@ -125,9 +114,11 @@ local sups = {'¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹','¹⁰'}
 
 M.setup = function(config, theme)
   config.enable_tab_bar = true
-  config.use_fancy_tab_bar = false
-  config.hide_tab_bar_if_only_one_tab = false
-  config.tab_max_width = 70
+  config.use_fancy_tab_bar = true
+  config.hide_tab_bar_if_only_one_tab = true
+  config.show_close_tab_button_in_tabs = false
+  config.show_new_tab_button_in_tab_bar = false
+  config.tab_max_width = 18
   config.tab_and_split_indices_are_zero_based = false
 
   config.colors = {

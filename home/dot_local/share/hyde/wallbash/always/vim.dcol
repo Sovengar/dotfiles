@@ -5,10 +5,6 @@ ${XDG_CONFIG_HOME:-$HOME/.config}/vim/colors/wallbash.vim|${WALLBASH_SCRIPTS}/vi
 " License:      Same as Vim
 " Last Change:  April 2025
 
-if exists('g:loaded_wallbash') | finish | endif
-let g:loaded_wallbash = 1
-
-
 " Detect background based on terminal colors
 if $BACKGROUND =~# 'light'
   set background=light
