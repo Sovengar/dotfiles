@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Synth-Wave
+Comment=Synth Wave Theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Synth-Wave
+MetacityTheme=Synth-Wave
+ButtonLayout=close,minimize,maximize:menu
