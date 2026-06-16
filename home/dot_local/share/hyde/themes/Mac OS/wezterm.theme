@@ -1,0 +1,16 @@
+border                   #1F2326
+active_status_fg         #2770C0
+inactive_status_fg       #1E4C84
+tab_primary              #2770C0
+tab_primary_hover        #1E4C84
+tab_active_bg            #1F2326
+tab_active_fg            #2770C0
+tab_inactive_bg          #1F2326
+tab_inactive_fg          #1E4C84
+tab_hover_bg             #1F2326
+tab_hover_fg             #1E4C84
+tab_new_fg               #BCCCDC
+tab_new_hover_fg         #2770C0
+tab_bell                 #FADA16
+tab_unseen               #555555
+tab_status               #2770C0

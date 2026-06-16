@@ -1,0 +1,16 @@
+border                   #FFFFFF
+active_status_fg         #FFFFFF
+inactive_status_fg       #999999
+tab_primary              #FFFFFF
+tab_primary_hover        #E5E5E5
+tab_active_bg            #000000
+tab_active_fg            #FFFFFF
+tab_inactive_bg          #0D0D0D
+tab_inactive_fg          #7A7A7A
+tab_hover_bg             #1A1A1A
+tab_hover_fg             #E5E5E5
+tab_new_fg               #E5E5E5
+tab_new_hover_fg         #E5E5E5
+tab_bell                 #FFFFFF
+tab_unseen               #5E5E5E
+tab_status               #FFFFFF

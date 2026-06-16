@@ -1,0 +1,10 @@
+active_border_color      #7aa2f7
+inactive_border_color    #292e42
+bell_border_color        #e0af68
+wayland_titlebar_color   system
+macos_titlebar_color     system
+active_tab_foreground    #1f2335
+active_tab_background    #7aa2f7
+inactive_tab_foreground  #545c7e
+inactive_tab_background  #292e42
+tab_bar_background       #1d202f

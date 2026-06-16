@@ -1,0 +1,45 @@
+$GTK_THEME = Vanta-Black
+$ICON_THEME = Tela-circle-black
+$CURSOR_THEME = Bibata-Modern-Ice
+$CURSOR_SIZE = 20
+$CODE_THEME = ZeroLux OLED Theme
+
+general {
+    gaps_in = 5
+    gaps_out = 10
+    border_size = 3
+    col.active_border = rgba(ffffffee) rgba(bfbfbfb0) rgba(bfbfbfb0) rgba(ffffffee) 45deg
+    col.inactive_border = rgba(2a2a2ab0) rgba(3c3c3cb0) rgba(3c3c3cb0) rgba(2a2a2ab0) 45deg
+    resize_on_border = yes
+}
+
+decoration {
+    rounding = 0
+    blur {
+        enabled = yes
+        size = 5
+        passes = 4
+        ignore_opacity = true
+        new_optimizations = true
+        xray = false
+        noise = 0.0
+        popups = true
+    }
+    shadow {
+        enabled = false
+    }
+}
+
+group {
+    col.border_inactive = rgba(1a1a1ab0)
+    col.border_active = rgba(ffffffee) rgba(bfbfbfb0) rgba(bfbfbfb0) rgba(ffffffee) 45deg
+    groupbar {
+        col.active = rgba(bfbfbfcc)
+        col.inactive = rgba(82828299)
+        font_family = JetBrainsMono NFM
+        font_size = 10
+        text_color = rgba(ffffffff)
+    }
+}
+
+layerrule = unset,waybar

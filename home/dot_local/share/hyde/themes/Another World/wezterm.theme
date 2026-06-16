@@ -1,0 +1,16 @@
+border                   #1e2431
+active_status_fg         #78C6EB
+inactive_status_fg       #6c5a30
+tab_primary              #78C6EB
+tab_primary_hover        #40E0D0
+tab_active_bg            #2E3440
+tab_active_fg            #78C6EB
+tab_inactive_bg          #1e2431
+tab_inactive_fg          #48778d
+tab_hover_bg             #1e2431
+tab_hover_fg             #40E0D0
+tab_new_fg               #eceffd
+tab_new_hover_fg         #78C6EB
+tab_bell                 #fdcd5e
+tab_unseen               #6c5a30
+tab_status               #78C6EB
