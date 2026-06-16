@@ -1,0 +1,19 @@
+# Gruvbox Retro wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #d79920
+active_status_fg         #d79920
+inactive_status_fg       #8b6a2e
+tab_primary              #d79920
+tab_primary_hover        #d65c0d
+tab_active_bg            #3c3836
+tab_active_fg            #d79920
+tab_inactive_bg          #272727
+tab_inactive_fg          #8b6a2e
+tab_hover_bg             #32302f
+tab_hover_fg             #d65c0d
+tab_new_fg               #ebdbb2
+tab_new_hover_fg         #d65c0d
+tab_bell                 #fabc2e
+tab_unseen               #8b6a2e
+tab_status               #d79920

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="ai-assistant"
+profile_root="${HOME}/.config/mozilla/firefox"
+
+profile_path=$(grep -A2 "^Name=${profile}$" "${profile_root}/profiles.ini" 2>/dev/null | grep "^Path=" | cut -d= -f2)
+profile_dir="${profile_root}/${profile_path:-${profile}}"
+
+if [ -z "$profile_path" ]; then
+  firefox -CreateProfile "${profile}" >/dev/null 2>&1 || true
+  profile_path=$(grep -A2 "^Name=${profile}$" "${profile_root}/profiles.ini" 2>/dev/null | grep "^Path=" | cut -d= -f2)
+  profile_dir="${profile_root}/${profile_path}"
+fi
+
+if pgrep -f "firefox.*--no-remote.*-P ${profile}" > /dev/null 2>&1; then
+  exit 0
+fi
+
+mkdir -p "$profile_dir"
+
+if ! grep -q "ai-assistant" "${profile_dir}/prefs.js" 2>/dev/null; then
+  cat >> "${profile_dir}/prefs.js" << 'PREFS'
+// ai-assistant: disable session restore
+user_pref("browser.sessionstore.resume_from_crash", false);
+user_pref("browser.sessionstore.restore_on_demand", false);
+user_pref("browser.sessionstore.max_tabs_undo", 0);
+PREFS
+fi
+
+rm -rf "${profile_dir}/sessionstore-backups" \
+       "${profile_dir}/sessionCheckpoints.json" \
+       "${profile_dir}/sessionstore.jsonlz4"
+
+exec firefox --no-remote -P "${profile}" \
+  "https://chatgpt.com" \
+  "https://gemini.google.com" \
+  "https://claude.ai" \
+  "https://arena.ai"

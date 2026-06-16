@@ -7,15 +7,23 @@ term_with_class = "kitty --class"
 [scratchpads.console]
 animation = "fromTop"
 class = "console-dropdown"
-command = "env NO_GREETING=1 xdg-terminal-exec --app-id=console-dropdown --title=console-dropdown"
-size = "600px 150px"
+command = "env NO_GREETING=1 kitty --class console-dropdown --title console-dropdown"
+size = "810px 180px"
 margin = 180
 
 [scratchpads.lazygit]
 animation = "fromTop"
 class = "pypr-lazygit"
-command = "pypr-lazygit-cwd"
+command = "bash -lc 'exec \"$HOME/.config/pypr/scripts/lazygit-cwd\"'"
 size = "80% 80%"
+lazy = true
+close_on_hide = true
+
+[scratchpads.fdx-floating]
+animation = "fromTop"
+class = "pypr-fdx-floating"
+command = "bash -lc 'exec \"$HOME/.config/pypr/scripts/fdx-floating-cwd\"'"
+size = "80% 70%"
 lazy = true
 close_on_hide = true
 
@@ -29,7 +37,7 @@ lazy = true
 [scratchpads.ai-assistant]
 animation = "fromTop"
 class = "firefox"
-command = "pypr-ai-assistant"
+command = "bash -lc 'exec \"$HOME/.config/pypr/scripts/ai-assistant\"'"
 size = "55% 75%"
 lazy = true
 match_by = "pid"

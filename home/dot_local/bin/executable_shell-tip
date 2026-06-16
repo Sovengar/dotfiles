@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+file="${HOME}/.local/share/tips/shell-interactive-tips.md"
+
+[ ! -f "$file" ] && exit 0
+
+awk -v seed="$$" '
+BEGIN { srand(seed) }
+/^#/ { next }
+/^```/ { next }
+/^$/ { next }
+{ tips[++n] = $0 }
+END {
+    if (n > 0) {
+        idx = int(rand() * n) + 1
+        print tips[idx]
+    }
+}
+' "$file"

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cwd="$HOME"
+opencode_pid=""
+active_pid="$(hyprctl activewindow -j 2>/dev/null | jq -r '.pid // empty' 2>/dev/null || true)"
+
+collect_descendants() {
+  local root="$1"
+  local current children child
+  local -a queue=("$root")
+
+  while ((${#queue[@]} > 0)); do
+    current="${queue[0]}"
+    queue=("${queue[@]:1}")
+    printf '%s\n' "$current"
+
+    mapfile -t children < <(pgrep -P "$current" 2>/dev/null || true)
+    for child in "${children[@]}"; do
+      queue+=("$child")
+    done
+  done
+}
+
+read_environ_value() {
+  local pid="$1"
+  local key="$2"
+
+  [[ -r "/proc/$pid/environ" ]] || return 1
+  tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null \
+    | awk -F= -v key="$key" '$1 == key { print substr($0, length(key) + 2); exit }'
+}
+
+if [[ -n "$active_pid" && -d "/proc/$active_pid" ]]; then
+  mapfile -t processes < <(collect_descendants "$active_pid")
+
+  for ((idx=${#processes[@]} - 1; idx >= 0; idx--)); do
+    pid="${processes[$idx]}"
+
+    if [[ -z "$opencode_pid" ]]; then
+      if env_pid="$(read_environ_value "$pid" OPENCODE_PID)" && [[ -n "$env_pid" ]]; then
+        opencode_pid="$env_pid"
+      elif [[ -r "/proc/$pid/comm" && "$(<"/proc/$pid/comm")" == "opencode" ]]; then
+        opencode_pid="$pid"
+      fi
+    fi
+
+    if [[ "$cwd" == "$HOME" && -r "/proc/$pid/cwd" ]]; then
+      cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || printf '%s' "$HOME")"
+    fi
+  done
+fi
+
+if [[ -n "$opencode_pid" ]]; then
+  exec env OPENCODE_PID="$opencode_pid" kitty --class pypr-fdx-floating --title fdx-floating --working-directory "$cwd" -e fish -lc 'fdx --floating --opencode'
+fi
+
+exec kitty --class pypr-fdx-floating --title fdx-floating --working-directory "$cwd" -e fish -lc 'fdx --floating --opencode'

@@ -59,7 +59,7 @@ $animation_items"
     notify-send -i "preferences-desktop-display" "Animation:" "$selected_animation"
 }
 fn_update() {
-    [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+    [ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/animation.conf" ] && source "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/animation.conf"
     [ -f "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}" ] && source "${WAYBAR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar/state}"
     current_animation=${HYPR_ANIMATION:-"theme"}
     echo "Animation updated to: $current_animation"

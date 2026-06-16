@@ -16,7 +16,7 @@ options:
 
 USAGE
 }
-[ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/hyde.conf" ] && source "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/hyde.conf"
 [ -f "/etc/os-release" ] && source "/etc/os-release"
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
 dataDir="${XDG_DATA_HOME:-$HOME/.local/share}"

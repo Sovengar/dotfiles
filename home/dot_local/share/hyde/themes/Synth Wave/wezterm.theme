@@ -1,0 +1,19 @@
+# Synth Wave wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #ff517d
+active_status_fg         #ff517d
+inactive_status_fg       #9f3b5e
+tab_primary              #ff517d
+tab_primary_hover        #ff87d4
+tab_active_bg            #2a2139
+tab_active_fg            #ff517d
+tab_inactive_bg          #1a1b27
+tab_inactive_fg          #9f3b5e
+tab_hover_bg             #322746
+tab_hover_fg             #ff87d4
+tab_new_fg               #e2e8ff
+tab_new_hover_fg         #ff87d4
+tab_bell                 #fede5d
+tab_unseen               #9f3b5e
+tab_status               #ff517d

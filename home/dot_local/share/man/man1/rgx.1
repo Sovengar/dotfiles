@@ -1,0 +1,63 @@
+.TH RGX 1 "June 2026" "rgx" "Fish Functions"
+.SH NAME
+rgx \- rg + fzf + bat preview fuzzy content search
+.SH SYNOPSIS
+.B rgx
+[OPTIONS] PATTERN
+.SH DESCRIPTION
+\fBrgx\fR is an interactive file content searcher that combines \fBrg\fR
+(ripgrep), \fBfzf\fR, and \fBbat\fR. Results open in \fBnvim\fR at the
+matching line.
+.SH OPTIONS
+.TP
+\fB\-\-hidden\fR, \fB\-H\fR
+Search hidden files and directories.
+.TP
+\fB\-\-help\fR, \fB\-h\fR
+Display usage information and exit.
+.PP
+Any additional arguments are passed through to \fBrg\fR(1) (e.g.,
+\fB\-g\fR for glob, \fB\-t\fR for file type).
+.SH KEYBINDINGS
+.TP
+Enter
+Open selected file in editor at the matching line.
+.TP
+Ctrl+P
+Paste selected paths to stdout.
+.TP
+Ctrl+Y
+Yank selected paths to clipboard (wl-copy).
+.TP
+Ctrl+Space
+Toggle file preview pane.
+.TP
+Tab
+Select/deselect multiple rows.
+.TP
+Alt+H
+Toggle hidden file visibility.
+.TP
+\(<-/\(->
+Scroll preview line by line.
+.TP
+Ctrl+D/U
+Scroll preview page up/down.
+.SH EXAMPLES
+.TP
+.B rgx foo
+Search for "foo" in current directory (recursive).
+.TP
+.B rgx \-\-hidden foo
+Search hidden files too.
+.TP
+.B rgx \-g '*.py' foo
+Search only Python files.
+.TP
+.B rgx \-t js foo
+Search only JavaScript/TypeScript files.
+.SH SEE ALSO
+.BR rg (1),
+.BR fzf (1),
+.BR bat (1),
+.BR fdx (1)

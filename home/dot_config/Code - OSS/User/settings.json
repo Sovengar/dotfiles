@@ -9,7 +9,8 @@
     "security.workspace.trust.startupPrompt": "never",
     "security.workspace.trust.enabled": false,
     "editor.minimap.side": "left",
-  "editor.fontFamily": "'JetbrainsMono Nerd Font','Maple Mono', monospace",
+    "editor.fontFamily": "'JetbrainsMono Nerd Font','Maple Mono', monospace",
+    "editor.fontLigatures": true,
     "extensions.autoUpdate": false,
     "wallBash.autoUpdate": true,
     "wallBash.enableThemeMode": false,
@@ -25,5 +26,4 @@
     "editor.minimap.enabled": false,
     "explorer.confirmDelete": false,
     "workbench.secondarySideBar.defaultVisibility": "visible"
-  }
-  
+}

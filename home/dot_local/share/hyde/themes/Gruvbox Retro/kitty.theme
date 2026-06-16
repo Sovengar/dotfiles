@@ -1,0 +1,11 @@
+# Gruvbox Retro kitty overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+active_border_color      #d3869b
+inactive_border_color    #665c54
+bell_border_color        #8ec07c
+visual_bell_color        #8ec07c
+active_tab_foreground    #fbf1c7
+active_tab_background    #665c54
+inactive_tab_foreground  #a89984
+inactive_tab_background  #3c3836

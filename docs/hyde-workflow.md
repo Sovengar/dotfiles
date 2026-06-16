@@ -49,7 +49,7 @@ Archivos **autogenerados**, NO editar manualmente (se sobreescriben en cada `hyp
 | `wallbash.conf` | Variables Hyprlang derivadas del theme (`$HYDE_THEME`, `$GTK_THEME`, `$ICON_THEME`, etc.) | wallbash |
 | `hyprland.theme.lua` | Tabla Lua con gaps, borders, blur, rounding, colores activo/inactivo | theme.switch.sh |
 | `animations.theme.conf` | Bloques de animación Hyprlang (bezier curves + animation rules) | wallbash desde `.dcol` |
-| `waybar.theme.conf` | `rounding = 10` (legacy, usado por Hyprland) | theme.switch.sh |
+| `state/waybar/theme.conf` | `rounding: 10;` (formato CSS, generado para waybar) | theme.switch.sh |
 | `shaders.conf` | Shader activo (`$SCREEN_SHADER`) y ruta al `.frag` compilado | shaders.sh |
 | `hyprlock` | Path al layout de hyprlock activo | hyprlock.sh |
 | `hyprsunset` | Config de temperatura de pantalla | hyprsunset |
@@ -199,9 +199,9 @@ El campo `HYPR_ANIMATION` en `staterc` indica el modo actual (`theme`), que dete
 - `settings.ini` → `gtk-theme-name=Rose-Pine`, `gtk-icon-theme-name=Tela-circle-pink`
 - Variables env: `GTK_THEME=Wallbash-Gtk`
 
-### Waybar (barra) — dos capas de estado dinámico
-- **Estado Hyprland** (`~/.local/state/hypr/waybar.theme.conf`): rounding value legacy (leído por Hyprland)
-- **Estado Waybar** (`~/.local/state/waybar/`): toda la config dinámica de waybar
+### Waybar (barra) — estado dinámico
+- **Rounding** (`~/.local/state/waybar/theme.conf`): generado por theme.switch.sh, leído por wbarstylegen.sh
+- **Config dinámica** (`~/.local/state/waybar/`): layouts, estilos, colores
   - `staterc`: `WAYBAR_LAYOUT_PATH`, `WAYBAR_LAYOUT_NAME`, `WAYBAR_STYLE_PATH`, `WAYBAR_SCALE`
   - `generated/config.jsonc`: layout de módulos, grupos, posiciones
   - `generated/style.css`: CSS maestro que importa en cascada:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
-[ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/shader.conf" ] && source "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/shader.conf"
 confDir="${XDG_CONFIG_HOME:-$HOME/.config}"
 dataDir="${XDG_DATA_HOME:-$HOME/.local/share}"
 cacheDir="${XDG_CACHE_HOME:-$HOME/.cache}"

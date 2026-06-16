@@ -1,0 +1,19 @@
+# Frosted Glass wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #125ccf
+active_status_fg         #125ccf
+inactive_status_fg       #6c8dbb
+tab_primary              #125ccf
+tab_primary_hover        #32c2c0
+tab_active_bg            #ffffff
+tab_active_fg            #125ccf
+tab_inactive_bg          #f2f6f8
+tab_inactive_fg          #6c8dbb
+tab_hover_bg             #eaf7fc
+tab_hover_fg             #32c2c0
+tab_new_fg               #262626
+tab_new_hover_fg         #32c2c0
+tab_bell                 #f96f1c
+tab_unseen               #6c8dbb
+tab_status               #125ccf

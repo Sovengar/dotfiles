@@ -89,7 +89,7 @@ else
     fi
 fi
 print_log "Patching" -g " --// $THEME_NAME //-- " "from " -b "$THEME_DIR\n"
-FAV_THEME_DIR="$THEME_DIR/Configs/.config/hyde/themes/$THEME_NAME"
+FAV_THEME_DIR="$THEME_DIR/Configs/.local/share/hyde/themes/$THEME_NAME"
 [ ! -d "$FAV_THEME_DIR" ] && print_log -r "[ERROR] " "'$FAV_THEME_DIR'" -y " Do not Exist" && exit 1
 config=$(find -H "${WALLBASH_DIRS[@]}" -type f -path "*/theme*" -name "*.dcol" 2>/dev/null | awk '!seen[substr($0, match($0, /[^/]+$/))]++' | awk -v favTheme="$THEME_NAME" -F 'theme/' '{gsub(/\.dcol$/, ".theme"); print ".local/share/hyde/themes/" favTheme "/" $2}')
 restore_list=""

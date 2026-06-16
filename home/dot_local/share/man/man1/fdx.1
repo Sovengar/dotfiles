@@ -1,0 +1,101 @@
+.TH FDX 1 "June 2026" "fdx" "Fish Functions"
+.SH NAME
+fdx \- fd + fzf + bat preview fuzzy file finder
+.SH SYNOPSIS
+.B fdx
+[OPTIONS] [PATTERN]
+.SH DESCRIPTION
+\fBfdx\fR is a fuzzy file/directory finder that combines \fBfd\fR, \fBfzf\fR,
+and \fBbat\fR for interactive searching with preview. Results open in
+\fBnvim\fR (or \fB$FDX_EDITOR\fR).
+.SH OPTIONS
+.TP
+\fB\-\-query\fR, \fB\-q\fR \fIpattern\fR
+Initial search pattern. Can also be passed as positional argument.
+.TP
+\fB\-\-query=\fIpattern\fR
+Alternative form of \fB\-\-query\fR.
+.TP
+\fB\-\-dir\fR, \fB\-d\fR \fIpath\fR
+Root directory for search (default: current directory).
+.TP
+\fB\-\-dir=\fIpath\fR
+Alternative form of \fB\-\-dir\fR.
+.TP
+\fB\-\-type\fR, \fB\-t\fR \fIf|d|all\fR
+Filter by file type: \fBf\fR (files, default), \fBd\fR (directories),
+\fBall\fR (both).
+.TP
+\fB\-\-type=f|d|all\fR, \fB\-tf\fR, \fB\-td\fR
+Shorthand forms of \fB\-\-type\fR.
+.TP
+\fB\-\-hidden\fR, \fB\-H\fR
+Include hidden files and directories.
+.TP
+\fB\-\-widget\fR
+Output paths to stdout without launching an editor. Useful in command
+substitutions.
+.TP
+\fB\-\-floating\fR
+Floating window mode for use with Pypr/hyprland scratchpads. Calls
+\fBpypr hide fdx-floating\fR on exit.
+.TP
+\fB\-\-opencode\fR
+Enable OpenCode integration. Adds \fBCtrl+O\fR to send selected paths
+to the OpenCode prompt bridger client.
+.TP
+\fB\-\-help\fR, \fB\-h\fR
+Display usage information and exit.
+.SH KEYBINDINGS
+.TP
+Enter
+Open selected files in editor (default: nvim). In command substitution or
+\fB\-\-widget\fR mode, prints paths to stdout.
+.TP
+Ctrl+P
+Paste selected paths to stdout.
+.TP
+Ctrl+Y
+Yank selected paths to clipboard (wl-copy).
+.TP
+Ctrl+Space
+Toggle file preview pane.
+.TP
+Tab
+Select/deselect multiple rows.
+.TP
+Ctrl+H
+Toggle hidden file visibility.
+.TP
+Ctrl+T
+Cycle file type filter: files \(-> directories \(-> all.
+.TP
+\(<-/\(->
+Scroll preview pane.
+.SH ENVIRONMENT
+.TP
+\fBFDX_EDITOR\fR
+Custom editor command (e.g., \fBcode\fR, \fBemacs\fR). Default: \fBnvim\fR.
+.SH EXAMPLES
+.TP
+.B fdx
+Launch interactive finder in current directory (files only).
+.TP
+.B fdx somefile
+Search for files matching "somefile".
+.TP
+.B fdx \-\-hidden \-\-type d
+Search hidden directories.
+.TP
+.B fdx \-\-dir ~/projects
+Search in ~/projects directory.
+.TP
+.B fdx \-\-floating \-\-opencode
+Launch in floating window with OpenCode integration.
+.TP
+.B nvim (fdx \-\-widget)
+Use fdx output as argument to nvim.
+.SH SEE ALSO
+.BR fd (1),
+.BR fzf (1),
+.BR bat (1)

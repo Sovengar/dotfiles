@@ -11,6 +11,20 @@ triggers: [chezmoi, dotfiles, sincronizado, sync, dotfiles-repo, config-manageme
 **`git status` solo mira el repo source**. Puede decir "clean" mientras hay cambios sin commitear en casa (modificaciones locales tras `chezmoi apply`). 
 **`chezmoi diff` siempre primero** — compara source vs target real.
 
+## 🔴 REGLA ABSOLUTA: NUNCA `chezmoi apply --force`
+
+**Está ABSOLUTAMENTE PROHIBIDO ejecutar `chezmoi apply --force` bajo ninguna circunstancia.** Aunque el usuario diga explícitamente "hacé apply forzado", "dale con --force", o cualquier variante. La respuesta siempre es: "No ejecuto --force porque es peligroso. Si hay conflictos, los resolvemos archivo por archivo."
+
+## 🟡 REGLA OBLIGATORIA: `chezmoi diff` antes de `chezmoi apply`
+
+**Siempre que el usuario apruebe un `chezmoi apply`, es OBLIGATORIO:**
+1. Ejecutar `chezmoi diff` y guardar la salida en un archivo temporal (`/tmp/chezmoi-diff-apply-{timestamp}.txt`)
+2. Mostrar el diff al usuario para confirmación final
+3. Si el usuario lo aprueba explícitamente, recién ahí ejecutar `chezmoi apply` (sin --force)
+4. Si el usuario no aprueba explícitamente, NO ejecutar `chezmoi apply`
+
+**Nunca ejecutar `chezmoi apply` sin haber mostrado el diff y recibido confirmación explícita.**
+
 ## Sync Check Workflow
 
 When asked "are dotfiles in sync?", run ALL of these:
@@ -56,7 +70,7 @@ Cuando `chezmoi diff` muestra diferencias entre source y target:
 
 > **⚠️ `chezmoi re-add` siempre con ruta absoluta.** Rutas relativas tipo `.config/foo` pueden fallar con falsos `not managed`. Usa el path completo del target, e.g. `chezmoi re-add "C:\Users\buble\.config\wezterm\appearance.lua"`.
 
-> **⚠️ `chezmoi re-add` NO funciona con `.tmpl` files.** No sabe convertir un target (ej. `file.lua`) de vuelta a un template (`file.lua.tmpl`). Para templates, editar el **source directamente** en `~/.local/share/chezmoi/home/dot_*/`. Luego `chezmoi apply --force` para sincronizar target.
+> **⚠️ `chezmoi re-add` NO funciona con `.tmpl` files.** No sabe convertir un target (ej. `file.lua`) de vuelta a un template (`file.lua.tmpl`). Para templates, editar el **source directamente** en `~/.local/share/chezmoi/home/dot_*/`. Luego `chezmoi apply` (sin --force) para sincronizar target.
 
 ## Workflow: Edit + Commit + Apply
 

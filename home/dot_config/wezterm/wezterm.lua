@@ -33,7 +33,7 @@ config.color_schemes = {
 font.setup(config)
 
 -- Tabs configuration
-tabs.setup(config, theme.colors)
+tabs.setup(config, theme)
 
 -- Status configuration
 config.status_update_interval = 2000
@@ -80,6 +80,9 @@ config.ssh_domains = {
     }
   },
 }
+-- Close confirmation: never prompt when closing window from WM
+config.window_close_confirmation = "NeverPrompt"
+
 -- Performance settings
 config.max_fps = 120
 config.animation_fps = 120

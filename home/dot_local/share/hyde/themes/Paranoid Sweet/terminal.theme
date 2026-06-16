@@ -1,0 +1,105 @@
+# Paranoid Sweet terminal base theme
+# Generated from pre-split kitty.theme; edit values only.
+
+# Special colors
+foreground               #cdd2d3
+background               #161925
+
+# Selection colors
+selection_foreground     #161925
+selection_background     #c74ded 
+#selection_background     #bd93f9 
+
+# Cursor colors
+cursor                   #c3c7c8
+cursor_text_color        #23076F
+
+# URL color
+url_color                #906ace
+
+# black
+color0                  #2d1b3a
+color8                  #7a6290
+# red → pink
+color1                  #ff6b9d
+color9                  #ff94b8
+# green → lavender
+color2                  #b392cc
+color10                 #d4b8e6
+# yellow → pale pink
+color3                  #f0c4d8
+color11                 #fad8e6
+# blue → violet
+color4                  #9b7fd4
+color12                 #bda3e6
+# magenta
+color5                  #e04fc0
+color13                 #f07fd4
+# color5                  #c74ded
+# color13                 #c74ded
+# cyan → dusty rose
+color6                  #d48bb3
+color14                 #e6b3cc
+# white
+color7                  #e8dff5
+color15                 #f2edfa
+
+# Old
+# black
+#color0                   #462952
+#color8                   #80578F
+# red
+#color1                   #FFCCFC
+#color9                   #F0AAEC
+# green
+#color2                   #ECCCFF
+#color10                  #D6AAF0
+# yellow
+#color3                   #DACCFF
+#color11                  #E6D8FF
+# blue
+#color4                   #C9A7F2
+#color12                  #D6B8FA
+# magenta
+#color5                   #D19AE6
+#color13                  #E2ADF0
+# cyan
+#color6                   #C7B7FF
+#color14                  #D8CCFF
+# white
+#color7                   #FFE8FF
+#color15                  #FFF4FF
+
+# Alternative RGB ANSI palette
+# Keep commented unless replacing the violet ANSI palette above.
+# black
+# color0                  #697388
+# color8                  #697388
+
+# red
+# color1                  #ed254e
+# color9                  #ed254e
+
+# green
+# color2                  #71f79f
+# color10                 #71f79f
+
+# yellow
+# color3                  #f9dc5c
+# color11                 #f9dc5c
+
+# blue
+# color4                  #7cb7ff
+# color12                 #7cb7ff
+
+# magenta
+# color5                  #c74ded
+# color13                 #c74ded
+
+# cyan
+# color6                  #00c1e4
+# color14                 #00c1e4
+
+# white
+# color7                  #dcdfe4
+# color15                 #dcdfe4

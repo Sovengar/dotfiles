@@ -39,14 +39,14 @@ local function get_wallpapers()
   return wallpapers
 end
 
-local function background_with_overlay(image_path, opacity)
+local function background_with_overlay(image_path, opacity, colors)
   return {
     {
       source = { File = image_path },
       opacity = opacity or DEFAULT_BG_OPACITY,
     },
     {
-      source = { Color = "#0f172a" },
+      source = { Color = (colors and colors.bg) or "#0f172a" },
       width = "100%",
       height = "100%",
       opacity = OVERLAY_OPACITY,
@@ -86,16 +86,16 @@ local function cycle_wallpaper_type(g)
   return true
 end
 
-local function cycle_wallpaper_startup(config, g)
+local function cycle_wallpaper_startup(config, g, colors)
   if not g.current_wallpaper_type then return end
   local images = g.wallpapers[g.current_wallpaper_type]
   if not images or #images == 0 then return end
   local path = WALLPAPER_DIR .. '/' .. g.current_wallpaper_type .. '/' .. images[1]
-  config.background = background_with_overlay(path, DEFAULT_BG_OPACITY)
+  config.background = background_with_overlay(path, DEFAULT_BG_OPACITY, colors)
   wezterm.log_info("wallpaper: applied startup wallpaper " .. path)
 end
 
-local function cycle_wallpaper(g, window)
+local function cycle_wallpaper(g, window, colors)
   wezterm.log_info("wallpaper: cycle_wallpaper called")
   if not g.current_wallpaper_type then
     wezterm.log_info("wallpaper: no current_type, aborting")
@@ -116,7 +116,7 @@ local function cycle_wallpaper(g, window)
 
   local path = WALLPAPER_DIR .. '/' .. g.current_wallpaper_type .. '/' .. images[g.selected_wallpaper]
   wezterm.log_info("wallpaper: setting path=" .. path .. " opacity=" .. current_opacity)
-  overrides.background = background_with_overlay(path, current_opacity)
+  overrides.background = background_with_overlay(path, current_opacity, colors)
   window:set_config_overrides(overrides)
   wezterm.log_info("wallpaper: overrides applied")
 
@@ -134,14 +134,14 @@ function M.setup(config, g, colors)
   wezterm.on('cycle-wallpaper', function(window, _)
     wezterm.log_info("wallpaper: event 'cycle-wallpaper' fired")
     ensure_loaded(g)
-    cycle_wallpaper(g, window)
+    cycle_wallpaper(g, window, colors)
   end)
 
   wezterm.on('cycle-wallpaper-folder', function(window, _)
     wezterm.log_info("wallpaper: event 'cycle-wallpaper-folder' fired")
     ensure_loaded(g)
     if cycle_wallpaper_type(g) then
-      cycle_wallpaper(g, window)
+      cycle_wallpaper(g, window, colors)
     end
   end)
 
@@ -167,7 +167,7 @@ function M.setup(config, g, colors)
   -- Load wallpapers for cycling; appearance decides whether startup uses one.
   ensure_loaded(g)
   if appearance.should_start_with_wallpaper() then
-    cycle_wallpaper_startup(config, g)
+    cycle_wallpaper_startup(config, g, colors)
   end
 end
 

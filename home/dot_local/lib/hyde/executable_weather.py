@@ -4,7 +4,6 @@ import os
 import sys
 import json
 from datetime import datetime
-from pathlib import Path
 import locale
 from typing import TypeAlias, TypedDict, Literal, cast
 
@@ -117,21 +116,6 @@ WEATHER_CODES = {
     **dict.fromkeys(["227", "230", "320", "323", "326", "374", "377", "386", "389"], "🌨️ "),
     **dict.fromkeys(["329", "332", "335", "338", "371", "395"], "❄️ "),
 }
-
-
-### Functions ###
-def load_env_file(filepath: Path) -> None:
-    """Loads environment variables from a file, ignoring any lines that are empty or start with #."""
-    try:
-        with open(filepath, encoding="utf-8") as f:
-            for line in f:
-                if line.strip() and not line.startswith("#"):
-                    if line.startswith("export "):
-                        line = line[len("export ") :]
-                    key, value = line.strip().split("=", 1)
-                    os.environ[key] = value.strip('"')
-    except Exception:
-        pass
 
 
 def get_weather_icon(weatherinstance: CurrentCondition | HourlyPoint) -> str:
@@ -330,9 +314,6 @@ def main() -> None:
 
     ### Variables ###
     def_lang, def_temp, def_time, def_wind = get_default_locale()  # default vals based on locale
-    home = Path.home()
-    load_env_file(home / ".local" / "state" / "hypr" / "staterc")
-
     user_lang = os.getenv("WEATHER_LANG")
     weather_lang = user_lang.lower() if user_lang else def_lang
     user_temp = os.getenv("WEATHER_TEMPERATURE_UNIT")

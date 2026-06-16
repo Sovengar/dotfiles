@@ -1,0 +1,19 @@
+# Tokyo Night wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #7aa2f7
+active_status_fg         #7aa2f7
+inactive_status_fg       #526a9a
+tab_primary              #7aa2f7
+tab_primary_hover        #bb9af7
+tab_active_bg            #1f2335
+tab_active_fg            #7aa2f7
+tab_inactive_bg          #16161e
+tab_inactive_fg          #526a9a
+tab_hover_bg             #24283b
+tab_hover_fg             #bb9af7
+tab_new_fg               #a9b1d6
+tab_new_hover_fg         #bb9af7
+tab_bell                 #e0af68
+tab_unseen               #526a9a
+tab_status               #7aa2f7

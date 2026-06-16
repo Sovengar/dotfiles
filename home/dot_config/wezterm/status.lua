@@ -55,10 +55,6 @@ M.setup = function(theme)
       table.insert(cells, { Text = battery })
     end
 
-    local time_str = os.date('%H:%M')
-    table.insert(cells, { Foreground = { Color = styles.dim } })
-    table.insert(cells, { Text = '  ' .. time_str })
-
     window:set_right_status(wezterm.format(cells))
   end)
 end

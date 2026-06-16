@@ -11,23 +11,15 @@ local function base_config(config)
   config.initial_cols = 120
   config.initial_rows = 40
   config.window_padding = { left = 25, right = 25, top = 25, bottom = 25 }
-  config.window_frame = {
-    font_size = 15,
-    active_titlebar_bg = "transparent",
-    inactive_titlebar_bg = "transparent",
-    active_titlebar_border_bottom = "transparent",
-    inactive_titlebar_border_bottom = "transparent",
-    button_bg = "transparent",
-    button_hover_bg = "transparent",
-    border_left_width = "0px",
-    border_right_width = "10px",
-    border_bottom_height = "10px",
-    border_top_height = "1px",
-    border_left_color = "transparent",
-    border_right_color = "transparent",
-    border_top_color = "transparent",
-    border_bottom_color = "transparent",
-  }
+  config.window_frame = config.window_frame or {}
+  config.window_frame.border_left_width = "0px"
+  config.window_frame.border_right_width = "10px"
+  config.window_frame.border_bottom_height = "10px"
+  config.window_frame.border_top_height = "1px"
+  config.window_frame.border_left_color = "transparent"
+  config.window_frame.border_right_color = "transparent"
+  config.window_frame.border_top_color = "transparent"
+  config.window_frame.border_bottom_color = "transparent"
 end
 
 local function backdrop(config, colors)
@@ -36,16 +28,17 @@ local function backdrop(config, colors)
   end
 
   -- Workaround: window_background_opacity does not apply to the tab bar.
+  config.window_background_opacity = 0.80
   config.background = {
     {
-      source = { Color = "#302e2e" },
+      source = { Color = (colors and colors.bg) or "#302e2e" },
       width = "100%",
       height = "100%",
-      opacity = 0.88,
+      opacity = 0.8,
     },
   }
 
-  -- Blur managed by Hyperland on Linux
+  -- Blur managed by Hyprland on Linux
 end
 
 function M.setup(config, colors)

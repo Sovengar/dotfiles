@@ -1,0 +1,19 @@
+# Edge Runner wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #FADA16
+active_status_fg         #FADA16
+inactive_status_fg       #8f810d
+tab_primary              #FADA16
+tab_primary_hover        #F29C6B
+tab_active_bg            #1B1C22
+tab_active_fg            #FADA16
+tab_inactive_bg          #000000
+tab_inactive_fg          #8f810d
+tab_hover_bg             #1F2229
+tab_hover_fg             #F29C6B
+tab_new_fg               #FDF500
+tab_new_hover_fg         #F29C6B
+tab_bell                 #37EBF3
+tab_unseen               #8f810d
+tab_status               #FADA16

@@ -16,11 +16,19 @@ fastfetch --config hyde/*.jsonc
     "separator": " : "
   },
   "modules": [
+    /*
     {
       "type": "command",
       "key": "  ",
       "keyColor": "blue",
       "text": "splash=$(hyprctl splash);echo $splash"
+    },
+    */
+    {
+      "type": "command",
+      "key": "   Tip",
+      "keyColor": "blue",
+      "text": "shell-tip 2>/dev/null || echo 'no tips'"
     },
     {
       "type": "custom",
@@ -42,7 +50,8 @@ fastfetch --config hyde/*.jsonc
     {
       "type": "packages",
       "key": "  󰏗 Packages",
-      "keyColor": "green"
+      "keyColor": "green",
+      "format": "{brew}, {flatpak-user}, {pacman} (Brew, Flatpak, Pacman)"
     },
     {
       "type": "display",
@@ -116,12 +125,15 @@ fastfetch --config hyde/*.jsonc
       "type": "custom",
       "format": "└──────────────────────────────────────────┘"
     },
+    /*
+    ! Comentado por su alto impacto en el rendimiento (fork + jq por cada ejecucion)
     {
       "type": "command",
       "key": "   Theme",
       "keyColor": "yellow",
-      "text": "grep '^\\$HYDE_THEME=' ~/.local/state/hypr/wallbash.conf 2>/dev/null | cut -d= -f2 || echo 'N/A'"
+      "text": "hyde=${XDG_STATE_HOME:-$HOME/.local/state}/hypr/hyde.conf; [ -r \"$hyde\" ] && . \"$hyde\"; metadata=$HOME/.local/lib/hyde/metadata-fetcher.sh; if [ -x \"$metadata\" ]; then theme=$(bash \"$metadata\" --json 2>/dev/null | jq -r '.theme.value // empty'); source=$(bash \"$metadata\" --json 2>/dev/null | jq -r '.gtk_theme.source // \"N/A\"'); case \"$source\" in wallbash) source='Wallbash' ;; live) source='Theme' ;; env) source='Theme' ;; *) source='N/A' ;; esac; echo \"${theme:-N/A}. Colors from $source\"; else theme=$(grep '^HYDE_THEME=' \"$hyde\" 2>/dev/null | cut -d= -f2 | tr -d '\"'); case \"${PALETTE_SOURCE:-}\" in theme) source='Theme' ;; wallbash_*) source='Wallbash' ;; *) source='N/A' ;; esac; echo \"${theme:-N/A}. Colors from $source\"; fi"
     },
+    */
     {
       "type": "colors",
       "paddingLeft": 2,

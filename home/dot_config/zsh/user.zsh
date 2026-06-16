@@ -30,4 +30,6 @@ if [[ ${HYDE_ZSH_NO_PLUGINS} != "1" ]]; then
     plugins=(
         "sudo"
     )
+    # zsh-vi-mode (cloned locally, not in omz custom dir)
+    source ${ZDOTDIR}/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 fi

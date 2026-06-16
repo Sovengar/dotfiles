@@ -1,0 +1,19 @@
+# Material Sakura wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #b4637a
+active_status_fg         #b4637a
+inactive_status_fg       #9d7b85
+tab_primary              #b4637a
+tab_primary_hover        #907aa9
+tab_active_bg            #f2e9e1
+tab_active_fg            #b4637a
+tab_inactive_bg          #faf4ed
+tab_inactive_fg          #9d7b85
+tab_hover_bg             #fffaf6
+tab_hover_fg             #907aa9
+tab_new_fg               #575279
+tab_new_hover_fg         #907aa9
+tab_bell                 #ea9d34
+tab_unseen               #9d7b85
+tab_status               #b4637a

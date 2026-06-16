@@ -1,0 +1,19 @@
+# Graphite Mono wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #A6A6A6
+active_status_fg         #A6A6A6
+inactive_status_fg       #6f6f6f
+tab_primary              #A6A6A6
+tab_primary_hover        #D9D9D9
+tab_active_bg            #262626
+tab_active_fg            #A6A6A6
+tab_inactive_bg          #1f1f1f
+tab_inactive_fg          #6f6f6f
+tab_hover_bg             #333333
+tab_hover_fg             #D9D9D9
+tab_new_fg               #D9D9D9
+tab_new_hover_fg         #D9D9D9
+tab_bell                 #D9D9D9
+tab_unseen               #6f6f6f
+tab_status               #A6A6A6

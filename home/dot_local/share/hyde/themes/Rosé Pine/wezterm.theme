@@ -1,0 +1,19 @@
+# Rosé Pine wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #eb6f92
+active_status_fg         #eb6f92
+inactive_status_fg       #8c4760
+tab_primary              #eb6f92
+tab_primary_hover        #ebbcba
+tab_active_bg            #26233a
+tab_active_fg            #eb6f92
+tab_inactive_bg          #191724
+tab_inactive_fg          #8c4760
+tab_hover_bg             #191724
+tab_hover_fg             #ebbcba
+tab_new_fg               #e0def4
+tab_new_hover_fg         #ebbcba
+tab_bell                 #f6c177
+tab_unseen               #8c4760
+tab_status               #eb6f92

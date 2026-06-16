@@ -94,9 +94,20 @@
       "custom/clipboard",
       "custom/swaync",
       "custom/dunst",
+      "custom/wallbash-mode",
       "group/misc",
       "custom/hyde-menu"
     ]
+  },
+  "custom/wallbash-mode": {
+    "exec": "/home/buble/.local/bin/waybar-wallbash-mode",
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "interval": 30,
+    "signal": 9,
+    "on-click": "/home/buble/.local/bin/waybar-wallbash-mode --next",
+    "on-click-right": "/home/buble/.local/bin/waybar-wallbash-mode --menu"
   },
   "custom/network": {
     "exec": "/home/buble/.local/bin/waybar-network-status",

@@ -1,0 +1,19 @@
+# Graphite Mono kitty overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+active_border_color      #595959
+inactive_border_color    #595959
+bell_border_color        #595959
+wayland_titlebar_color   system
+macos_titlebar_color     system
+active_tab_foreground    #D9D9D9
+active_tab_background    #262626
+inactive_tab_foreground  #D9D9D9
+inactive_tab_background  #262626
+tab_bar_background       #D9D9D9
+mark1_foreground         #262626
+mark1_background         #404040
+mark2_foreground         #262626
+mark2_background         #262626
+mark3_foreground         #262626
+mark3_background         #A6A6A6

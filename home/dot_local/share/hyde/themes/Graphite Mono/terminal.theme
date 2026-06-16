@@ -1,0 +1,49 @@
+# Graphite Mono terminal base theme
+# Generated from pre-split kitty.theme; edit values only.
+
+# Special colors
+foreground               #D9D9D9
+background               #262626
+
+# Selection colors
+selection_foreground     #262626
+selection_background     #A6A6A6
+
+# Cursor colors
+cursor                   #A6A6A6
+cursor_text_color        #D9D9D9
+
+# URL color
+url_color                #D9D9D9
+
+# black
+color0                   #404040
+color8                   #404040
+
+# red
+color1                   #D9D9D9
+color9                   #D9D9D9
+
+# green
+color2                   #D9D9D9
+color10                  #D9D9D9
+
+# yellow
+color3                   #595959
+color11                  #595959
+
+# blue
+color4                   #A6A6A6
+color12                  #A6A6A6
+
+# magenta
+color5                   #A6A6A6
+color13                  #A6A6A6
+
+# cyan
+color6                   #A6A6A6
+color14                  #A6A6A6
+
+# white
+color7                   #D9D9D9
+color15                  #D9D9D9

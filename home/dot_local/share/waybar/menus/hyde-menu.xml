@@ -391,6 +391,12 @@
 
 
         <child>
+            <object class="GtkMenuItem" id="show-current-state">
+                <property name="label">󰋗 Show current state</property>
+            </object>
+        </child>
+
+        <child>
             <object class="GtkSeparatorMenuItem" id="delimiter-1" />
         </child>
 

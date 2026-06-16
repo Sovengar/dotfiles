@@ -43,6 +43,7 @@
       "gamma-20": "hyde-shell hyprsunset --cm gamma -s 20 -P waybar:19",
       "shaders-select": "hyde-shell shaders --select;pkill -RTMIN+19 waybar",
       "keybinds-hint": "hyde-shell keybinds_hint",
+      "show-current-state": "${HOME}/.local/bin/waybar-zenite-notify",
       "about-hyde": "xdg-open https://hydeproject.pages.dev"
     }
   }

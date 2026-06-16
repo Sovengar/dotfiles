@@ -585,10 +585,43 @@ def run_waybar():
     logger.debug(f"Launched {UNIT_NAME}")
 
 
+def kill_orphan_waybars():
+    """Kill waybar processes not managed by the current systemd unit."""
+    try:
+        result = subprocess.run(
+            ["pgrep", "-u", os.environ.get("USER", ""), "-x", "waybar"],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            return
+        pids = [int(p) for p in result.stdout.strip().split() if p]
+        if not pids:
+            return
+        main_pid = "0"
+        try:
+            svc_result = subprocess.run(
+                ["systemctl", "--user", "show", "--property=MainPID", UNIT_NAME],
+                capture_output=True, text=True
+            )
+            if svc_result.returncode == 0:
+                parsed = svc_result.stdout.strip().split("=", 1)
+                if len(parsed) == 2:
+                    main_pid = parsed[1].strip()
+        except Exception:
+            pass
+        for pid in pids:
+            if str(pid) != main_pid:
+                logger.debug(f"Killing orphan waybar PID {pid}")
+                os.kill(pid, signal.SIGTERM)
+    except Exception as e:
+        logger.error(f"Error killing orphan waybars: {e}")
+
+
 def kill_waybar():
-    """Stop Waybar systemd unit for current session desktop."""
+    """Stop Waybar systemd unit and orphan waybar processes."""
     subprocess.run(["systemctl", "--user", "stop", UNIT_NAME])
     logger.debug(f"Stopped Waybar systemd unit: {UNIT_NAME}")
+    kill_orphan_waybars()
 
 
 def restart_waybar():
@@ -1290,6 +1323,7 @@ def update_style(style_path):
 
 def watch_waybar():
     """Launch Waybar as a persistent systemd service with auto-restart. Exits immediately."""
+    kill_orphan_waybars()
     if is_waybar_running_for_current_user():
         logger.debug(f"Waybar unit already active: {UNIT_NAME}")
         return

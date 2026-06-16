@@ -16,7 +16,6 @@
 # Subgroup1.. - The subgroup names can be use to avoid repeating the same description
 ]]
 
-local primary_apps = require("hyprland.primary_apps")
 local mainMod = "SUPER"
 
 local function exec(keys, command, description, opts)
@@ -33,14 +32,10 @@ end
 
 -- Window Management
 bind(mainMod .. " + Backspace", hl.dsp.window.close(), "Close focused window")
-bind("ALT + F4", hl.dsp.window.close(), "Close focused window")
 exec(mainMod .. " + Delete", "hyde-shell logout", "Kill Hyprland session")
 bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
-bind("SHIFT + F11", hl.dsp.window.fullscreen(), "Toggle fullscreen")
-exec(mainMod .. " + L", "hyde-shell lock-session", "Lock screen")
 exec(mainMod .. " + SHIFT + F", "hyde-shell window.pin", "Toggle pin on focused window")
 exec("CONTROL + ALT + Delete", "hyde-shell logoutlaunch", "Logout menu")
-exec("Alt_R + Control_R", "hyde-shell waybar --hide", "Toggle waybar and reload config")
 exec(mainMod .. " + CONTROL + H", "hyprctl dispatch changegroupactive b", "Previous group")
 exec(mainMod .. " + CONTROL + L", "hyprctl dispatch changegroupactive f", "Next group")
 
@@ -49,7 +44,6 @@ bind(mainMod .. " + Left", hl.dsp.focus({ direction = "left" }), "Focus left")
 bind(mainMod .. " + Right", hl.dsp.focus({ direction = "right" }), "Focus right")
 bind(mainMod .. " + Up", hl.dsp.focus({ direction = "up" }), "Focus up")
 bind(mainMod .. " + Down", hl.dsp.focus({ direction = "down" }), "Focus down")
-exec("ALT + Tab", "hyprctl --batch \"dispatch cyclenext ; dispatch alterzorder top\"", "Cycle focus")
 
 -- Window Management / Resize Active Window
 bind(mainMod .. " + SHIFT + Right", hl.dsp.window.resize({ x = 30, y = 0, relative = true }), "Resize window right", { repeating = true })
@@ -88,12 +82,12 @@ bind(mainMod .. " + X", hl.dsp.send_shortcut({ mods = "CTRL", key = "X" }), "Uni
 bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), "Toggle split")
 
 -- Launcher / Apps
-exec(mainMod .. " + Return", primary_apps.terminal, "Open terminal")
+exec(mainMod .. " + Return", "sh -lc 'exec \"${TERMINAL:-wezterm}\"'", "Open terminal")
 exec(mainMod .. " + ALT + Return", "hyde-shell pypr toggle console", "Open dropdown terminal")
-exec(mainMod .. " + E", primary_apps.explorer, "Open file explorer")
-exec(mainMod .. " + Y", "kitty -e yazi", "Open yazi file manager")
-exec(mainMod .. " + T", primary_apps.editor, "Open text editor")
-exec(mainMod .. " + B", primary_apps.browser, "Open browser")
+exec(mainMod .. " + E", "sh -lc 'exec hyde-shell open --fall \"${EXPLORER:-dolphin}\" file-manager'", "Open file explorer")
+exec(mainMod .. " + Y", "sh -lc 'exec \"${TERMINAL:-wezterm}\" -e yazi'", "Open yazi file manager")
+exec(mainMod .. " + T", "sh -lc 'exec hyde-shell open --fall \"${EDITOR:-code-oss}\" text-editor'", "Open text editor")
+exec(mainMod .. " + B", "sh -lc 'exec hyde-shell open --fall \"${BROWSER:-zen-browser}\" web-browser'", "Open browser")
 exec("CONTROL + SHIFT + Escape", "hyde-shell system.monitor", "Open system monitor")
 
 -- Launcher / Rofi menus
@@ -154,12 +148,16 @@ exec(mainMod .. " + SHIFT + Y", "pkill -x rofi || hyde-shell animations --select
 exec(mainMod .. " + SHIFT + U", "pkill -x rofi || hyde-shell hyprlock --select", "Select hyprlock layout")
 
 -- Workspaces / Navigation
-for i = 1, 10 do
-    local key = i % 10
-    bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }), "Go to workspace " .. i)
-    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "Move to workspace " .. i)
-    exec(mainMod .. " + ALT + " .. key, "hyprctl dispatch movetoworkspacesilent " .. i, "Move to workspace " .. i .. " (silent)")
+for i = 1, 9 do
+    bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }), "Go to workspace " .. i)
+    bind(mainMod .. " + F" .. i, hl.dsp.window.move({ workspace = i }), "Move to workspace " .. i)
+    exec(mainMod .. " + ALT + " .. i, "hyprctl dispatch movetoworkspacesilent " .. i, "Move to workspace " .. i .. " (silent)")
 end
+
+-- Workspace 10
+bind(mainMod .. " + 0", hl.dsp.focus({ workspace = 10 }), "Go to workspace 10")
+bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }), "Move to workspace 10")
+exec(mainMod .. " + ALT + 0", "hyprctl dispatch movetoworkspacesilent 10", "Move to workspace 10 (silent)")
 
 bind(mainMod .. " + CONTROL + Right", hl.dsp.focus({ workspace = "r+1" }), "Next relative workspace")
 bind(mainMod .. " + CONTROL + Left", hl.dsp.focus({ workspace = "r-1" }), "Previous relative workspace")

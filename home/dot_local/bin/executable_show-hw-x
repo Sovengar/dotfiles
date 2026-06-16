@@ -74,15 +74,11 @@ case "${1:-}" in
 esac
 
 tools=(
-  "Monitores|btop|TUI moderno: CPU, RAM, procesos, discos y red."
   "Monitores|htop|TUI clasico de procesos, CPU y memoria."
-  "Monitores|btm|Bottom: CPU, memoria, discos, red y procesos."
-  "Monitores|top|Monitor basico incluido en casi cualquier sistema."
   "Rendimiento|hyperfine|Benchmark de comandos y comparativas de rendimiento."
   "Sistema base|fastfetch|Resumen de sistema, kernel, CPU, GPU, RAM y escritorio."
   "Sistema base|inxi|Inventario detallado de hardware, drivers y sistema."
   "Sistema base|lshw|Inventario profundo de hardware detectado por Linux."
-  "Sistema base|hwinfo|Inventario amplio de hardware y dispositivos."
   "Sistema base|dmidecode|SMBIOS/firmware: placa base, BIOS, RAM y chasis."
   "CPU y memoria|lscpu|CPU, nucleos, flags, caches y arquitectura."
   "CPU y memoria|lsmem|Bloques de memoria fisica detectados."
@@ -93,8 +89,7 @@ tools=(
   "Discos|lsblk|Discos, particiones, puntos de montaje y tamanos."
   "Discos|blkid|UUID, labels y tipos de filesystem."
   "Discos|df|Uso de filesystems montados."
-  "Discos|duf|Uso de disco con salida clara y agrupada."
-  "Discos|dust|Uso de disco por directorios con salida legible."
+  "Discos|du|Uso de disco por directorios."
   "Discos|smartctl|Estado SMART de discos SATA/NVMe."
   "Discos|nvme|Gestion e informacion de discos NVMe."
   "Energia y sensores|sensors|Temperaturas, voltajes y ventiladores."
@@ -115,7 +110,6 @@ tools=(
   "Audio PipeWire|wpctl|WirePlumber: volumen, mute, fuentes y sinks."
   "Audio PipeWire|pactl|Pulse/PipeWire Pulse: sinks, sources y volumen."
   "Audio PipeWire|pavucontrol|GUI para volumen y rutas de audio."
-  "Audio PipeWire|helvum|GUI patchbay para conexiones PipeWire."
   "Audio PipeWire|qpwgraph|GUI avanzada para grafo PipeWire/JACK."
   "Red y Bluetooth|nmcli|NetworkManager: Wi-Fi, Ethernet, VPN y estado."
   "Red y Bluetooth|iwctl|CLI de iwd para Wi-Fi."
@@ -131,6 +125,19 @@ tools=(
   "Pantalla y desktop|nwg-displays|GUI para monitores Wayland/wlroots."
   "Pantalla y desktop|nwg-look|GUI para tema GTK, iconos y fuentes."
   "Entrada|libinput|Teclado, mouse, touchpad y eventos de entrada."
+)
+
+aliased_tools=(
+  "duf|df|Uso de disco con salida clara y agrupada."
+  "dust|du|Uso de disco por directorios con salida legible."
+  "btop|htop|TUI moderno: CPU, RAM, procesos, discos y red."
+)
+
+duplicate_tools=(
+  "btm|htop|Bottom: CPU, memoria, discos, red y procesos."
+  "top|htop|Monitor basico incluido en casi cualquier sistema."
+  "helvum|qpwgraph|GUI patchbay para conexiones PipeWire."
+  "hwinfo|lshw|Inventario amplio de hardware y dispositivos."
 )
 
 print_banner
@@ -175,6 +182,48 @@ done
 if [[ "$category_has_rows" == true ]]; then
   print_category_footer
 fi
+
+aliased_found=0
+print_category_header "Aliased"
+
+for entry in "${aliased_tools[@]}"; do
+  command_name=${entry%%|*}
+  rest=${entry#*|}
+  via_name=${rest%%|*}
+  description=${rest#*|}
+
+  display_name="$command_name -> $via_name"
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    print_row "$display_name" "ok" "$description"
+    aliased_found=$((aliased_found + 1))
+  elif [[ "$show_all" == true ]]; then
+    print_row "$display_name" "missing" "$description"
+  fi
+done
+
+print_category_footer
+
+aliased_found=0
+print_category_header "Duplicates"
+
+for entry in "${duplicate_tools[@]}"; do
+  command_name=${entry%%|*}
+  rest=${entry#*|}
+  via_name=${rest%%|*}
+  description=${rest#*|}
+
+  display_name="$command_name (cubierto por $via_name)"
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    print_row "$display_name" "ok" "$description"
+    aliased_found=$((aliased_found + 1))
+  elif [[ "$show_all" == true ]]; then
+    print_row "$display_name" "missing" "$description"
+  fi
+done
+
+print_category_footer
 
 if (( found == 0 )); then
   printf '\nNo encontre ninguna herramienta de la lista en PATH. Usa show-hw-x --all para ver la lista completa.\n' >&2

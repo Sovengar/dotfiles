@@ -1,0 +1,19 @@
+# Catppuccin Mocha wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #CBA6F7
+active_status_fg         #CBA6F7
+inactive_status_fg       #7e6a9f
+tab_primary              #CBA6F7
+tab_primary_hover        #F5C2E7
+tab_active_bg            #313244
+tab_active_fg            #CBA6F7
+tab_inactive_bg          #1E1E2E
+tab_inactive_fg          #7e6a9f
+tab_hover_bg             #181825
+tab_hover_fg             #F5C2E7
+tab_new_fg               #CDD6F4
+tab_new_hover_fg         #F5C2E7
+tab_bell                 #F9E2AF
+tab_unseen               #7e6a9f
+tab_status               #CBA6F7

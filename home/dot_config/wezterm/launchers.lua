@@ -6,11 +6,6 @@ local M = {}
 
 M.setup = function(config)
   config.default_domain = 'local'
-
-  if not platform.is_windows() then
-    config.default_prog = { "fish" }
-    return
-  end
   
   local has_pwsh = system.exe_exists('pwsh.exe')
   local has_powershell = system.exe_exists('powershell.exe')
@@ -44,6 +39,7 @@ M.setup = function(config)
       args = { 'cmd.exe' },
     })
   end
+  
   for _, dom in ipairs(wsl_domains) do
     table.insert(launch_menu, {
       label = 'WSL: ' .. dom.distribution,
@@ -53,12 +49,17 @@ M.setup = function(config)
 
   config.launch_menu = launch_menu
 
-  -- if #wsl_domains > 0 then
-  --   first_wsl_name = wsl_domains[1].name -- e.g. "WSL:Ubuntu-22.04"
-  --   config.default_domain = first_wsl_name
-  -- end
+  if not platform.is_windows() then
+    config.default_prog = { "fish" }
+    return
+  else -- Windows
+    config.default_prog = { "pwsh.exe", "-NoLogo" }
+      -- if #wsl_domains > 0 then
+      --   first_wsl_name = wsl_domains[1].name -- e.g. "WSL:Ubuntu-22.04"
+      --   config.default_domain = first_wsl_name
+      -- end
+  end
 
-  config.default_prog = { "pwsh.exe", "-NoLogo" }
 end
 
 return M

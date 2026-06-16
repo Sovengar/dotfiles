@@ -1,0 +1,19 @@
+# Paranoid Sweet wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #bd93f9
+active_status_fg         #bd93f9
+inactive_status_fg       #6f538f
+tab_primary              #bd93f9
+tab_primary_hover        #d19ae6
+tab_active_bg            #23076F
+tab_active_fg            #bd93f9
+tab_inactive_bg          #161925
+tab_inactive_fg          #6f538f
+tab_hover_bg             #101014
+tab_hover_fg             #d19ae6
+tab_new_fg               #cdd2d3
+tab_new_hover_fg         #d19ae6
+tab_bell                 #E6D8FF
+tab_unseen               #6f538f
+tab_status               #bd93f9

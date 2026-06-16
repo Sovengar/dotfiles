@@ -67,7 +67,7 @@ Wall_Cache() {
     if [ "$set_as_global" == "true" ]; then
         print_log -sec "wallpaper" "Setting Wallpaper as global"
         "$LIB_DIR/hyde/wallpaper/cache.sh" commence -w "${wallList[setIndex]}" &> /dev/null
-        "$LIB_DIR/hyde/color.set.sh" "${wallList[setIndex]}" &
+        "$LIB_DIR/hyde/color.set.sh" "${wallList[setIndex]}"
         ln -fs "$thmbDir/${wallHash[setIndex]}.sqre" "$wallSqr"
         ln -fs "$thmbDir/${wallHash[setIndex]}.thmb" "$wallTmb"
         ln -fs "$thmbDir/${wallHash[setIndex]}.blur" "$wallBlr"

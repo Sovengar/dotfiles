@@ -1,0 +1,11 @@
+# Synth Wave kitty overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+wayland_titlebar_color   system
+macos_titlebar_color     system
+mark1_foreground         #2a2139
+mark1_background         #7d4eae
+mark2_foreground         #2a2139
+mark2_background         #7d4eae
+mark3_foreground         #2a2139
+mark3_background         #7d4eae

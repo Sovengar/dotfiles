@@ -9,7 +9,6 @@ local home = os.getenv("HOME") or ""
 package.path = home .. "/.local/lib/?.lua;" .. home .. "/.local/lib/?/init.lua;" .. package.path
 
 -- HyDE compatibility and owned baseline config
-load("hyprland.primary_apps") -- primary terminal, editor, file manager and browser
 load("hyprland.variables")   -- HyDE variables table (scrPath, envList, unit, cursor, fonts, etc.)
 load("hyprland.env")         -- hl.env(): Qt, Mozilla, Electron, XDG, PATH
 load("hyprland.hardware.nvidia")  -- Nvidia env and cursor settings
@@ -19,7 +18,7 @@ load("hyprland.hardware.input")   -- keyboard, mouse, touchpad
 load("hyprland.misc")        -- misc compositor defaults
 load("hyprland.hardware.gestures") -- touchpad gesture defaults
 load("hyprland.startup")     -- hl.on("hyprland.start"): dbus, polkit, bar, wallpaper, clipboard, applets, idle
-load("hypr.scripts.wallbash_metadata_loader") -- wallbash metadata from generated state
+load("hypr.scripts.startup_vars_loader") -- theme vars from generated state (written by theme.switch.sh on theme change)
 
 -- User personal configuration
 load("hyprland.hardware.monitors") -- monitor setup
@@ -30,8 +29,6 @@ load("hyprland.windowrules")      -- window rules
 load("hyprland.style.windowrules") -- style-specific window rules
 load("hypr.selected_workflow_loader") -- HyDE workflow overrides from HYPR_WORKFLOW state
 load("hyprland.keybindings")      -- keyboard shortcuts
-
-load("hypr.metadata_generator")   -- metadata snapshot for tooling/debugging
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("pypr")

@@ -1,0 +1,19 @@
+# Decay Green wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #90ceaa
+active_status_fg         #90ceaa
+inactive_status_fg       #5f806e
+tab_primary              #90ceaa
+tab_primary_hover        #93cee9
+tab_active_bg            #151720
+tab_active_fg            #90ceaa
+tab_inactive_bg          #0d0f18
+tab_inactive_fg          #5f806e
+tab_hover_bg             #1c1e27
+tab_hover_fg             #93cee9
+tab_new_fg               #a5b6cf
+tab_new_hover_fg         #93cee9
+tab_bell                 #ecd3a0
+tab_unseen               #5f806e
+tab_status               #90ceaa

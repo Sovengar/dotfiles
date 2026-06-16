@@ -50,7 +50,18 @@ cat <<NOTICE
 [wallbashcode]  and type "Preferences: Color Theme" and select "Wallbash".
 NOTICE
 
-set_theme="${1:-"Wallbash"}"
+# Read CODE_THEME from hyde startup_vars.lua if not passed as argument
+if [[ $# -eq 0 ]]; then
+    startup_vars="${XDG_STATE_HOME:-$HOME/.local/state}/hypr/startup_vars.lua"
+    if [[ -f "$startup_vars" ]]; then
+        code_theme=$(grep -oP 'CODE_THEME\s*=\s*"\K[^"]+' "$startup_vars" 2>/dev/null || echo "Wallbash")
+    else
+        code_theme="Wallbash"
+    fi
+else
+    code_theme="$1"
+fi
+set_theme="${code_theme}"
 for i in "${!codeConf[@]}"; do
     [ -d "${codeConf[i]}/User" ] || continue
     [ -f "${codeConf[i]}/User/settings.json" ] || echo -e "{\n \"workbench.colorTheme\":\"Wallbash\" \n}" >"${codeConf[i]}/User/settings.json"

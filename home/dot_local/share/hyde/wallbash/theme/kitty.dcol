@@ -1,14 +1,14 @@
 foreground              #<wallbash_txt1>
-background              #<wallbash_pry1>
-selection_foreground    #<wallbash_pry1>
+background              #<wallbash_pry2>
+selection_foreground    #<wallbash_pry2>
 selection_background    #<wallbash_txt1>
 cursor                  #<wallbash_pry4>
 cursor_text_color       #<wallbash_txt4>
 
-active_tab_foreground     #<wallbash_pry1>
+active_tab_foreground     #<wallbash_pry2>
 active_tab_background     #<wallbash_pry3>
 inactive_tab_foreground   #<wallbash_pry3>
-inactive_tab_background   #<wallbash_pry1>
+inactive_tab_background   #<wallbash_pry2>
 
 # black
 color0      #<wallbash_1xa1>

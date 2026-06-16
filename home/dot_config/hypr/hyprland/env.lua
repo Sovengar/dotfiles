@@ -21,14 +21,23 @@ env_if_unset("MOZ_ENABLE_WAYLAND", "1")
 env_if_unset("GDK_SCALE", "1")
 env_if_unset("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
+-- XDG Base Directory Specification
 env_if_unset("XDG_CURRENT_DESKTOP", "Hyprland")
 env_if_unset("XDG_SESSION_TYPE", "wayland")
 env_if_unset("XDG_SESSION_DESKTOP", "Hyprland")
-env_if_unset("HYPRLAND_CONFIG", config_home .. "/hypr/hyprland.lua")
-
-env("PATH", home .. "/.local/bin:" .. vars.scrPath .. ":" .. (os.getenv("PATH") or ""))
-
 env_if_unset("XDG_CONFIG_HOME", home .. "/.config")
 env_if_unset("XDG_CACHE_HOME", home .. "/.cache")
 env_if_unset("XDG_DATA_HOME", home .. "/.local/share")
 env_if_unset("XDG_STATE_HOME", home .. "/.local/state")
+
+-- Hyprland specific environment variables
+env_if_unset("HYPRLAND_CONFIG", config_home .. "/hypr/hyprland.lua")
+
+-- User applications
+env("TERMINAL", vars.TERMINAL)
+env("EDITOR", vars.EDITOR)
+env("EXPLORER", vars.EXPLORER)
+env("BROWSER", vars.BROWSER)
+
+-- Prepend user bin and scr paths to PATH
+env("PATH", home .. "/.local/bin:" .. vars.scrPath .. ":" .. (os.getenv("PATH") or ""))

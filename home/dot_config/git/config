@@ -1,0 +1,134 @@
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+
+[user]
+	name = Sovengar
+	email = bubles_2009@hotmail.com
+	signingkey = 5AFD53A9A236DCB4  # RSA4096 key for signed commits
+
+[init]
+	defaultBranch = dev  # avoid creating main by accident
+
+[core]
+	editor = code --wait
+	excludesfile = ~/.gitignore_global
+	attributesfile = ~/.gitattributes_global
+	autocrlf = input  # keep newlines as in input
+	compression = 9  # trade cpu for network bandwidth
+	fsync = none  # disable fsync for performance
+	preloadindex = true  # faster git status
+	whitespace = error  # reject incorrect whitespace
+
+[credential "https://github.com"]
+	helper =
+	helper = !/home/buble/.local/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/home/buble/.local/bin/gh auth git-credential
+
+[alias]
+	glance = "!clear -x; git status; git log --oneline -4"
+
+[advice]
+	addEmptyPathspec = false  # silence "empty pathspec" warning
+	pushNonFastForward = false  # silence push non-ff warning
+	statusHints = false  # cleaner git status output
+
+[blame]
+	coloring = highlightRecent  # fade old commits
+	date = relative  # "3 days ago" instead of dates
+
+[branch]
+	sort = -committerdate  # most recent branches first
+
+[color "blame"]
+	highlightRecent = black bold,1 year ago,white,1 month ago,default,7 days ago,blue
+
+[color "branch"]
+	current = magenta
+	local = default
+	remote = yellow
+	upstream = green
+	plain = blue
+
+[color "diff"]
+	meta = black bold
+	frag = magenta
+	context = white
+	whitespace = yellow reverse
+	old = red
+
+[color.decorate]
+	HEAD = red
+	branch = blue
+	tag = yellow
+	remoteBranch = magenta
+
+[commit]
+	gpgSign = true  # sign all commits
+	verbose = true  # show diff in commit message editor
+
+[diff]
+	context = 3  # 3 lines of context in diffs
+	renames = copies  # detect copies as renames
+	interHunkContext = 10  # merge adjacent hunks
+
+[interactive]
+	singlekey = true  # single-key nav in add -p
+	diffFilter = diff-so-fancy --patch  # fancy interactive diffs
+
+[log]
+	abbrevCommit = true  # short commit hashes
+	graphColors = blue,yellow,cyan,magenta,green,red
+
+[pack]
+	threads = 0  # use all cpu threads
+	windowMemory = 1g  # 1gb memory for pack window
+	packSizeLimit = 1g  # max packfile size
+
+[pager]
+	branch = false  # no pager for git branch
+	tag = false  # no pager for git tag
+	diff = diff-so-fancy  # syntax-highlighted diffs (git handles paging)
+
+[diff-so-fancy]
+	markEmptyLines = false  # don't mark trailing empty lines
+
+[pull]
+	# rebase = true  # rebase instead of merge on pull
+	default = current # pull only current branch
+
+[push]
+	autoSetupRemote = true  # auto --set-upstream on first push
+	default = current  # push only current branch
+	followTags = true  # push tags along with commits
+	gpgSign = false  # remotes don't support signed pushes
+
+[rebase]
+	autoStash = true  # auto-stash before rebase
+	missingCommitsCheck = warn  # warn if rebase drops commits
+
+[status]
+	branch = true
+	short = true  # compact status format
+	showStash = true  # show stash count
+	showUntrackedFiles = all  # show individual untracked files
+
+[submodule]
+	fetchJobs = 16  # fetch 16 submodules in parallel
+
+[tag]
+	sort = -taggerdate  # most recent tags first
+
+[transfer]
+	fsckObjects = true  # verify object integrity on fetch/push
+
+[receive]
+	fsckObjects = true  # verify objects on receive
+
+[fetch]
+	fsckObjects = true  # verify objects on fetch

@@ -5,6 +5,7 @@
 ### Terminal & Shell
 | Tool | Purpose | Install |
 |------|---------|---------|
+| tealdeer (tldr) | Simplified man pages with examples | cargo/system |
 | ghostty | Terminal emulator | system |
 | wezterm | Terminal emulator | AUR (nightly bin) |
 | kitty | Terminal emulator | system |
@@ -60,6 +61,7 @@
 | snip | Token saver | go install |
 | dust | Intuitive du (`du-dust`) | cargo |
 | sd | Find & replace (s/foo/bar) | cargo |
+| diff-so-fancy | Git diff pager with syntax highlighting | npm |
 | dog | DNS client (`dog-dns`) | cargo |
 | xh | HTTPie-style HTTP client | cargo |
 | atuin | Shell history with search | cargo |
@@ -77,6 +79,7 @@
 | TheHyDEProject.wallbash | VS Code/Code OSS dynamic Wallbash theme | code extension |
 | IntelliJ IDEA | Java IDE | winget |
 | Bruno | API client | winget |
+| Posting | TUI HTTP API client (Postman alternative) | pip |
 | DBeaver | DB client | winget |
 | Beekeeper Studio | DB client | winget |
 | JMeter | Load testing | manual |
@@ -116,6 +119,7 @@
 | Tool | Purpose | Install |
 |------|---------|---------|
 | spotify-adblock | Spotify ad blocker | AUR |
+| imv | Wayland-native lightweight image viewer | system |
 | ffmpeg | Video/audio processing | system |
 | resvg | SVG rendering | cargo |
 
@@ -178,6 +182,15 @@
 | qt5-wayland/qt6-wayland | Qt Wayland support | system |
 | wallust | Color gen (wallbash) | aur/pip |
 | imagemagick | Image processing | system |
+
+### HyDE Theme Assets
+| Asset | Type | Source |
+|-------|------|--------|
+| Windows-11 | Icon theme | hyde-gallery Windows-11 branch (setup/assets/05-icons.sh) |
+| Cursor-Windows | Cursor theme | hyde-gallery Windows-11 branch (setup/assets/04-cursors.sh) |
+| Windows-11 | GTK theme | hyde-gallery Windows-11 branch (manual extract) |
+| Tela-circle-solarized | Icon theme | Solarized-Dark repo (setup/assets/05-icons.sh) |
+| Capitaine-Cursors-White | Cursor theme | Solarized-Dark repo (setup/assets/04-cursors.sh) |
 
 ### HyDE Dependencies — Utilities
 | Tool | Purpose | Notes |

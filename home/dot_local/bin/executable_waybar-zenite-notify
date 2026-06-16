@@ -1,0 +1,37 @@
+#!/bin/bash
+# waybar-zenite-notify — Show current HyDE state in rofi
+
+[[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
+
+output=$(hyde-shell metadata-fetcher --categorized 2>/dev/null)
+
+hypr_border=${hypr_border:-$(hyprctl -j getoption decoration:rounding | jq '.int')}
+hypr_width=${hypr_width:-$(hyprctl -j getoption general:border_size | jq '.int')}
+wind_border=$((hypr_border * 3 / 2))
+
+font_scale=${ROFI_SCALE:-10}
+font_name=${ROFI_FONT:-$(get_hyprConf "MENU_FONT" 2>/dev/null)}
+font_name=${font_name:-$(get_hyprConf "FONT" 2>/dev/null)}
+font_name=${font_name:-"JetBrainsMono Nerd Font"}
+
+r_override="window {
+  width: 55em;
+  height: 40em;
+  border: ${hypr_width}px;
+  border-radius: ${wind_border}px;
+}
+mainbox { padding: 0.5em; }
+wallbox { border-radius: ${wind_border}px; }
+wallframe { border-radius: ${wind_border}px; }
+listbox { children: [listview]; padding: 0em; }
+listview { padding: 0.5em; lines: 18; }
+element { padding: 0.3em 0.8em; }
+element selected.normal { border-radius: ${elem_border:-4}px; }
+dummy { padding: 0em; }
+* { font: \"$font_name $font_scale\"; }"
+
+echo "$output" | rofi -dmenu -p "󰋗 Current State" \
+  -l 15 \
+  -theme-str "$r_override" \
+  -theme "${ROFI_STYLE:-clipboard}" \
+  -no-custom >/dev/null

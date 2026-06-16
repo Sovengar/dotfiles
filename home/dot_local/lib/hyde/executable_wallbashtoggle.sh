@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 [[ $HYDE_SHELL_INIT -ne 1 ]] && eval "$(hyde-shell init)"
-wallbashModes=("theme" "auto" "dark" "light")
+paletteModes=("theme" "wallbash_auto" "wallbash_dark" "wallbash_light")
+paletteLabels=("theme" "auto" "dark" "light")
 rofi_wallbash() {
     pkill -u "$USER" rofi && exit 0
     font_scale=$ROFI_WALLBASH_MODE_SCALE
@@ -8,24 +9,40 @@ rofi_wallbash() {
     r_scale="configuration {font: \"JetBrainsMono Nerd Font $font_scale\";}"
     elem_border=$((hypr_border * 4))
     r_override="window{border-radius:${elem_border}px;} element{border-radius:${elem_border}px;}"
-    rofiSel=$(parallel echo {} ::: "${wallbashModes[@]}" | rofi -dmenu \
+    current_idx=0
+    for i in "${!paletteModes[@]}"; do
+        if [ "${paletteModes[i]}" == "${PALETTE_SOURCE:-theme}" ]; then
+            current_idx=$i
+            break
+        fi
+    done
+    rofiSel=$(parallel echo {} ::: "${paletteLabels[@]}" | rofi -dmenu \
         -theme-str "$r_scale" \
         -theme-str "$r_override" \
         -theme wallbash \
-        -select "${wallbashModes[$enableWallDcol]}")
-    if [ ! -z "$rofiSel" ]; then
-        setMode="$(parallel --link echo {} ::: "${!wallbashModes[@]}" ::: "${wallbashModes[@]}" ::: "$rofiSel" | awk '{if ($2 == $3) print $1}')"
+        -select "${paletteLabels[$current_idx]}")
+    if [ -n "$rofiSel" ]; then
+        for i in "${!paletteLabels[@]}"; do
+            if [ "${paletteLabels[i]}" == "$rofiSel" ]; then
+                setMode="${paletteModes[i]}"
+                break
+            fi
+        done
     else
         exit 0
     fi
 }
 step_wallbash() {
-    for i in "${!wallbashModes[@]}"; do
-        if [ "$enableWallDcol" == "$i" ]; then
+    local current="${PALETTE_SOURCE:-theme}"
+    for i in "${!paletteModes[@]}"; do
+        if [ "${paletteModes[i]}" == "$current" ]; then
             if [ "$1" == "n" ]; then
-                setMode=$(((i + 1) % ${#wallbashModes[@]}))
+                local next=$(((i + 1) % ${#paletteModes[@]}))
+                setMode="${paletteModes[next]}"
             elif [ "$1" == "p" ]; then
-                setMode=$((i - 1))
+                local prev=$((i - 1))
+                [ $prev -lt 0 ] && prev=$((${#paletteModes[@]} - 1))
+                setMode="${paletteModes[prev]}"
             fi
             break
         fi
@@ -38,7 +55,7 @@ case "$1" in
     *) step_wallbash n ;;
 esac
 export reload_flag=1
-[[ $setMode -lt 0 ]] && setMode=$((${#wallbashModes[@]} - 1))
-set_conf "enableWallDcol" "$setMode"
+[ -z "$setMode" ] && setMode="${PALETTE_SOURCE:-theme}"
+set_conf "PALETTE_SOURCE" "$setMode"
 "$LIB_DIR/hyde/theme.switch.sh"
-notify-send -a "HyDE Alert" -i "$ICONS_DIR/Wallbash-Icon/hyde.png" " ${wallbashModes[setMode]} mode"
+notify-send -a "HyDE Alert" -i "$ICONS_DIR/Wallbash-Icon/hyde.png" " ${setMode} mode"

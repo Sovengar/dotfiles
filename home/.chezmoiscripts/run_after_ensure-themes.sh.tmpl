@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEMES_SRC="${HOME}/.local/share/themes"
+THEMES_DST="${HOME}/.themes"
+
+mkdir -p "$THEMES_DST"
+
+for theme_dir in "$THEMES_SRC"/*/; do
+  [ -d "$theme_dir" ] || continue
+  name="$(basename "$theme_dir")"
+
+  case "$name" in
+    Wallbash-Gtk|.) continue ;;
+  esac
+
+  link_target="$THEMES_SRC/$name"
+  link_path="$THEMES_DST/$name"
+
+  if [[ -L "$link_path" ]]; then
+    current="$(readlink "$link_path")"
+    [[ "$current" == "$link_target" ]] && continue
+    rm "$link_path"
+  elif [[ -e "$link_path" ]]; then
+    continue
+  fi
+
+  ln -sfn "$link_target" "$link_path"
+done

@@ -7,8 +7,7 @@ conf_ctl="$waybar_dir/config.ctl"
 in_file="$waybar_dir/modules/style.css"
 out_file="$waybar_dir/style.css"
 src_file="${XDG_STATE_HOME:-$HOME/.local/state}/waybar/theme.css"
-legacy_src_file="${HYPR_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr}/waybar.theme.conf"
-[[ -r $src_file || ! -r $legacy_src_file ]] || src_file="$legacy_src_file"
+rounding_file="${WAYBAR_STATE_HOME:-${XDG_STATE_HOME:-$HOME/.local/state}/waybar}/theme.conf"
 b_height=${WAYBAR_SCALE:-$(grep '^1|' "$conf_ctl" | cut -d '|' -f 2)}
 if [ -z "$b_height" ] || [ "$b_height" == "0" ]; then
     y_monres=$(cat /sys/class/drm/*/modes | head -1 | cut -d 'x' -f 2)
@@ -94,7 +93,7 @@ export font_name=${font_name:-"JetBrainsMono Nerd Font"}
 export modules_ls
 modules_ls=$(grep -m 1 '".*.": {' --exclude="$modules_dir/footer.jsonc" "$modules_dir"/*.jsonc | cut -d '"' -f 2 | awk -F '/' '{print ($1=="custom" ? "#custom-"$NF : "#"$NF)","}')
 envsubst < "$in_file" > "$out_file"
-hypr_border=$(awk -F '=' '{if($1~"rounding") print $2}' "$src_file" | sed 's/ //g')
+hypr_border=$(sed -n 's/^rounding:\s*\([0-9]*\).*/\1/p' "$rounding_file")
 hypr_border=${hypr_border:-$WAYBAR_BORDER_RADIUS}
 if [ "$hypr_border" == "0" ] || [ -z "$hypr_border" ]; then
     sed -i "/border-radius: /c\    border-radius: 0px;" "$out_file"

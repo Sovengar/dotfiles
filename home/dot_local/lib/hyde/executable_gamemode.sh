@@ -14,7 +14,7 @@ if [ -f "$LOCK_FILE" ]; then
     rm -f "$LOCK_FILE"
 else
     mkdir -p "${XDG_RUNTIME_DIR}/hyde"
-    [ -f "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}" ] && source "${HYPR_STATE_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/hypr/state}"
+    [ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/workflow.conf" ] && source "${XDG_STATE_HOME:-$HOME/.local/state}/hypr/workflow.conf"
     printf "%s\n" "${HYPR_WORKFLOW:-default}" >"$LOCK_FILE"
     set_conf "HYPR_WORKFLOW" "gaming"
     hyprctl reload config-only -q

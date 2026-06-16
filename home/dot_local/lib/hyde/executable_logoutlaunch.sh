@@ -40,8 +40,7 @@ export fntSize=$((y_mon * 2 / 100))
 cacheDir="$HYDE_CACHE_HOME"
 dcol_mode="${dcol_mode:-dark}"
 [ -f "$cacheDir/wall.dcol" ] && source "$cacheDir/wall.dcol"
-enableWallDcol="${enableWallDcol:-1}"
-if [ "$enableWallDcol" -eq 0 ]; then
+if [ "${PALETTE_SOURCE:-wallbash_auto}" == "theme" ]; then
     HYDE_THEME_DIR="${HYDE_THEME_DIR:-${HYDE_DATA_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/hyde}/themes/$HYDE_THEME}"
     dcol_mode=$(get_hyprConf "COLOR_SCHEME")
     dcol_mode=${dcol_mode#prefer-}

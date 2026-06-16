@@ -198,6 +198,20 @@ window#waybar.bottom label.module:hover {
     min-width: 1.35em;
 }
 
+#custom-wallbash-mode {
+    min-width: 5.8em;
+}
+
+#custom-wallbash-mode.wallbash-theme {
+    color: alpha(@main-fg, 0.72);
+}
+
+#custom-wallbash-mode.wallbash-auto,
+#custom-wallbash-mode.wallbash-dark,
+#custom-wallbash-mode.wallbash-light {
+    color: @main-fg;
+}
+
 #audio {
     margin: 0 0.12em;
     padding: 0 0.1em;

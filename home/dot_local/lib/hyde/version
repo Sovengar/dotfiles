@@ -1,0 +1,7 @@
+HYDE_CLONE_PATH='/home/buble/HyDE'
+HYDE_BRANCH='master'
+HYDE_REMOTE='https://github.com/HyDE-Project/HyDE'
+HYDE_VERSION='95adf01'
+HYDE_VERSION_LAST_CHECKED='2026-05-15 19:3342 +0200'
+HYDE_VERSION_COMMIT_MSG='fix(hypr): complete #1743 - idle_inhibit template file missed (#1747)'
+HYDE_COMMIT_HASH='95adf01f0ef32bca4f10ea73513602266220a61c'

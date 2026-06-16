@@ -1,9 +1,20 @@
 function vop {
   local session_file=/tmp/vop3-kitty-session.conf
   local cwd=${(q)PWD}
+  local terminal=${TERMINAL}
 
-  printf 'layout tall\nlaunch --cwd=%s nvim .\nlaunch --cwd=%s opencode\n' "$cwd" "$cwd" >| "$session_file"
-  kitty --detach --session "$session_file" >/tmp/vop3-kitty.log 2>&1
+  case "$(basename "$terminal")" in
+    wezterm)
+      command "$terminal" start --cwd "$PWD" -- bash -lc 'wezterm cli split-pane --right --cwd "$PWD" -- opencode >/dev/null; exec nvim .'
+      ;;
+    kitty)
+      printf 'layout tall\nlaunch --cwd=%s nvim .\nlaunch --cwd=%s opencode\n' "$cwd" "$cwd" >| "$session_file"
+      command "$terminal" --detach --session "$session_file" >/tmp/vop3-kitty.log 2>&1
+      ;;
+    *)
+      command "$terminal" -e nvim .
+      ;;
+  esac
 }
 
 function connect {
@@ -57,6 +68,25 @@ function __rgx_preview_zsh {
 
   printf '%s%s:%s%s\n\n' "$header_color" "$file" "$line" "$reset_color"
 
+  if command -v bat >/dev/null 2>&1; then
+    bat --color=always --style=numbers --paging=never --line-range "$start:$end" --highlight-line "$line" --theme='RGX Muted' "$file" \
+      | RGX_HIGHLIGHT="$pattern" \
+          RGX_EXACT_COLOR="$exact_match_color" \
+          RGX_FOLDED_COLOR="$folded_match_color" \
+          RGX_RESET_COLOR="$reset_color" \
+          perl -CS -pe '
+            BEGIN {
+              $h = $ENV{RGX_HIGHLIGHT};
+              $exact = $ENV{RGX_EXACT_COLOR};
+              $folded = $ENV{RGX_FOLDED_COLOR};
+              $reset = $ENV{RGX_RESET_COLOR};
+              $quoted = quotemeta($h);
+            }
+            s/($quoted)/($1 eq $h ? "$exact$1$reset" : "$folded$1$reset")/gie if $h ne "";
+          '
+    return
+  fi
+
   while IFS= read -r content; do
     (( current_file_line++ ))
 
@@ -98,7 +128,7 @@ function __rgx_search_zsh {
 
   local hidden_label=OFF
   [[ "$hidden" == 1 ]] && hidden_label=ON
-  printf 'Hidden:%s\t\t\n' "$hidden_label"
+  printf 'Status --> Show Hidden Files:%s\t\t\n' "$hidden_label"
 
   rg_args=(--line-number --no-heading --color=never -i)
   [[ "$hidden" == 1 ]] && rg_args+=(--hidden)
@@ -160,12 +190,48 @@ function __rgx_toggle_hidden_zsh {
 }
 
 function rgx {
+  for arg in "$@"; do
+    case "$arg" in
+      --help|-h)
+        echo "Usage: rgx [OPTIONS] PATTERN"
+        echo ""
+        echo "rg + fzf + bat preview — fuzzy file content search with editor launch"
+        echo ""
+        echo "Options:"
+        echo "  --hidden, -H    Include hidden files"
+        echo "  --help, -h      Show this help"
+        echo ""
+        echo "Any other arguments are passed through to rg (ripgrep)."
+        echo ""
+        echo "Keybindings:"
+        echo "  Enter        Open in editor at matching line"
+        echo "  Ctrl-P       Paste selected paths"
+        echo "  Ctrl-Y       Yank paths to clipboard"
+        echo "  Ctrl-Space   Toggle preview"
+        echo "  Tab          Select multiple rows"
+        echo "  Alt-H        Toggle hidden files"
+        echo "  ←/→          Scroll preview up/down"
+        echo "  Ctrl-D/U     Scroll preview page"
+        echo ""
+        echo "Examples:"
+        echo "  rgx foo"
+        echo "  rgx --hidden foo"
+        echo "  rgx -g '*.py' foo"
+        echo "  rgx -t js foo"
+        return 0
+        ;;
+    esac
+  done
+
   local pattern=""
   local initial_hidden=0
   local arg
 
   for arg in "$@"; do
     case "$arg" in
+      --help|-h)
+        continue
+        ;;
       --hidden|-H)
         initial_hidden=1
         continue
@@ -187,7 +253,7 @@ function rgx {
   export RGX_PATTERN="$pattern"
   export RGX_ARGS_FILE="$args_file"
 
-  local header=$'󰌑 Enter: nvim/print path | Ctrl+Y: Print path | Tab: Select row | Alt+H: Hidden | ←/→: Preview scroll\nDefault args: -i | Args utiles: -w | -g "*.ts" | -t ts'
+  local header=$'Enter: nvim/print path | Ctrl+P: Paste path | Ctrl+Y: Yank path  |\nCtrl+Space: Preview    | Tab: Select row   | Alt+H: Hidden      | ←/→: Preview scroll'
   local -a selection rows files nvim_args
   local key row display file match_line
 
@@ -196,12 +262,12 @@ function rgx {
       --delimiter $'\t' \
       --with-nth=1 \
       --nth=1 \
-      --expect=enter,ctrl-y \
+      --expect=enter,ctrl-p,ctrl-y \
       --header="$header" \
       --header-lines=1 \
       --preview 'zsh -c '\''source "${ZDOTDIR:-$HOME/.config/zsh}/functions/user-tools.zsh"; __rgx_preview_zsh "$@"'\'' -- "$RGX_PATTERN" {2} {3}' \
       --preview-window='up:60%:wrap:+{4}-/2' \
-      --bind 'right:preview-down,left:preview-up,ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+      --bind 'right:preview-down,left:preview-up,ctrl-d:preview-page-down,ctrl-u:preview-page-up,ctrl-space:toggle-preview' \
       --bind "alt-h:reload(zsh -c 'source \"\${ZDOTDIR:-\$HOME/.config/zsh}/functions/user-tools.zsh\"; __rgx_toggle_hidden_zsh \"\$1\"; __rgx_search_zsh \"\$1\"' -- '$state_file')" \
       --multi)}")
 
@@ -221,8 +287,11 @@ function rgx {
   done
 
   case "$key" in
-    ctrl-y)
+    ctrl-p)
       __zsh_picker_print_unique "${files[@]}"
+      ;;
+    ctrl-y)
+      __zsh_picker_print_unique "${files[@]}" | wl-copy
       ;;
     enter|'')
       if __zsh_picker_in_cmdsubst; then
@@ -277,9 +346,11 @@ function __fdx_preview_zsh {
 
 function __fdx_search_zsh {
   local state_file="$1"
-  local hidden=0 type_filter=f key value arg file name dir git_root git_root_name
+  local hidden=0 type_filter=f root_dir=. key value arg file name dir git_root git_root_name
   local -a fd_args
   local skip_next_type_value=false
+
+  [[ -n "$FDX_ROOT_DIR" ]] && root_dir="$FDX_ROOT_DIR"
 
   while IFS='=' read -r key value; do
     case "$key" in
@@ -290,7 +361,12 @@ function __fdx_search_zsh {
 
   local hidden_label=OFF
   [[ "$hidden" == 1 ]] && hidden_label=ON
-  printf 'Hidden:%s | Type:%s | Alt+H hidden | Ctrl+T type\t\n' "$hidden_label" "$type_filter"
+  local type_label='Files only'
+  case "$type_filter" in
+    d) type_label='Directories only' ;;
+    all) type_label='Files and Directories' ;;
+  esac
+  printf 'Status --> Show Hidden Files:%s | Type:%s\t\n' "$hidden_label" "$type_label"
 
   fd_args=(--color=never)
   [[ "$hidden" == 1 ]] && fd_args+=(--hidden)
@@ -316,7 +392,11 @@ function __fdx_search_zsh {
     done < "$FDX_ARGS_FILE"
   fi
 
-  fd "${fd_args[@]}" | while IFS= read -r file; do
+  if [[ "$root_dir" == . ]]; then
+    fd "${fd_args[@]}"
+  else
+    fd "${fd_args[@]}" . "$root_dir"
+  fi | while IFS= read -r file; do
     [[ "$type_filter" == f && ! -f "$file" ]] && continue
     [[ "$type_filter" == d && ! -d "$file" ]] && continue
 
@@ -370,12 +450,68 @@ function __fdx_cycle_type_zsh {
 
 function fdx {
   local pattern=""
+  local root_dir=.
+  local widget_mode=false
   local initial_hidden=0
   local initial_type=f
   local skip_next_type_value=false
+  local skip_next_query_value=false
+  local skip_next_dir_value=false
+  local -a fd_args
   local arg
 
   for arg in "$@"; do
+    case "$arg" in
+      --help|-h)
+        echo "Usage: fdx [OPTIONS] [PATTERN]"
+        echo ""
+        echo "fd + fzf + bat preview — fuzzy file/directory finder with editor launch"
+        echo ""
+        echo "Options:"
+        echo "  --query, -q <pattern>       Initial search pattern"
+        echo "  --query=<pattern>            (alternative form)"
+        echo "  --dir, -d <path>             Root directory (default: .)"
+        echo "  --dir=<path>                 (alternative form)"
+        echo "  --type, -t <f|d|all>         Filter by file type (default: f)"
+        echo "  --type=f|d|all, -t[f|d]     (shorthand)"
+        echo "  --hidden, -H                 Include hidden files"
+        echo "  --widget                     Output-only mode (no editor)"
+        echo "  --help, -h                   Show this help"
+        echo ""
+        echo "Keybindings:"
+        echo "  Enter        Open in editor (or print path in command substitution)"
+        echo "  Ctrl-P       Paste selected paths"
+        echo "  Ctrl-Y       Yank paths to clipboard"
+        echo "  Ctrl-Space   Toggle file preview"
+        echo "  Tab          Select multiple rows"
+        echo "  Ctrl-H       Toggle hidden files"
+        echo "  Ctrl-T       Cycle file type (f → d → all)"
+        echo "  ←/→          Scroll preview"
+        echo ""
+        echo "Examples:"
+        echo "  fdx"
+        echo "  fdx somefile"
+        echo "  fdx --hidden --type d"
+        echo "  fdx --dir ~/projects"
+        echo "  nvim (fdx --widget)"
+        return 0
+        ;;
+    esac
+  done
+
+  for arg in "$@"; do
+    if [[ "$skip_next_query_value" == true ]]; then
+      pattern="$arg"
+      skip_next_query_value=false
+      continue
+    fi
+
+    if [[ "$skip_next_dir_value" == true ]]; then
+      root_dir="$arg"
+      skip_next_dir_value=false
+      continue
+    fi
+
     if [[ "$skip_next_type_value" == true ]]; then
       case "$arg" in
         f|file) initial_type=f ;;
@@ -392,6 +528,26 @@ function fdx {
         initial_hidden=1
         continue
         ;;
+      --widget)
+        widget_mode=true
+        continue
+        ;;
+      --query)
+        skip_next_query_value=true
+        continue
+        ;;
+      --query=*)
+        pattern="${arg#--query=}"
+        continue
+        ;;
+      --dir)
+        skip_next_dir_value=true
+        continue
+        ;;
+      --dir=*)
+        root_dir="${arg#--dir=}"
+        continue
+        ;;
       --type|-t)
         skip_next_type_value=true
         continue
@@ -403,12 +559,13 @@ function fdx {
       --type=d|--type=dir|--type=directory|-td)
         initial_type=d
         continue
-        ;;
+      ;;
     esac
+
+    fd_args+=("$arg")
 
     if [[ "$arg" != -* ]]; then
       pattern="$arg"
-      break
     fi
   done
 
@@ -417,10 +574,11 @@ function fdx {
   args_file=$(mktemp -t fdx-args.XXXXXX)
   printf 'hidden=%s\n' "$initial_hidden" >| "$state_file"
   printf 'type=%s\n' "$initial_type" >> "$state_file"
-  printf '%s\n' "$@" >| "$args_file"
+  printf '%s\n' "${fd_args[@]}" >| "$args_file"
 
   export FDX_PATTERN="$pattern"
   export FDX_ARGS_FILE="$args_file"
+  export FDX_ROOT_DIR="$root_dir"
 
   local -a selection rows files
   local key row display file
@@ -431,13 +589,13 @@ function fdx {
       --delimiter $'\t' \
       --with-nth=1 \
       --nth=1 \
-      --expect=enter,ctrl-y \
-      --header='󰈞 nvim | Ctrl+Y: Print path | Enter: nvim or print inside $(fdx ...) | Alt+H: Hidden | Ctrl+T: Type f/d/all' \
+      --expect=enter,ctrl-p,ctrl-y \
+      --header=$'Editor: Enter/print path | Ctrl+P: Paste path   | Ctrl+Y: Yank path\nCtrl+Space: Preview      | Tab: Select row      |\nCtrl+H: Hidden           | Ctrl+T: Type f/d/all | ←/→: Preview scroll' \
       --header-lines=1 \
       --preview 'zsh -c '\''source "${ZDOTDIR:-$HOME/.config/zsh}/functions/user-tools.zsh"; __fdx_preview_zsh "$@"'\'' -- {2}' \
       --preview-window='right:60%:wrap' \
-      --bind 'right:preview-down,left:preview-up' \
-      --bind "alt-h:reload(zsh -c 'source \"\${ZDOTDIR:-\$HOME/.config/zsh}/functions/user-tools.zsh\"; __fdx_toggle_hidden_zsh \"\$1\"; __fdx_search_zsh \"\$1\"' -- '$state_file')" \
+      --bind 'right:preview-down,left:preview-up,ctrl-space:toggle-preview' \
+      --bind "ctrl-h:reload(zsh -c 'source \"\${ZDOTDIR:-\$HOME/.config/zsh}/functions/user-tools.zsh\"; __fdx_toggle_hidden_zsh \"\$1\"; __fdx_search_zsh \"\$1\"' -- '$state_file')" \
       --bind "ctrl-t:reload(zsh -c 'source \"\${ZDOTDIR:-\$HOME/.config/zsh}/functions/user-tools.zsh\"; __fdx_cycle_type_zsh \"\$1\"; __fdx_search_zsh \"\$1\"' -- '$state_file')" \
       --multi)}")
 
@@ -453,11 +611,14 @@ function fdx {
   done
 
   case "$key" in
-    ctrl-y)
+    ctrl-p)
       __zsh_picker_print_unique "${files[@]}"
       ;;
+    ctrl-y)
+      __zsh_picker_print_unique "${files[@]}" | wl-copy
+      ;;
     enter|'')
-      if __zsh_picker_in_cmdsubst; then
+      if __zsh_picker_in_cmdsubst && [[ "$widget_mode" == false ]]; then
         __zsh_picker_print_unique "${files[@]}"
         return
       fi
@@ -465,4 +626,58 @@ function fdx {
       nvim "${files[@]}"
       ;;
   esac
+}
+
+function __fdx_parse_commandline_zsh {
+  local token="${LBUFFER##*[[:space:]]}"
+  local query="$token"
+  local prefix=""
+  local dir="."
+  local path_query path_dir base_dir
+
+  if [[ "$LBUFFER" != *' -- '* && "$token" =~ '^(-[^[:space:]=]+=|-[^-])' ]]; then
+    prefix="$MATCH"
+    query="${token#$prefix}"
+  fi
+
+  if [[ -n "$query" ]]; then
+    path_query="${query/#\~/$HOME}"
+    [[ "$path_query" != /* ]] && path_query="$PWD/$path_query"
+    path_dir="$path_query"
+
+    while [[ ! -d "$path_dir" && "$path_dir" != / ]]; do
+      path_dir="${path_dir:h}"
+    done
+
+    if [[ -d "$path_dir" ]]; then
+      dir="$path_dir"
+      base_dir="$dir"
+      [[ "$base_dir" != */ ]] && base_dir="$base_dir/"
+      query="${path_query#$base_dir}"
+    fi
+  fi
+
+  print -r -- "$dir"
+  print -r -- "$query"
+  print -r -- "$prefix"
+  print -r -- "$token"
+}
+
+function fdx_file_widget_zsh {
+  local -a parsed result
+  local dir query prefix token replacement
+
+  parsed=("${(@f)$(__fdx_parse_commandline_zsh)}")
+  dir="${parsed[1]:-.}"
+  query="${parsed[2]:-}"
+  prefix="${parsed[3]:-}"
+  token="${parsed[4]:-}"
+  result=("${(@f)$(fdx --widget --dir "$dir" --query "$query")}")
+
+  if (( ${#result[@]} )); then
+    replacement="${prefix}${(j: :)${(q)result}} "
+    LBUFFER="${LBUFFER[1,$(( ${#LBUFFER} - ${#token} ))]}$replacement"
+  fi
+
+  zle reset-prompt
 }

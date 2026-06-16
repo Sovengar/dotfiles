@@ -7,12 +7,15 @@ hypr_border=${hypr_border:-2}
 if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
     mon_data=$(hyprctl -j monitors)
     mon_x_res=$(jq '.[] | select(.focused==true) | if (.transform % 2 == 0) then .width else .height end' <<< "$mon_data")
+    mon_y_res=$(jq '.[] | select(.focused==true) | if (.transform % 2 == 0) then .height else .width end' <<< "$mon_data")
     mon_scale=$(jq '.[] | select(.focused==true) | .scale' <<< "$mon_data" | sed "s/\.//")
 fi
 
 mon_x_res=${mon_x_res:-1920}
+mon_y_res=${mon_y_res:-1080}
 mon_scale=${mon_scale:-1}
 mon_x_res=$((mon_x_res * 100 / mon_scale))
+mon_y_res=$((mon_y_res * 100 / mon_scale))
 
 selector_menu() {
     font_scale="$ROFI_THEME_MENU_SCALE"
@@ -27,10 +30,11 @@ selector_menu() {
     max_avail=$((mon_x_res - (4 * font_scale)))
     col_count=$((max_avail / elm_width))
     [[ $col_count -gt 5 ]] && col_count=5
-    r_override="window{width:100%;}
-                listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};}
+    max_rows=3
+    r_override="window{width:100%;padding:0.5em;}
+                listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};lines:${max_rows};}
                 element{orientation:vertical;border-radius:${elem_border}px;}
-                element-icon{border-radius:${icon_border}px;size:20em;}
+                element-icon{border-radius:${icon_border}px;size:18em;}
                 element-text{enabled:false;}"
     RofiSel=$(find -L "$rofiAssetDir" -name "theme_style_*" | awk -F '[_.]' '{print $((NF - 1))}' | while
         read -r styleNum
@@ -39,7 +43,9 @@ selector_menu() {
     done | sort -n | rofi -dmenu \
         -theme-str "$r_override" \
         -select "$ROFI_THEME_STYLE" \
-        -theme "${ROFI_THEME_MENU_STYLE:-selector}")
+        -theme "${ROFI_THEME_MENU_STYLE:-selector}" \
+        -l "${max_rows}" \
+        -fixed-num-lines)
     if [ -n "$RofiSel" ]; then
         selectedStyle=$(echo "$RofiSel" | awk -F '\x00' '{print $1}' | sed 's/Style //')
         notify-send -a "HyDe Alert" -i "$rofiAssetDir/theme_style_$selectedStyle.png" "Style $selectedStyle applied..."
@@ -81,24 +87,28 @@ case "$1" in
         ROFI_THEME_STYLE="${ROFI_THEME_STYLE:-1}"
         case "$ROFI_THEME_STYLE" in
             2 | "quad")
-                elm_width=$(((20 + 12) * font_scale * 2))
+                elm_width=$(((18 + 12) * font_scale * 2))
                 max_avail=$((mon_x_res - (4 * font_scale)))
                 col_count=$((max_avail / elm_width))
-                r_override="window{width:100%;background-color:#00000003;}
-                            listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};}
-                            element{border-radius:${elem_border}px;background-color:@main-bg;}
-                            element-icon{size:20em;border-radius:${icon_border}px 0px 0px ${icon_border}px;}"
+                [[ $col_count -gt 5 ]] && col_count=5
+                max_rows=3
+                r_override="window{width:100%;background-color:#00000003;padding:0.5em;}
+                            listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};lines:${max_rows};}
+                            element{border-radius:${elem_border}px;background-color:@main-bg;padding:0.5em;}
+                            element-icon{size:18em;border-radius:${icon_border}px;}"
                 thmbExtn="quad"
                 ROFI_THEME_STYLE="selector"
                 ;;
             1 | "square")
-                elm_width=$(((23 + 12 + 1) * font_scale * 2))
+                elm_width=$(((20 + 12 + 1) * font_scale * 2))
                 max_avail=$((mon_x_res - (4 * font_scale)))
                 col_count=$((max_avail / elm_width))
-                r_override="window{width:100%;}
-                            listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};}
-                            element{border-radius:${elem_border}px;padding:0.5em;}
-                            element-icon{size:23em;border-radius:${icon_border}px;}"
+                [[ $col_count -gt 5 ]] && col_count=5
+                max_rows=3
+                r_override="window{width:100%;padding:0.5em;}
+                            listview{columns:${ROFI_THEME_COLUMN_COUNT:-${col_count}};lines:${max_rows};}
+                            element{border-radius:${elem_border}px;background-color:@main-bg;padding:0.5em;}
+                            element-icon{size:20em;border-radius:${icon_border}px;}"
                 thmbExtn="sqre"
                 ROFI_THEME_STYLE="selector"
                 ;;
@@ -115,6 +125,8 @@ rofiSel=$(
         -theme-str "$font_override" \
         -theme-str "$r_override" \
         -theme "${ROFI_THEME_STYLE:-selector}" \
+        -l "${max_rows}" \
+        -fixed-num-lines \
         -select "$HYDE_THEME"
 )
 if [ -n "$rofiSel" ]; then

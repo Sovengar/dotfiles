@@ -1,0 +1,9 @@
+# Material Sakura kitty overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+active_border_color      #286983
+inactive_border_color    #dfdad9
+active_tab_foreground    #575279
+active_tab_background    #f2e9e1
+inactive_tab_foreground  #9893a5
+inactive_tab_background  #faf4ed

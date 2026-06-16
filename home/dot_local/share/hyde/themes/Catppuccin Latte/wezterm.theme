@@ -1,0 +1,19 @@
+# Catppuccin Latte wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #8839EF
+active_status_fg         #8839EF
+inactive_status_fg       #8a6fbd
+tab_primary              #8839EF
+tab_primary_hover        #EA76CB
+tab_active_bg            #EFF1F5
+tab_active_fg            #8839EF
+tab_inactive_bg          #DCE0E8
+tab_inactive_fg          #8a6fbd
+tab_hover_bg             #E6E9EF
+tab_hover_fg             #EA76CB
+tab_new_fg               #4C4F69
+tab_new_hover_fg         #EA76CB
+tab_bell                 #DF8E1D
+tab_unseen               #8a6fbd
+tab_status               #8839EF

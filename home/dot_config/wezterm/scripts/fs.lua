@@ -10,6 +10,7 @@ function M.normalize_path(path)
   if not path then return nil end
 
   local value = tostring(path)
+  value = value:gsub("^file://[^/]+", "")
   value = value:gsub("^file://", "")
   value = value:gsub("\\", "/")
   value = value:gsub("^/", "")

@@ -1,0 +1,19 @@
+# Nordic Blue wezterm overrides
+# Generated from pre-split kitty.theme; edit values only.
+
+border                   #81A1C1
+active_status_fg         #81A1C1
+inactive_status_fg       #5f7288
+tab_primary              #81A1C1
+tab_primary_hover        #88C0D0
+tab_active_bg            #3B4252
+tab_active_fg            #81A1C1
+tab_inactive_bg          #2E3440
+tab_inactive_fg          #5f7288
+tab_hover_bg             #3B4252
+tab_hover_fg             #88C0D0
+tab_new_fg               #D8DEE9
+tab_new_hover_fg         #88C0D0
+tab_bell                 #EBCB8B
+tab_unseen               #5f7288
+tab_status               #81A1C1
