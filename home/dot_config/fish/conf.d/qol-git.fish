@@ -94,7 +94,7 @@ abbr g git  # "g" → "git", abrevia todos los comandos
     abbr fp --command git 'push --force-with-lease --force-if-includes'  # Force push with security (doesn't override if are new remote commits), use by default after a secured ammend/rebase.
 
 # Branching
-    abbr swbr --command git --function __abbr_swbr  # Switch to Branch, use º for fzf.
+    abbr sw --command git --function __abbr_swbr  # Switch to Branch, use º for fzf.
     abbr cbr --command git 'switch -c'  # Create and switch to a new branch.
     abbr dbr --command git --function __abbr_dbr  # Branch deleter, use º for fzf.
 
@@ -115,8 +115,8 @@ abbr g git  # "g" → "git", abrevia todos los comandos
     abbr discard --command git --function __abbr_discard --set-cursor=!  # Descarta cambios en el archivo especificado, sean staged o unstaged.
 
 # Commit
-    abbr c --command git 'commit -m ""'  # commit con mensaje
-    abbr co --command git 'commit -m ""'  # commit con mensaje
+    abbr c --command git --set-cursor=! 'commit -m "!"'  # commit con mensaje (cursor dentro de las comillas)
+    abbr co --command git --set-cursor=! 'commit -m "!"'  # commit con mensaje (cursor dentro de las comillas)
     abbr cp --command git cherry-pick  # aplica commits específicos sobre HEAD
 
 # Compaction
@@ -260,7 +260,7 @@ end
 
 function __abbr_sync
     set -g __ctx_rb
-    echo "fetch --prune --all; and rebase"
+    echo "fetch --prune --all; and git rebase"
 end
 
 function __abbr_isync
