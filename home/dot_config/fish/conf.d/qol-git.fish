@@ -73,7 +73,7 @@ abbr g git  # "g" → "git", abrevia todos los comandos
 
 # Pull
     # No pull abbr to enforce usage of "u" (pull --rebase --autostash) or "sync" (rebase onto selected branch)    
-    abbr fe --command git 'fetch --prune --all'  # Fetch + Delete remote branches that have been deleted in any remote.
+    abbr fe --command git 'fetch --prune --all'  # Fetch all branches + Delete remote branches that have been deleted in any remote. Defaults to remote origin if it only exists one.
     abbr rb --command git --function __abbr_rb  # [Default] rebase. Use º for fzf branch selector.
 
 # Update working branch (feat/login) with latest remote changes
@@ -268,7 +268,7 @@ function __abbr_isync
     echo "pull --rebase=interactive --autostash"
 end
 
-function __fish_brd_fzf
+function __fish_ctx_fzf
     if set -q __ctx_dbr
         set -e __ctx_dbr
         set -l branch (git branch --merged 2>/dev/null \
@@ -280,8 +280,7 @@ function __fish_brd_fzf
         end
     else if set -q __ctx_swbr
         set -e __ctx_swbr
-        set -l branch (git branch --all --format='%(refname:short)' 2>/dev/null \
-            | grep -v 'origin/HEAD' \
+        set -l branch (git branch --format='%(refname:short)' 2>/dev/null \
             | fzf --prompt="Switch to: ")
         if test -n "$branch"
             commandline -i -- $branch
@@ -333,8 +332,8 @@ function __fish_brd_fzf
     commandline -f repaint
 end
 
-bind º __fish_brd_fzf
-bind -M insert º __fish_brd_fzf
+bind º __fish_ctx_fzf
+bind -M insert º __fish_ctx_fzf
 
 function __abbr_pr
     if not command -v gh >/dev/null; and not command -v glab >/dev/null
