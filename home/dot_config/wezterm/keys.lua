@@ -20,6 +20,15 @@ M.bindings = {
   { mods = "CTRL",          key = "-",              action = act.DecreaseFontSize,                                  desc = "Decrease font size" },
   { mods = "CTRL|SHIFT",    key = "0",              action = act.ResetFontSize,                                     desc = "Reset font size" },
   { mods = "CTRL|SHIFT",    key = "c",              action = act.CopyTo("ClipboardAndPrimarySelection"),            desc = "Copy to clipboard" },
+  { mods = "CTRL|SHIFT",    key = "x",              action = wezterm.action_callback(function(win, pane)
+    local sel = pane:GetSelectionTextAsGsub()
+    if sel and sel ~= '' then
+      win:copy_to_clipboard(sel, "ClipboardAndPrimarySelection")
+      pane:SendKey({ key = "Backspace" })
+    end
+  end),                                                                                                                  desc = "Cut text" },
+  { mods = "CTRL|SHIFT",    key = "UpArrow",        action = act.ScrollByLine(-1),                                  desc = "Scroll up one line" },
+  { mods = "CTRL|SHIFT",    key = "DownArrow",      action = act.ScrollByLine(1),                                   desc = "Scroll down one line" },
   { mods = "CTRL|SHIFT",    key = "v",              action = act.PasteFrom("Clipboard"),                            desc = "Paste from clipboard" },
   { mods = "ALT",           key = "t",              action = wezterm.action_callback(function(win, pane) quickterm.toggle(win, pane) end), desc = "Toggle quickterm" },
   { mods = "ALT",           key = "f",              action = wezterm.action_callback(function() wezterm.background_child_process({ "pypr", "toggle", "fdx-floating" }) end), desc = "Open floating fdx" },

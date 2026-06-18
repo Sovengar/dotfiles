@@ -25,6 +25,10 @@ function fish_user_key_bindings
     bind tab accept_autosuggestion_or_complete
     bind -M insert tab accept_autosuggestion_or_complete
 
+    # Ctrl+↑/↓ → Inicio/fin de línea
+    bind -M insert ctrl-up   beginning-of-line
+    bind -M insert ctrl-down end-of-line
+
     # Fzf built-in key bindings
     if functions -q fzf_key_bindings
         fzf_key_bindings
