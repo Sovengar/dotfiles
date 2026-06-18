@@ -106,6 +106,7 @@ if type -q sd
 end
 
 # Abbreviations
+abbr reload 'source ~/.config/fish/config.fish'
 abbr mkdir 'mkdir -p'
 abbr vi nvim
 
