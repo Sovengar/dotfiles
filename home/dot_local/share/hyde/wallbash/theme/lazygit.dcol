@@ -1,0 +1,11 @@
+${XDG_CONFIG_HOME}/lazygit/themes/current.yml|${WALLBASH_SCRIPTS}/merge_lazygit.sh
+
+gui:
+  theme:
+    activeBorderColor: ["#<wallbash_txt1>", bold]
+    inactiveBorderColor: ["#<wallbash_1xa9>"]
+    selectedLineBgColor: ["#<wallbash_4xa8>"]
+    searchingActiveBorderColor: ["#<wallbash_txt3>", bold]
+    optionsTextColor: ["#<wallbash_1xa8>"]
+    unstagedChangesColor: ["#<wallbash_4xa9>"]
+    defaultFgColor: ["#<wallbash_txt1>"]
