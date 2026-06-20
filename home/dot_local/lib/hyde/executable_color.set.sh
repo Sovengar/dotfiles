@@ -356,6 +356,11 @@ wallbash_deploy_target() {
             '${WEZTERM_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/wezterm}/theme.lua' \
             ''
         ;;
+    yazi.dcol)
+        printf '%s|%s\n' \
+            '${confDir}/yazi/theme.toml' \
+            '${WALLBASH_SCRIPTS}/reload_yazi.sh'
+        ;;
     esac
 }
 fn_wallbash() {
@@ -451,6 +456,12 @@ fn_wallbash() {
         mkdir -p "${WEZTERM_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/wezterm}"
         if [ -s "$temp_target_file" ]; then
             mv "$temp_target_file" "${WEZTERM_GENERATED_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/wezterm}/theme.lua"
+        fi
+        ;;
+    yazi.dcol)
+        mkdir -p "$(dirname "$target_file")"
+        if [ -s "$temp_target_file" ]; then
+            mv "$temp_target_file" "$target_file"
         fi
         ;;
     *)
