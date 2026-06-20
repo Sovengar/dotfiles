@@ -1,3 +1,13 @@
+keybinding:
+  universal:
+    nextBlock: <disabled>
+    nextBlock-alt: l
+    nextBlock-alt2: <tab>
+    prevBlock: <disabled>
+    prevBlock-alt: h
+    prevBlock-alt2: <backtab>
+    nextTab: <right>
+    prevTab: <left>
 git:
   pullMode: rebase
   merging:
