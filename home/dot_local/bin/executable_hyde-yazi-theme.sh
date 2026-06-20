@@ -17,6 +17,7 @@ set -euo pipefail
 
 HYDE_THEMES_DIR="${HYDE_THEMES_DIR:-$HOME/.local/share/hyde/themes}"
 YAZI_CONFIG_DIR="${YAZI_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/yazi}"
+YAZI_STATE_DIR="${YAZI_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/yazi}"
 HYDE_STATE_FILE="${HYDE_STATE_FILE:-$HOME/.local/state/hypr/hyde.conf}"
 
 # Parse terminal.theme and extract color values
@@ -326,6 +327,7 @@ main() {
                 echo "Environment:"
                 echo "  HYDE_THEMES_DIR   Hyde themes directory (default: ~/.local/share/hyde/themes)"
                 echo "  YAZI_CONFIG_DIR   Yazi config directory (default: ~/.config/yazi)"
+                echo "  YAZI_STATE_DIR    Yazi state directory (default: ~/.local/state/yazi)"
                 echo "  HYDE_STATE_FILE   Hyde state file (default: ~/.local/state/hypr/hyde.conf)"
                 exit 0
                 ;;
@@ -334,7 +336,7 @@ main() {
     done
 
     if [[ "$all_themes" == true ]]; then
-        mkdir -p "$YAZI_CONFIG_DIR/themes"
+        mkdir -p "$YAZI_STATE_DIR/themes"
         for theme_dir in "$HYDE_THEMES_DIR"/*/; do
             local tname
             tname="$(basename "$theme_dir")"
@@ -346,11 +348,11 @@ main() {
             echo "[Yazi] Generating theme for '$tname'..." >&2
             declare -A COLORS
             parse_terminal_theme "$theme_file"
-            generate_theme > "$YAZI_CONFIG_DIR/themes/${tname// /_}.toml"
+            generate_theme > "$YAZI_STATE_DIR/themes/${tname// /_}.toml"
             unset COLORS
             declare -A COLORS
         done
-        echo "[Yazi] All themes generated in $YAZI_CONFIG_DIR/themes/" >&2
+        echo "[Yazi] All themes generated in $YAZI_STATE_DIR/themes/" >&2
         return 0
     fi
 
@@ -376,9 +378,11 @@ main() {
     if [[ "$output_mode" == "stdout" ]]; then
         generate_theme
     else
+        mkdir -p "$YAZI_STATE_DIR"
+        generate_theme > "$YAZI_STATE_DIR/theme.toml"
         mkdir -p "$YAZI_CONFIG_DIR"
-        generate_theme > "$YAZI_CONFIG_DIR/theme.toml"
-        echo "[Yazi] Theme generated: $YAZI_CONFIG_DIR/theme.toml (from '$theme_name')" >&2
+        ln -sf "$YAZI_STATE_DIR/theme.toml" "$YAZI_CONFIG_DIR/theme.toml"
+        echo "[Yazi] Theme generated: $YAZI_STATE_DIR/theme.toml → $YAZI_CONFIG_DIR/theme.toml (from '$theme_name')" >&2
     fi
 }
 

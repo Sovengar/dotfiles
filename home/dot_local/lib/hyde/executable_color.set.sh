@@ -358,7 +358,7 @@ wallbash_deploy_target() {
         ;;
     yazi.dcol)
         printf '%s|%s\n' \
-            '${confDir}/yazi/theme.toml' \
+            '${XDG_STATE_HOME:-$HOME/.local/state}/yazi/theme.toml' \
             '${WALLBASH_SCRIPTS}/reload_yazi.sh'
         ;;
     esac
