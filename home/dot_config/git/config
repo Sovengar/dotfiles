@@ -13,6 +13,7 @@
 	defaultBranch = dev  # avoid creating main by accident
 
 [core]
+	pager = delta
 	editor = code --wait
 	excludesfile = ~/.gitignore_global
 	attributesfile = ~/.gitattributes_global
@@ -79,11 +80,38 @@
 
 [interactive]
 	singlekey = true  # single-key nav in add -p
-	diffFilter = diff-so-fancy --patch  # fancy interactive diffs
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true  # n/N between hunks
+	line-numbers = true
+	syntax-theme = Dracula
+	features = sxs
+	minus-style = red
+	plus-style = green
+	minus-emph-style = red bold "#301111"
+	plus-emph-style = green bold "#113011"
+	file-decoration-style = blue ol
+	hunk-header-decoration-style = blue box
+	line-numbers-left-style = cyan
+	line-numbers-right-style = cyan
+	line-numbers-minus-style = red
+	line-numbers-plus-style = green
+
+[delta "sxs"]
+	side-by-side = true
 
 [log]
 	abbrevCommit = true  # short commit hashes
 	graphColors = blue,yellow,cyan,magenta,green,red
+
+[merge]
+	conflictStyle = zdiff3  # muestra base en conflictos
+	tool = ec  # mergetool 3-pane
+
+[mergetool "ec"]
+	cmd = ec \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+	trustExitCode = true
 
 [pack]
 	threads = 0  # use all cpu threads
@@ -93,10 +121,10 @@
 [pager]
 	branch = false  # no pager for git branch
 	tag = false  # no pager for git tag
-	diff = diff-so-fancy  # syntax-highlighted diffs (git handles paging)
 
-[diff-so-fancy]
-	markEmptyLines = false  # don't mark trailing empty lines
+[rerere]
+	enabled = true  # reuse recorded resolution for merge conflicts
+	autoUpdate = false  # review resolution before staging
 
 [pull]
 	# rebase = true  # rebase instead of merge on pull
@@ -132,3 +160,6 @@
 
 [fetch]
 	fsckObjects = true  # verify objects on fetch
+[git-wip]
+	save = untracked
+	gpg-sign = false

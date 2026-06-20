@@ -1,0 +1,36 @@
+git:
+  pullMode: rebase
+  merging:
+    mergetool: ec
+  pagers:
+    - pager: "delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format='lazygit-edit://{path}:{line}' --features="
+customCommands:
+  - key: "X"
+    command: git absorb
+    description: Auto fixup commits
+    context: files
+    loadingText: Absorbing...
+  - key: ","
+    command: git absorb --dry-run
+    description: Preview absorb (dry-run)
+    context: files
+    loadingText: Absorbing (dry-run)...
+  - key: M
+    command: git machete status
+    description: Branch hierarchy
+    context: localBranches
+  - key: U
+    command: git machete update
+    description: Rebase cascade onto parent
+    context: localBranches
+    loadingText: Updating branch chain...
+  - key: T
+    command: git machete traverse
+    description: Interactive traverse
+    context: localBranches
+    loadingText: Traversing...
+  - key: D
+    command: git machete diff
+    description: Diff against parent branch
+    context: localBranches
+    output: terminal

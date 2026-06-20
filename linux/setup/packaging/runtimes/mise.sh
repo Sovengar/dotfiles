@@ -15,3 +15,16 @@ else
   pkg_install mise
   success "mise installed"
 fi
+
+log "Installing mise tools (python, node, go, etc.)..."
+mise install 2>/dev/null || true
+success "mise tools installed"
+
+log "Installing Python utility packages (required by AUR builds)..."
+_python="$(mise which python 2>/dev/null || true)"
+if [[ -n "$_python" && -x "$_python" ]]; then
+  "$_python" -m pip install --quiet setuptools build 2>/dev/null || true
+  success "python-build + setuptools installed"
+else
+  warn "mise python not found, skipping python-build"
+fi

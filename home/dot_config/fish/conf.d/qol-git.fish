@@ -89,15 +89,15 @@ abbr g git  # "g" → "git", abrevia todos los comandos
     abbr st --command git status --short  # Status (porcelain)
     abbr sta --command git status  # Status of all
     abbr sh --command git --function __abbr_sh  # Show <file/commit/branch>
+    abbr sh-hunk 'hunk show'  # Review commit with hunk TUI
     abbr wc --command git 'whatchanged -p --abbrev-commit --pretty=medium' #Shows what changed since last commit
 
     abbr d --command git --function __abbr_diff  # Diff without whitespace changes.
-    abbr d-hunk --command hunk --argument diff  # Review working tree with hunk TUI
-    abbr show-hunk --command hunk --argument show  # Review commit with hunk TUI
+    abbr d-hunk 'hunk diff'  # Review working tree with hunk TUI
+    abbr show-hunk 'hunk show'  # Review commit with hunk TUI
         abbr s --command git --function __abbr_s  # Adds --staged (Only expands after "diff" or "d")
     abbr releasediff --command git 'h --first-parent latest..HEAD'  # Diff between latest and HEAD (same format as h)
     
-
 # Lists
     abbr lsbr --command git --function __abbr_lsbr  # List and switch branches with fzf preview
     abbr lsmbr --command git 'branch --merged'  # Lists merged branches (To cleanup them)
