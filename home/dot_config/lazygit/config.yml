@@ -44,3 +44,15 @@ customCommands:
     description: Diff against parent branch
     context: localBranches
     output: terminal
+
+# HYDE_THEME_START
+gui:
+  theme:
+    activeBorderColor: [green, bold]
+    inactiveBorderColor: [default]
+    selectedLineBgColor: [blue]
+    searchingActiveBorderColor: [cyan, bold]
+    optionsTextColor: [blue]
+    unstagedChangesColor: [red]
+    defaultFgColor: [default]
+# HYDE_THEME_END
