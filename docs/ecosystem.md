@@ -16,7 +16,6 @@
 | fisher | Fish plugin manager | curl |
 | broot | TUI tree nav | brew/curl |
 | yazi | TUI file manager | cargo/brew |
-| lazygit | TUI git | brew/curl |
 | lazynpm | TUI npm | brew (tap: jesseduffield/lazynpm) |
 | lazydocker | TUI docker | brew/curl |
 | btm (bottom) | TUI process | brew/curl |
@@ -55,13 +54,10 @@
 | hyperfine | Benchmark | brew/curl |
 | pastel | Color swatches | brew/curl |
 | mise | Dev env manager | brew/curl |
-| jj | Git-compat VCS | brew/curl |
-| worktrunk | Git worktree manager (`wt`) | system |
 | jqp | TUI jq playground | go install |
 | snip | Token saver | go install |
 | dust | Intuitive du (`du-dust`) | cargo |
 | sd | Find & replace (s/foo/bar) | cargo |
-| diff-so-fancy | Git diff pager with syntax highlighting | npm |
 | dog | DNS client (`dog-dns`) | cargo |
 | xh | HTTPie-style HTTP client | cargo |
 | atuin | Shell history with search | cargo |
@@ -70,6 +66,12 @@
 | http-server | Static development server | npm |
 | pm2 | Node process manager | npm |
 | snyk | Dependency vulnerability scanner | npm |
+| delta | Syntax-highlighted git pager (git-delta) | pacman |
+| hunkdiff (hunk) | TUI diff viewer with AI/agent annotations | npm |
+| git-absorb | Auto fixup commits | pacman |
+| git-machete | Git branch hierarchy manager | pip |
+
+| easy-conflict (ec) | 3-pane conflict resolver TUI | AUR |
 
 ### Dev Tools
 | Tool | Purpose | Install |
