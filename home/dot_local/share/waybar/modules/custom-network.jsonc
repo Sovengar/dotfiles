@@ -1,0 +1,11 @@
+{
+  "custom/network": {
+    "exec": "$XDG_CONFIG_HOME/waybar/scripts/waybar-network-status",
+    "return-type": "json",
+    "tooltip": true,
+    "interval": 2,
+    "signal": 8,
+    "on-click": "exec ghostty --title=nmtui -e nmtui",
+    "on-click-right": "/home/buble/.config/waybar/scripts/waybar-network-toggle"
+  }
+}

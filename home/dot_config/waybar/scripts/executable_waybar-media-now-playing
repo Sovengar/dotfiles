@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+zscroll_bin=${ZSCROLL_BIN:-/home/buble/.local/bin/zscroll}
+separator=${WAYBAR_MEDIA_SEPARATOR:- - }
+icon_playing=${WAYBAR_MEDIA_ICON_PLAYING:-󰐊}
+icon_paused=${WAYBAR_MEDIA_ICON_PAUSED:-󰏤}
+icon_stopped=${WAYBAR_MEDIA_ICON_STOPPED:-󰓛}
+standby_text=${WAYBAR_MEDIA_STANDBY_TEXT:-Music}
+progress_full=${WAYBAR_MEDIA_PROGRESS_FULL:-━}
+progress_empty=${WAYBAR_MEDIA_PROGRESS_EMPTY:-─}
+progress_width=${WAYBAR_MEDIA_PROGRESS_WIDTH:-20}
+players=${WAYBAR_MEDIA_PLAYERS:-}
+ignore_players=${WAYBAR_MEDIA_IGNORE_PLAYERS:-}
+animation_frames=("▂▄▆" "▄▂▆" "▄▆▂" "▆▄▂" "▆▂▄")
+
+playerctl_args=()
+[[ -n "$players" ]] && playerctl_args+=(--player "$players")
+[[ -n "$ignore_players" ]] && playerctl_args+=(--ignore-player "$ignore_players")
+
+playerctl_media() {
+    playerctl "${playerctl_args[@]}" "$@"
+}
+
+current_text() {
+    local artist title player
+    artist=$(playerctl_media metadata --format '{{artist}}' 2>/dev/null || true)
+    title=$(playerctl_media metadata --format '{{title}}' 2>/dev/null || true)
+    player=$(playerctl_media metadata --format '{{playerName}}' 2>/dev/null || true)
+
+    if [[ -n "$artist" && -n "$title" ]]; then
+        printf '%s%s%s' "$artist" "$separator" "$title"
+    elif [[ -n "$title" ]]; then
+        printf '%s' "$title"
+    else
+        printf '%s' "${player:-$standby_text}"
+    fi
+}
+
+format_time() {
+    local seconds=${1:-0}
+    printf '%02d:%02d' "$((seconds / 60))" "$((seconds % 60))"
+}
+
+progress_bar() {
+    local position=${1:-0} duration=${2:-0} filled empty
+
+    if ((duration <= 0)); then
+        for ((i = 0; i < progress_width; i++)); do printf '%s' "$progress_empty"; done
+        return
+    fi
+
+    filled=$((position * progress_width / duration))
+    ((filled > progress_width)) && filled=$progress_width
+    ((filled < 0)) && filled=0
+    empty=$((progress_width - filled))
+
+    for ((i = 0; i < filled; i++)); do printf '%s' "$progress_full"; done
+    for ((i = 0; i < empty; i++)); do printf '%s' "$progress_empty"; done
+}
+
+metadata_microseconds_to_seconds() {
+    local value=${1:-0}
+    [[ "$value" =~ ^[0-9]+$ ]] || value=0
+    printf '%s' "$((value / 1000000))"
+}
+
+build_tooltip() {
+    local player status artist title duration_us position duration loop shuffle bar
+
+    player=$(playerctl_media metadata --format '{{playerName}}' 2>/dev/null || true)
+    status=$(playerctl_media status 2>/dev/null || printf 'Stopped')
+    artist=$(playerctl_media metadata --format '{{artist}}' 2>/dev/null || true)
+    title=$(playerctl_media metadata --format '{{title}}' 2>/dev/null || true)
+    duration_us=$(playerctl_media metadata --format '{{mpris:length}}' 2>/dev/null || printf 0)
+    position_us=$(playerctl_media metadata --format '{{position}}' 2>/dev/null || printf 0)
+    duration=$(metadata_microseconds_to_seconds "$duration_us")
+    position=$(metadata_microseconds_to_seconds "$position_us")
+    loop=$(playerctl_media loop 2>/dev/null || true)
+    shuffle=$(playerctl_media shuffle 2>/dev/null || true)
+    bar=$(progress_bar "$position" "$duration")
+
+    printf '%s\n%s\n%s\n%s / %s  %s\nLoop: %s\nShuffle: %s' \
+        "${player:-Media}" \
+        "$status" \
+        "${artist:+$artist$separator}$title" \
+        "$(format_time "$position")" \
+        "$(format_time "$duration")" \
+        "$bar" \
+        "${loop:-unknown}" \
+        "${shuffle:-unknown}"
+}
+
+status_icon() {
+    local status
+    status=$(playerctl_media status 2>/dev/null || printf 'Stopped')
+    case "$status" in
+        Playing) printf '%s' "$icon_playing" ;;
+        Paused) printf '%s' "$icon_paused" ;;
+        *) printf '%s' "$icon_stopped" ;;
+    esac
+}
+
+build_progress_json() {
+    local duration_us position_us duration position bar class
+    duration_us=$(playerctl_media metadata --format '{{mpris:length}}' 2>/dev/null || printf 0)
+    position_us=$(playerctl_media metadata --format '{{position}}' 2>/dev/null || printf 0)
+    duration=$(metadata_microseconds_to_seconds "$duration_us")
+    position=$(metadata_microseconds_to_seconds "$position_us")
+    bar=$(progress_bar "$position" "$duration")
+    class=$(build_class)
+
+    jq -nc \
+        --arg text "$bar" \
+        --arg class "$class" \
+        --arg tooltip "$(format_time "$position") / $(format_time "$duration")" \
+        '{text: $text, class: $class, tooltip: $tooltip}'
+}
+
+build_time_json() {
+    local duration_us position_us duration position class
+    duration_us=$(playerctl_media metadata --format '{{mpris:length}}' 2>/dev/null || printf 0)
+    position_us=$(playerctl_media metadata --format '{{position}}' 2>/dev/null || printf 0)
+    duration=$(metadata_microseconds_to_seconds "$duration_us")
+    position=$(metadata_microseconds_to_seconds "$position_us")
+    class=$(build_class)
+
+    jq -nc \
+        --arg text "$(format_time "$position")/$(format_time "$duration")" \
+        --arg class "$class" \
+        --arg tooltip "$(format_time "$position") / $(format_time "$duration")" \
+        '{text: $text, class: $class, tooltip: $tooltip}'
+}
+
+build_animation_json() {
+    local frame=${1:-} status text class
+    status=$(playerctl_media status 2>/dev/null || printf 'Stopped')
+    class=$(build_class)
+
+    case "$status" in
+        Playing) text=$frame ;;
+        *) text='' ;;
+    esac
+
+    jq -nc \
+        --arg text "$text" \
+        --arg class "$class" \
+        --arg tooltip "$status" \
+        '{text: $text, class: $class, tooltip: $tooltip}'
+}
+
+build_state_json() {
+    local player class tooltip
+    player=$(playerctl_media metadata --format '{{playerName}}' 2>/dev/null || true)
+    class=$(build_class)
+    tooltip=$(build_tooltip)
+
+    jq -nc \
+        --arg text "$(status_icon)" \
+        --arg class "$class" \
+        --arg alt "${player:-player-closed}" \
+        --arg tooltip "$tooltip" \
+        '{text: $text, class: $class, alt: $alt, tooltip: $tooltip}'
+}
+
+build_class() {
+    local player status
+    player=$(playerctl_media metadata --format '{{playerName}}' 2>/dev/null || printf 'none')
+    status=$(playerctl_media status 2>/dev/null || printf 'Stopped')
+    printf 'custom-%s %s' "${player,,}" "${status,,}"
+}
+
+metadata_command='"$XDG_CONFIG_HOME/waybar/scripts/waybar-media-now-playing" --text'
+
+if [[ "${1:-}" == "--text" ]]; then
+    current_text
+    exit 0
+fi
+
+if [[ "${1:-}" == "--state-json" ]]; then
+    build_state_json
+    exit 0
+fi
+
+if [[ "${1:-}" == "--progress-json" ]]; then
+    build_progress_json
+    exit 0
+fi
+
+if [[ "${1:-}" == "--time-json" ]]; then
+    build_time_json
+    exit 0
+fi
+
+if [[ "${1:-}" == "--animation-json" ]]; then
+    while :; do
+        for frame in "${animation_frames[@]}"; do
+            build_animation_json "$frame"
+            sleep "${WAYBAR_MEDIA_ANIMATION_DELAY:-0.1}"
+        done
+    done
+fi
+
+"$zscroll_bin" \
+    --length "${WAYBAR_MEDIA_SCROLL_LENGTH:-42}" \
+    --delay "${WAYBAR_MEDIA_SCROLL_DELAY:-0.25}" \
+    --scroll-padding "${WAYBAR_MEDIA_SCROLL_PADDING:-   }" \
+    --update-check true \
+    --update-interval "${WAYBAR_MEDIA_UPDATE_INTERVAL:-2}" \
+    --eval-in-shell true \
+    "$metadata_command" |
+while IFS= read -r text; do
+    player=$(playerctl_media metadata --format '{{playerName}}' 2>/dev/null || true)
+
+    jq -nc \
+        --arg text "$text" \
+        --arg class "$(build_class)" \
+        --arg alt "${player:-player-closed}" \
+        --arg tooltip "$(build_tooltip)" \
+        '{text: $text, class: $class, alt: $alt, tooltip: $tooltip}'
+done

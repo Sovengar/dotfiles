@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+if ! command -v get_hyprConf >/dev/null 2>&1; then
+    eval "$(hyde-shell init)"
+fi
+
+rofi_theme=${ROFI_MISE_STYLE:-${ROFI_LAUNCH_STYLE:-clipboard}}
+font_scale=${ROFI_MISE_SCALE:-${ROFI_LAUNCH_SCALE:-${ROFI_SCALE:-10}}}
+font_name=${ROFI_MISE_FONT:-${ROFI_LAUNCH_FONT:-${ROFI_FONT:-}}}
+font_name=${font_name:-$(get_hyprConf "MENU_FONT")}
+font_name=${font_name:-$(get_hyprConf "FONT")}
+hypr_border=${hypr_border:-$(hyprctl -j getoption decoration:rounding 2>/dev/null | jq '.int' 2>/dev/null || printf 10)}
+hypr_width=${hypr_width:-$(hyprctl -j getoption general:border_size 2>/dev/null | jq '.int' 2>/dev/null || printf 2)}
+wind_border=$((hypr_border * 3 / 2))
+elem_border=$([ "$hypr_border" -eq 0 ] && echo "5" || echo "$hypr_border")
+
+font_override="* {font: \"${font_name:-JetBrainsMono Nerd Font} $font_scale\";}"
+layout_override="window {width: ${ROFI_MISE_WIDTH:-34em}; border: ${hypr_width}px; border-radius: ${wind_border}px;} entry {border-radius: ${elem_border}px; placeholder: \"󱁤 Mise\";} element {border-radius: ${elem_border}px;} listview {lines: ${ROFI_MISE_LINES:-8};}"
+
+terminal_run() {
+    /home/buble/.local/lib/hyde/xdg-terminal-exec bash -lc "$1; printf '\nPulsa Enter para cerrar...'; read -r _"
+}
+
+rofi_input() {
+    rofi -dmenu -p "$1" \
+        -theme-str "$font_override" \
+        -theme-str "$layout_override" \
+        -theme "$rofi_theme"
+}
+
+set_global_env() {
+    key=$(rofi_input "Variable") || exit 0
+    [[ -n "$key" ]] || exit 0
+
+    value=$(rofi_input "Valor para $key") || exit 0
+    mise set -g "$key=$value" && notify-send "Mise" "Variable global actualizada: $key"
+}
+
+unset_global_env() {
+    key=$(mise set -g 2>/dev/null | awk 'NR > 1 {print $1}' | rofi_input "Borrar variable") || exit 0
+    [[ -n "$key" ]] || exit 0
+
+    mise unset -g "$key" && notify-send "Mise" "Variable global eliminada: $key"
+}
+
+selection=$(printf '%s\n' \
+    "󰐕 Add global env var" \
+    "󰆴 Remove global env var" \
+    "󰈙 List global env vars" \
+    "󱁤 Mise current" \
+    "󰚰 Mise install" \
+    "󰓦 Mise outdated" \
+    "󰁨 Mise reshim" \
+    "󰗠 Mise trust" \
+    "󰈔 Edit ~/.config/mise/config.toml" \
+    "󰏫 Open terminal shell" \
+    | rofi -dmenu -i -p "Mise" \
+        -theme-str "$font_override" \
+        -theme-str "$layout_override" \
+        -theme "$rofi_theme") || exit 0
+
+case "$selection" in
+    "󰐕 Add global env var") set_global_env ;;
+    "󰆴 Remove global env var") unset_global_env ;;
+    "󰈙 List global env vars") terminal_run "mise set -g" ;;
+    "󱁤 Mise current") terminal_run "mise current" ;;
+    "󰚰 Mise install") terminal_run "mise install" ;;
+    "󰓦 Mise outdated") terminal_run "mise outdated" ;;
+    "󰁨 Mise reshim") terminal_run "mise reshim" ;;
+    "󰗠 Mise trust") terminal_run "mise trust" ;;
+    "󰈔 Edit ~/.config/mise/config.toml") ${EDITOR:-xdg-open} "${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml" ;;
+    "󰏫 Open terminal shell") /home/buble/.local/lib/hyde/xdg-terminal-exec bash -lc "mise doctor; exec \${SHELL:-bash}" ;;
+esac

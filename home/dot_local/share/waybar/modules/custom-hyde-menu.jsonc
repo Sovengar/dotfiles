@@ -1,10 +1,11 @@
 {
   "custom/hyde-menu": {
-    "format": " ",
-    "tooltip": true,
-    "tooltip-format": "Right-click for more HyDE options",
-    "menu": "on-click-right",
-    "menu-file": "${HYDE_WAYBAR_MENU_DIR:-$XDG_DATA_HOME/waybar/menus}/hyde-menu.xml",
+    "format": "{}",
+    "exec": "echo '{\"text\":\"\uF0C9 \",\"tooltip\":\"HyDE menu\"}'",
+    "return-type": "json",
+    "interval": 86400,
+    "menu": "on-click",
+    "menu-file": "$XDG_DATA_HOME/waybar/menus/hyde-menu.xml",
     "menu-actions": {
       "animations-select": "hyde-shell animations --select",
       "wallpaper-select": "hyde-shell wallpaper --select --global",
@@ -15,6 +16,7 @@
       "theme-previous": "hyde-shell themeswitch -p",
       "theme-select": "hyde-shell themeselect",
       "theme-import": "hyde-shell app -T -- hydectl theme import",
+      "palette-select": "waybar-wallbash-mode --menu",
       "waybar-restart": "hyde-shell waybar -ubg",
       "waybar-reload-css": "sed -i '${/^$/d;}'  ${XDG_STATE_HOME:-$HOME/.local/state}/waybar/style.css",
       "waybar-layout-select": "hyde-shell waybar --select-layout",
@@ -43,7 +45,7 @@
       "gamma-20": "hyde-shell hyprsunset --cm gamma -s 20 -P waybar:19",
       "shaders-select": "hyde-shell shaders --select;pkill -RTMIN+19 waybar",
       "keybinds-hint": "hyde-shell keybinds_hint",
-      "show-current-state": "${HOME}/.local/bin/waybar-zenite-notify",
+      "show-current-state": "${HOME}/.config/waybar/scripts/waybar-zenite-notify",
       "about-hyde": "xdg-open https://hydeproject.pages.dev"
     }
   }

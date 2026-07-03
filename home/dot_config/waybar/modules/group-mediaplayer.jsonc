@@ -1,0 +1,79 @@
+{
+  "group/khing-mediaplayer": {
+    "orientation": "inherit",
+    "modules": [
+      "custom/media-now-playing",
+      "custom/media-time",
+      "custom/media-animation",
+      "custom/mediaplayer-previous",
+      "custom/mediaplayer-play-pause",
+      "custom/mediaplayer-next"
+    ]
+  },
+  "custom/media-gap-left": {
+    "format": " ",
+    "tooltip": false
+  },
+  "custom/media-gap-right": {
+    "format": " ",
+    "tooltip": false
+  },
+  "custom/media-now-playing": {
+    "exec": "$XDG_CONFIG_HOME/waybar/scripts/waybar-media-now-playing",
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "playerctl play-pause",
+    "on-click-middle": "playerctl previous",
+    "on-scroll-up": "playerctl position 1-",
+    "on-scroll-down": "playerctl position 1+",
+    "menu": "on-click-right",
+    "menu-file": "${HYDE_WAYBAR_MENU_DIR:-$XDG_DATA_HOME/waybar/menus}/mediaplayer.xml",
+    "menu-actions": {
+      "play-pause": "playerctl play-pause",
+      "next": "playerctl next",
+      "previous": "playerctl previous",
+      "stop": "playerctl stop",
+      "shuffle": "playerctl shuffle toggle",
+      "repeat": "playerctl loop Track",
+      "loop": "playerctl loop Playlist",
+      "disable-loop": "playerctl loop None"
+    },
+    "restart-interval": 5
+  },
+  "custom/media-time": {
+    "exec": "$XDG_CONFIG_HOME/waybar/scripts/waybar-media-now-playing --time-json",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 1,
+    "tooltip": true,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl position 1-",
+    "on-scroll-down": "playerctl position 1+"
+  },
+  "custom/media-animation": {
+    "exec": "$XDG_CONFIG_HOME/waybar/scripts/waybar-media-now-playing --animation-json",
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "playerctl play-pause"
+  },
+  "custom/mediaplayer-play-pause": {
+    "format": "󰐌",
+    "tooltip": true,
+    "tooltip-format": "Play/pause",
+    "on-click": "playerctl play-pause"
+  },
+  "custom/mediaplayer-next": {
+    "format": "󰙡",
+    "tooltip": true,
+    "tooltip-format": "Next",
+    "on-click": "playerctl next"
+  },
+  "custom/mediaplayer-previous": {
+    "format": "󰙣",
+    "tooltip": true,
+    "tooltip-format": "Previous",
+    "on-click": "playerctl previous"
+  }
+}

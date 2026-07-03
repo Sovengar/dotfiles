@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# winapps-launch: quick launch Windows VM with keep-alive
+# Convenience wrapper around winapps-vm launch -k
+
+exec winapps-vm launch --keep-alive "$@"

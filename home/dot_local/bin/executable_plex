@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+status=$(systemctl is-active plexmediaserver 2>/dev/null || echo "inactive")
+
+if [[ "$status" != "active" ]]; then
+  echo "Plex Media Server no está corriendo. Iniciando..."
+  sudo systemctl start plexmediaserver
+  sleep 2
+fi
+
+systemctl --no-pager status plexmediaserver | head -10
+
+xdg-open http://localhost:32400/web &

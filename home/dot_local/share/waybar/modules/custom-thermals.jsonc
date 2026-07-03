@@ -1,0 +1,7 @@
+{
+  "custom/thermals": {
+    "format": "󰔏",
+    "tooltip": true,
+    "tooltip-format": "Temperaturas y sensores"
+  }
+}

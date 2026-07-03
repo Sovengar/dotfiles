@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Plex Media Server
+Comment=Media streaming server
+Exec=plex
+Icon=tv.plex.PlexDesktop
+Terminal=false
+Type=Application
+Categories=AudioVideo;Video;Network;
+StartupNotify=true

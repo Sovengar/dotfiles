@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${XDG_RUNTIME_DIR:-/tmp}/waybar-network"
+mode_file="$state_dir/mode"
+mkdir -p "$state_dir"
+
+if [[ $(cat "$mode_file" 2>/dev/null || printf icon) == bandwidth ]]; then
+    printf icon > "$mode_file"
+else
+    printf bandwidth > "$mode_file"
+fi
+
+pkill -RTMIN+8 waybar 2>/dev/null || true

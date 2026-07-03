@@ -73,6 +73,7 @@ esac
 
 tools=(
   "cdx|cdx-rs|Navegador de directorios: cd directo, zoxide y TUI fd/fzf/rg."
+  "plex|plex|Abre Plex Media Server en el navegador."
 )
 
 print_banner

@@ -5,6 +5,7 @@ local theme = require "appearance.theme"
 local font = require "appearance.font"
 local launchers = require "launchers"
 local keys = require "keys"
+local layouts = require "layouts"
 local tabs = require "tabs"
 local status = require "status"
 local appearance = require "appearance"
@@ -21,6 +22,9 @@ launchers.setup(config)
 
 -- Keybindings
 keys.setup(config)
+
+-- Layout templates
+layouts.setup(config)
 
 -- Set color schema
 config.color_scheme = theme.scheme_name

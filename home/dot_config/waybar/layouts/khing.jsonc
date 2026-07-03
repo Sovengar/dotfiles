@@ -3,10 +3,14 @@
   "output": ["*"],
   "exclusive": true,
   "passthrough": false,
+  "margin": "5",
   "reload_style_on_change": true,
   "include": [
     "$XDG_CONFIG_HOME/waybar/modules/group-mediaplayer.jsonc", 
-    "$XDG_CONFIG_HOME/waybar/modules/custom-weather.jsonc", 
+    "$XDG_CONFIG_HOME/waybar/modules/custom-weather.jsonc",
+    "$XDG_CONFIG_HOME/waybar/modules/hardware.jsonc",
+    "$XDG_DATA_HOME/waybar/modules/custom-network.jsonc",
+    "$XDG_DATA_HOME/waybar/modules/custom-thermals.jsonc",
     // "$XDG_DATA_HOME/waybar/modules/*json*" 
     "includes/includes.json" 
   ],
@@ -77,7 +81,7 @@
     "format": "󱁤",
     "tooltip": true,
     "tooltip-format": "Gestionar Mise",
-    "on-click": "/home/buble/.local/bin/waybar-mise-menu"
+    "on-click": "$XDG_CONFIG_HOME/waybar/scripts/waybar-mise-menu"
   },
   "group/leaf": {
     "orientation": "inherit",
@@ -94,29 +98,9 @@
       "custom/clipboard",
       "custom/swaync",
       "custom/dunst",
-      "custom/wallbash-mode",
       "group/misc",
       "custom/hyde-menu"
     ]
-  },
-  "custom/wallbash-mode": {
-    "exec": "/home/buble/.local/bin/waybar-wallbash-mode",
-    "return-type": "json",
-    "format": "{}",
-    "tooltip": true,
-    "interval": 30,
-    "signal": 9,
-    "on-click": "/home/buble/.local/bin/waybar-wallbash-mode --next",
-    "on-click-right": "/home/buble/.local/bin/waybar-wallbash-mode --menu"
-  },
-  "custom/network": {
-    "exec": "/home/buble/.local/bin/waybar-network-status",
-    "return-type": "json",
-    "tooltip": true,
-    "interval": 2,
-    "signal": 8,
-    "on-click": "/home/buble/.local/bin/waybar-network-menu",
-    "on-click-right": "/home/buble/.local/bin/waybar-network-toggle"
   },
   "group/hardware": {
     "orientation": "inherit",
@@ -127,25 +111,6 @@
       "click-to-reveal": true
     },
     "modules": ["custom/hardware", "cpu", "memory"]
-  },
-  "custom/hardware": {
-    "format": "󰘚",
-    "tooltip": true,
-    "tooltip-format": "Hardware usage"
-  },
-  "cpu": {
-    "interval": 10,
-    "format": "󰍛 {usage}%",
-    "on-click": "kitty btop",
-    "format-alt": "{icon0}{icon1}{icon2}{icon3}",
-    "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-  },
-  "memory": {
-    "interval": 30,
-    "format": " {percentage}%",
-    "tooltip-format": "{used:0.1f}G/{total:0.1f}G used",
-    "on-click": "kitty btop",
-    "max-length": 10
   },
   "group/thermals": {
     "orientation": "inherit",
@@ -162,39 +127,8 @@
       "custom/sensorsinfo"
     ]
   },
-  "custom/thermals": {
-    "format": "󰔏",
-    "tooltip": true,
-    "tooltip-format": "Temperaturas y sensores"
-  },
   "group/audio": {
     "orientation": "inherit",
     "modules": ["pulseaudio#microphone", "pulseaudio", "pulseaudio/slider"]
-  },
-  "pulseaudio": {
-    "format": "{icon} {volume}%",
-    "format-muted": "󰝟 Muted",
-    "format-icons": {
-      "headphone": "",
-      "hands-free": "",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["", "", ""]
-    },
-    "tooltip": true,
-    "tooltip-format": "{icon} {desc}\nVolume: <b>{volume}%</b>",
-    "on-click": "pavucontrol-qt -t 3 || pavucontrol -t 3",
-    "on-click-right": "hyde-shell volumecontrol -s ''",
-    "on-click-middle": "hyde-shell volumecontrol -o m",
-    "on-scroll-up": "hyde-shell volumecontrol -o i",
-    "on-scroll-down": "hyde-shell volumecontrol -o d",
-    "scroll-step": 5
-  },
-  "pulseaudio/slider": {
-    "min": 0,
-    "max": 100,
-    "orientation": "horizontal"
   }
 }

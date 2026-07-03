@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPTS_DIR="$HOME/.local/share/color-scripts"
+PREVIEW_DIR="$(dirname "$SCRIPTS_DIR")/preview"
+
+usage() {
+  cat <<EOF
+Uso: color-scripts [opcion] [nombre]
+
+Opciones:
+  <nombre>       Ejecuta un script de color por nombre (ej: bars, pacman)
+  -l, --list     Lista todos los scripts disponibles
+  -r, --random   Ejecuta un script aleatorio
+  -h, --help     Muestra esta ayuda
+
+Ejemplos:
+  color-scripts bars
+  color-scripts pacman
+  color-scripts -r
+  color-scripts -l
+EOF
+}
+
+list_scripts() {
+  local scripts
+  scripts=("$SCRIPTS_DIR"/*)
+  scripts=("${scripts[@]##*/}")
+
+  printf 'Scripts de color disponibles (%d):\n\n' "${#scripts[@]}"
+
+  local cols=3
+  local count=0
+  for script in "${scripts[@]}"; do
+    printf '  %-20s' "$script"
+    count=$((count + 1))
+    if (( count % cols == 0 )); then
+      printf '\n'
+    fi
+  done
+  if (( count % cols != 0 )); then
+    printf '\n'
+  fi
+}
+
+run_random() {
+  local scripts
+  scripts=("$SCRIPTS_DIR"/*)
+  local picked
+  picked="${scripts[RANDOM % ${#scripts[@]}]}"
+  printf 'Ejecutando: %s\n\n' "$(basename "$picked")"
+  exec "$picked"
+}
+
+case "${1:-}" in
+  "")
+    list_scripts
+    ;;
+  -l | --list)
+    list_scripts
+    ;;
+  -r | --random)
+    run_random
+    ;;
+  -h | --help)
+    usage
+    ;;
+  *)
+    script="$SCRIPTS_DIR/$1"
+    if [[ -f "$script" && -x "$script" ]]; then
+      exec "$script"
+    else
+      printf 'Error: no se encontro el script "%s"\n' "$1" >&2
+      printf 'Usa color-scripts -l para ver los disponibles.\n' >&2
+      exit 1
+    fi
+    ;;
+esac

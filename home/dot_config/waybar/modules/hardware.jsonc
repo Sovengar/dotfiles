@@ -1,0 +1,7 @@
+{
+  "custom/hardware": {
+    "format": "󰘚",
+    "tooltip": true,
+    "tooltip-format": "Hardware usage"
+  }
+}

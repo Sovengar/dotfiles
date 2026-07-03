@@ -1,0 +1,623 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# winapps-vm: manage a lightweight Windows 11 VM for Microsoft 365 apps
+# Inspired by omarchy-windows-vm, adapted for CachyOS + chezmoi reproducibility
+
+COMPOSE_FILE="$HOME/.config/winapps-vm/docker-compose.yml"
+CONFIG_FILE="$HOME/.config/winapps-vm/config.env"
+SHARED_DIR="$HOME/WinApps/shared"
+STORAGE_DIR="$HOME/.local/share/winapps-vm/storage"
+
+# ── Defaults ────────────────────────────────────────────────────
+
+DEFAULT_RAM="16G"
+DEFAULT_CPU_CORES="8"
+DEFAULT_DISK_SIZE="64G"
+DEFAULT_VERSION="11"
+DEFAULT_USERNAME="docker"
+CONTAINER_NAME="mini-windows"
+
+# ── Colors ───────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+info()  { printf "${CYAN}[INFO]${NC}  %s\n" "$*"; }
+ok()    { printf "${GREEN}[OK]${NC}    %s\n" "$*"; }
+warn()  { printf "${YELLOW}[WARN]${NC} %s\n" "$*"; }
+err()   { printf "${RED}[ERR]${NC}   %s\n" "$*" >&2; return 1; }
+
+# ── Config ───────────────────────────────────────────────────────
+
+load_config() {
+  if [[ -f "$CONFIG_FILE" ]]; then
+    # shellcheck source=/dev/null
+    source "$CONFIG_FILE"
+  fi
+
+  WINAPPS_VM_RAM="${WINAPPS_VM_RAM:-$DEFAULT_RAM}"
+  WINAPPS_VM_CPU_CORES="${WINAPPS_VM_CPU_CORES:-$DEFAULT_CPU_CORES}"
+  WINAPPS_VM_DISK_SIZE="${WINAPPS_VM_DISK_SIZE:-$DEFAULT_DISK_SIZE}"
+  WINAPPS_VM_VERSION="${WINAPPS_VM_VERSION:-$DEFAULT_VERSION}"
+  WINAPPS_VM_USERNAME="${WINAPPS_VM_USERNAME:-$DEFAULT_USERNAME}"
+  WINAPPS_VM_PASSWORD="${WINAPPS_VM_PASSWORD:-}"
+  TZ="${TZ:-$(timedatectl show -p Timezone --value 2>/dev/null || echo UTC)}"
+}
+
+save_config() {
+  mkdir -p "$(dirname "$CONFIG_FILE")"
+  cat > "$CONFIG_FILE" <<EOF
+# winapps-vm configuration
+# Edit this file to change VM resources. Run 'winapps-vm remove && winapps-vm install' to apply.
+WINAPPS_VM_RAM=${WINAPPS_VM_RAM}
+WINAPPS_VM_CPU_CORES=${WINAPPS_VM_CPU_CORES}
+WINAPPS_VM_DISK_SIZE=${WINAPPS_VM_DISK_SIZE}
+WINAPPS_VM_VERSION=${WINAPPS_VM_VERSION}
+WINAPPS_VM_USERNAME=${WINAPPS_VM_USERNAME}
+WINAPPS_VM_PASSWORD=${WINAPPS_VM_PASSWORD}
+TZ=${TZ}
+EOF
+}
+
+# ── Prerequisites ────────────────────────────────────────────────
+
+check_prerequisites() {
+  local disk_size_num
+  disk_size_num=$(echo "${1:-$WINAPPS_VM_DISK_SIZE}" | sed 's/G//')
+  local required_space=$((disk_size_num + 10))
+
+  if [[ ! -e /dev/kvm ]]; then
+    err "KVM not available!"
+    echo ""
+    echo "  Enable virtualization in BIOS, then run:"
+    echo "    sudo modprobe kvm-amd   # for AMD CPUs"
+    echo "    sudo modprobe kvm-intel # for Intel CPUs"
+    exit 1
+  fi
+
+  if ! command -v docker &>/dev/null; then
+    err "Docker is not installed!"
+    echo "  Install it with: linux/setup/packaging/container-tools/docker.sh"
+    exit 1
+  fi
+
+  if ! docker info &>/dev/null; then
+    err "Docker daemon is not running!"
+    echo "  Start it with: sudo systemctl start docker"
+    exit 1
+  fi
+
+  local available_space
+  available_space=$(df "$HOME" | awk 'NR==2 {print int($4/1024/1024)}')
+  if (( available_space < required_space )); then
+    err "Insufficient disk space! Available: ${available_space}GB, Required: ${required_space}GB"
+    exit 1
+  fi
+
+  local missing=()
+  for cmd in docker-compose xfreerdp3 jq gum; do
+    if ! command -v "$cmd" &>/dev/null; then
+      missing+=("$cmd")
+    fi
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    err "Missing dependencies: ${missing[*]}"
+    echo "  Install them with: linux/setup/packaging/office/winapps-vm.sh"
+    exit 1
+  fi
+}
+
+# ── Install ──────────────────────────────────────────────────────
+
+install_vm() {
+  trap 'echo ""; echo "Installation cancelled"; exit 1' INT
+
+  info "WinApps VM Installer"
+  echo ""
+
+  # Load or create config
+  if [[ -f "$CONFIG_FILE" ]]; then
+    info "Found existing config at $CONFIG_FILE"
+    load_config
+  else
+    info "Creating new configuration..."
+    WINAPPS_VM_RAM="$DEFAULT_RAM"
+    WINAPPS_VM_CPU_CORES="$DEFAULT_CPU_CORES"
+    WINAPPS_VM_DISK_SIZE="$DEFAULT_DISK_SIZE"
+    WINAPPS_VM_VERSION="$DEFAULT_VERSION"
+    WINAPPS_VM_USERNAME="$DEFAULT_USERNAME"
+  fi
+
+  # Get system resources
+  local total_ram
+  total_ram=$(awk 'NR==1 {printf "%d", $2/1024/1024}' /proc/meminfo)
+  local total_cores
+  total_cores=$(nproc)
+
+  echo "System: ${total_ram}GB RAM, ${total_cores} CPU cores"
+  echo ""
+
+  # RAM selection
+  local ram_options=""
+  for size in 4 8 16 24 32 64; do
+    if (( size <= total_ram )); then
+      ram_options="$ram_options ${size}G"
+    fi
+  done
+
+  local selected_ram
+  selected_ram=$(echo "$ram_options" | tr ' ' '\n' | gum choose --selected="$WINAPPS_VM_RAM" --header="RAM for Windows VM?")
+  [[ -z "$selected_ram" ]] && { echo "Cancelled"; exit 1; }
+  WINAPPS_VM_RAM="$selected_ram"
+
+  # CPU selection
+  local selected_cores
+  selected_cores=$(gum input --placeholder="CPU cores (1-${total_cores})" --value="$WINAPPS_VM_CPU_CORES" --header="CPU cores for Windows VM?" --char-limit=3)
+  [[ -z "$selected_cores" ]] && { echo "Cancelled"; exit 1; }
+  if ! [[ "$selected_cores" =~ ^[0-9]+$ ]] || (( selected_cores < 1 )) || (( selected_cores > total_cores )); then
+    warn "Invalid input. Using default: $DEFAULT_CPU_CORES cores"
+    selected_cores="$DEFAULT_CPU_CORES"
+  fi
+  WINAPPS_VM_CPU_CORES="$selected_cores"
+
+  # Disk selection
+  local available_space
+  available_space=$(df "$HOME" | awk 'NR==2 {print int($4/1024/1024)}')
+  local max_disk=$((available_space - 10))
+  if (( max_disk < 32 )); then
+    err "Insufficient disk space for VM! Available: ${available_space}GB"
+    exit 1
+  fi
+
+  local disk_options=""
+  for size in 32 50 64 80 128 160 200; do
+    if (( size <= max_disk )); then
+      disk_options="$disk_options ${size}G"
+    fi
+  done
+
+  local selected_disk
+  selected_disk=$(echo "$disk_options" | tr ' ' '\n' | gum choose --selected="$WINAPPS_VM_DISK_SIZE" --header="Disk size for Windows VM? (64G recommended for Microsoft 365)")
+  [[ -z "$selected_disk" ]] && { echo "Cancelled"; exit 1; }
+
+  local disk_num
+  disk_num=$(echo "$selected_disk" | sed 's/G//')
+  if (( disk_num < 50 )); then
+    warn "Disk < 50G is very tight for Windows 11 + Microsoft 365. 64G+ recommended."
+  fi
+  WINAPPS_VM_DISK_SIZE="$selected_disk"
+
+  # Password
+  local password
+  password=$(gum input --placeholder="Password (default: admin)" --password --header="Windows password:")
+  if [[ -z "$password" ]]; then
+    password="admin"
+  fi
+  WINAPPS_VM_PASSWORD="$password"
+
+  # Summary
+  echo ""
+  gum style \
+    --border normal \
+    --padding "1 2" \
+    --margin "1" \
+    --align left \
+    --bold \
+    "WinApps VM Configuration" \
+    "" \
+    "RAM:       $WINAPPS_VM_RAM" \
+    "CPU:       $WINAPPS_VM_CPU_CORES cores" \
+    "Disk:      $WINAPPS_VM_DISK_SIZE" \
+    "Version:   Windows $WINAPPS_VM_VERSION" \
+    "Username:  $WINAPPS_VM_USERNAME" \
+    "Password:  ****"
+
+  echo ""
+  if ! gum confirm "Proceed with this configuration?"; then
+    echo "Cancelled"
+    exit 1
+  fi
+
+  # Prerequisites check
+  check_prerequisites "$disk_num"
+
+  # Save config
+  save_config
+  ok "Configuration saved to $CONFIG_FILE"
+
+  # Create directories
+  mkdir -p "$STORAGE_DIR"
+  mkdir -p "$SHARED_DIR"
+  mkdir -p "$HOME/.config/winapps-vm"
+  mkdir -p "$HOME/.local/share/applications/icons"
+
+  # Copy setup scripts to shared folder
+  local chezmoi_source="$HOME/.local/share/chezmoi/windows/setup/miniwindows"
+  if [[ -d "$chezmoi_source" ]]; then
+    mkdir -p "$SHARED_DIR/setup-mini"
+    cp -r "$chezmoi_source/"* "$SHARED_DIR/setup-mini/"
+    ok "Mini setup scripts copied to $SHARED_DIR/setup-mini/"
+  elif [[ -d "$HOME/.local/share/winapps-vm/setup-mini" ]]; then
+    cp -r "$HOME/.local/share/winapps-vm/setup-mini" "$SHARED_DIR/setup-mini/"
+    ok "Mini setup scripts copied to $SHARED_DIR/setup-mini/"
+  else
+    warn "Mini setup source not found."
+    warn "Copy Windows setup scripts from chezmoi/windows/setup/miniwindows/ to $SHARED_DIR/setup-mini/"
+  fi
+
+  # Create .desktop files
+  create_desktop_entries
+
+  # Generate docker-compose.yml
+  generate_compose
+
+  # Start VM
+  echo ""
+  info "Starting Windows VM installation..."
+  info "This will download a Windows 11 image (may take 10-15 minutes)."
+  echo ""
+  info "Monitor progress at: http://127.0.0.1:8006"
+  echo ""
+
+  if ! docker-compose -f "$COMPOSE_FILE" up -d 2>&1; then
+    err "Failed to start Windows VM!"
+    echo "  Common issues:"
+    echo "  - Docker daemon not running: sudo systemctl start docker"
+    echo "  - Port already in use: check if another VM is running"
+    echo "  - Permission issues: ensure user is in the docker group"
+    exit 1
+  fi
+
+  echo ""
+  ok "Windows VM is starting up!"
+  echo ""
+  info "Opening browser to monitor installation..."
+
+  sleep 3
+  xdg-open "http://127.0.0.1:8006" 2>/dev/null || true
+
+  echo ""
+  ok "Installation is running in the background."
+  echo ""
+  echo "  Monitor:  http://127.0.0.1:8006"
+  echo "  Launch:    winapps-vm launch"
+  echo "  Status:    winapps-vm status"
+  echo "  Stop:      winapps-vm stop"
+  echo "  Logs:      winapps-vm logs"
+  echo ""
+  info "After Windows boots, copy setup scripts from C:/shared/setup-mini/"
+}
+
+# ── Desktop Entries ─────────────────────────────────────────────
+
+create_desktop_entries() {
+  local icon_dir="$HOME/.local/share/applications/icons"
+  local icon_dest="$icon_dir/winapps-vm.png"
+  mkdir -p "$icon_dir"
+
+  # Try multiple icon source locations
+  local icon_found=false
+  for icon_src in \
+    "$HOME/.local/share/winapps-vm/icons/windows.png" \
+    "$HOME/.local/share/chezmoi/home/dot_local/share/winapps-vm/icons/windows.png" \
+    "/usr/share/icons/windows.png"; do
+    if [[ -f "$icon_src" ]]; then
+      cp "$icon_src" "$icon_dest"
+      icon_found=true
+      break
+    fi
+  done
+
+  if [[ "$icon_found" == false ]]; then
+    # Download a generic Windows icon if none found
+    warn "No Windows icon found, desktop entry will use default icon"
+  fi
+
+  cat > "$HOME/.local/share/applications/winapps-vm.desktop" <<'EOF'
+[Desktop Entry]
+Name=Windows Apps
+Comment=Launch Windows VM for Microsoft 365 apps via RDP
+Exec=uwsm app -- winapps-vm launch
+Icon=winapps-vm
+Terminal=false
+Type=Application
+Categories=Office;System;Virtualization;
+EOF
+
+  ok "Desktop entry created"
+}
+
+# ── Generate Compose ─────────────────────────────────────────────
+
+generate_compose() {
+  cat > "$COMPOSE_FILE" <<EOF
+services:
+  windows:
+    image: dockurr/windows
+    container_name: ${CONTAINER_NAME}
+    environment:
+      VERSION: "${WINAPPS_VM_VERSION}"
+      RAM_SIZE: "${WINAPPS_VM_RAM}"
+      CPU_CORES: "${WINAPPS_VM_CPU_CORES}"
+      DISK_SIZE: "${WINAPPS_VM_DISK_SIZE}"
+      USERNAME: "${WINAPPS_VM_USERNAME}"
+      PASSWORD: "${WINAPPS_VM_PASSWORD}"
+      TZ: "${TZ}"
+      ARGUMENTS: "-rtc base=localtime,clock=host,driftfix=slew"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "127.0.0.1:8006:8006"
+      - "127.0.0.1:3389:3389/tcp"
+      - "127.0.0.1:3389:3389/udp"
+    volumes:
+      - ${STORAGE_DIR}:/storage
+      - ${SHARED_DIR}:/shared
+    restart: unless-stopped
+    stop_grace_period: 2m
+EOF
+
+  ok "docker-compose.yml generated at $COMPOSE_FILE"
+}
+
+# ── Launch ───────────────────────────────────────────────────────
+
+launch_vm() {
+  local keep_alive=false
+  if [[ "${1:-}" == "--keep-alive" ]] || [[ "${1:-}" == "-k" ]]; then
+    keep_alive=true
+  fi
+
+  if [[ ! -f "$COMPOSE_FILE" ]]; then
+    err "Windows VM not configured. Run: winapps-vm install"
+    exit 1
+  fi
+
+  load_config
+
+  local win_user="${WINAPPS_VM_USERNAME:-docker}"
+  local win_pass="${WINAPPS_VM_PASSWORD:-admin}"
+
+  # Start container if not running
+  local container_status
+  container_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "missing")
+
+  if [[ "$container_status" != "running" ]]; then
+    info "Starting Windows VM..."
+
+    notify-send "Starting Windows VM" "This can take 15-30 seconds" -t 15000 2>/dev/null || true
+
+    if ! docker-compose -f "$COMPOSE_FILE" up -d 2>&1; then
+      err "Failed to start Windows VM!"
+      echo "  Check: winapps-vm status"
+      echo "  Logs: winapps-vm logs"
+      notify-send -u critical "WinApps VM" "Failed to start" 2>/dev/null || true
+      exit 1
+    fi
+
+    info "Waiting for Windows VM to be ready..."
+    local wait_count=0
+    until docker logs "$CONTAINER_NAME" 2>&1 | grep -qi "windows started successfully"; do
+      sleep 2
+      wait_count=$((wait_count + 1))
+      if (( wait_count > 90 )); then
+        err "Timeout: Windows VM failed to start within 3 minutes"
+        echo "  Check logs: winapps-vm logs"
+        exit 1
+      fi
+    done
+    ok "Windows VM is ready"
+  fi
+
+  # Lifecycle message
+  if [[ "$keep_alive" == true ]]; then
+    echo ""
+    gum style \
+      --border normal \
+      --padding "1 2" \
+      --margin "1" \
+      --align center \
+      "Connecting to Windows VM" \
+      "" \
+      "VM will keep running after RDP closes" \
+      "To stop: winapps-vm stop"
+  else
+    echo ""
+    gum style \
+      --border normal \
+      --padding "1 2" \
+      --margin "1" \
+      --align center \
+      "Connecting to Windows VM" \
+      "" \
+      "VM will auto-stop when RDP closes" \
+      "Use -k flag to keep running"
+  fi
+
+  # Detect Hyprland scale for RDP
+  local rdp_scale=""
+  if command -v hyprctl &>/dev/null; then
+    local hypr_scale
+    hypr_scale=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused == true) | .scale' 2>/dev/null || echo "")
+    if [[ -n "$hypr_scale" ]]; then
+      local scale_percent
+      scale_percent=$(echo "$hypr_scale" | awk '{print int($1 * 100)}')
+      if (( scale_percent >= 170 )); then
+        rdp_scale="/scale:180"
+      elif (( scale_percent >= 130 )); then
+        rdp_scale="/scale:140"
+      fi
+    fi
+  fi
+
+  # Connect via RDP
+  xfreerdp3 \
+    /u:"$win_user" \
+    /p:"$win_pass" \
+    /v:127.0.0.1:3389 \
+    -grab-keyboard \
+    /sound \
+    /microphone \
+    /clipboard \
+    /cert:ignore \
+    /dynamic-resolution \
+    /gfx:AVC444 \
+    /floatbar:sticky:off,default:visible,show:fullscreen \
+    /title:"Windows Apps" \
+    $rdp_scale
+
+  # After RDP closes
+  if [[ "$keep_alive" == false ]]; then
+    echo ""
+    info "RDP session closed. Stopping Windows VM..."
+    docker-compose -f "$COMPOSE_FILE" down 2>/dev/null
+    ok "Windows VM stopped."
+  else
+    echo ""
+    info "RDP session closed. VM is still running."
+    echo "  To stop: winapps-vm stop"
+  fi
+}
+
+# ── Stop ─────────────────────────────────────────────────────────
+
+stop_vm() {
+  if [[ ! -f "$COMPOSE_FILE" ]]; then
+    err "Windows VM not configured."
+    exit 1
+  fi
+
+  info "Stopping Windows VM..."
+  docker-compose -f "$COMPOSE_FILE" down 2>/dev/null
+  ok "Windows VM stopped."
+}
+
+# ── Status ───────────────────────────────────────────────────────
+
+status_vm() {
+  if [[ ! -f "$COMPOSE_FILE" ]]; then
+    echo "Windows VM not configured."
+    echo "To set up: winapps-vm install"
+    exit 1
+  fi
+
+  local container_status
+  container_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "missing")
+
+  if [[ -z "$container_status" ]] || [[ "$container_status" == "missing" ]]; then
+    echo "Windows VM container not found."
+    echo "To start: winapps-vm launch"
+  elif [[ "$container_status" == "running" ]]; then
+    gum style \
+      --border normal \
+      --padding "1 2" \
+      --margin "1" \
+      --align left \
+      "Windows VM Status: RUNNING" \
+      "" \
+      "Web interface: http://127.0.0.1:8006" \
+      "RDP available:  port 3389" \
+      "" \
+      "To connect: winapps-vm launch" \
+      "To stop:    winapps-vm stop"
+  else
+    echo "Windows VM is stopped, status: $container_status"
+    echo "To start: winapps-vm launch"
+  fi
+}
+
+# ── Logs ─────────────────────────────────────────────────────────
+
+logs_vm() {
+  if [[ ! -f "$COMPOSE_FILE" ]]; then
+    err "Windows VM not configured."
+    exit 1
+  fi
+  docker logs "$CONTAINER_NAME" --tail 50 "${@:-}"
+}
+
+# ── Remove ───────────────────────────────────────────────────────
+
+remove_vm() {
+  if ! gum confirm --default=false "Remove Windows VM and delete all data?"; then
+    echo "Removal cancelled"
+    exit 0
+  fi
+
+  info "Removing Windows VM..."
+
+  docker-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
+  docker rmi dockurr/windows 2>/dev/null || true
+
+  rm -f "$HOME/.local/share/applications/winapps-vm.desktop"
+  rm -rf "$HOME/.config/winapps-vm"
+  rm -rf "$STORAGE_DIR"
+
+  local shared_msg="Also remove shared folder? This deletes files shared between Linux and Windows."
+  if gum confirm --default=false "$shared_msg"; then
+    rm -rf "$SHARED_DIR"
+    ok "Shared folder removed"
+  else
+    info "Shared folder kept at $SHARED_DIR"
+  fi
+
+  echo ""
+  ok "Windows VM removal completed!"
+}
+
+# ── Usage ────────────────────────────────────────────────────────
+
+show_usage() {
+  cat <<'EOF'
+winapps-vm - manage a lightweight Windows 11 VM for Microsoft 365 apps
+
+Usage: winapps-vm <command> [options]
+
+Commands:
+  install              Set up Windows VM for the first time
+  launch [options]     Start VM and connect via RDP
+    --keep-alive, -k   Keep VM running after RDP disconnects
+  stop                 Shut down the VM
+  status               Show current VM status
+  logs [options]       Show VM container logs (passes args to docker logs)
+  remove               Remove VM and optionally delete all data
+  help                 Show this help message
+
+Examples:
+  winapps-vm install           # First-time setup
+  winapps-vm launch             # Connect (auto-stop on exit)
+  winapps-vm launch -k         # Connect (keep running)
+  winapps-vm stop               # Shut down
+  winapps-vm logs -f            # Follow VM logs
+  winapps-vm status             # Check status
+
+Config: ~/.config/winapps-vm/config.env
+Shared: ~/WinApps/shared (maps to C:\shared in Windows)
+EOF
+}
+
+# ── Main ──────────────────────────────────────────────────────────
+
+case "${1:-}" in
+  install)  install_vm ;;
+  launch|start) launch_vm "${2:-}" ;;
+  stop|down) stop_vm ;;
+  status)   status_vm ;;
+  logs)     shift; logs_vm "$@" ;;
+  remove)  remove_vm ;;
+  help|--help|-h|"") show_usage ;;
+  *)
+    err "Unknown command: ${1:-}"
+    show_usage >&2
+    exit 1
+    ;;
+esac

@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+if ! command -v get_hyprConf >/dev/null 2>&1; then
+    eval "$(hyde-shell init)"
+fi
+
+rofi_theme=${ROFI_NETWORK_STYLE:-${ROFI_LAUNCH_STYLE:-clipboard}}
+font_scale=${ROFI_NETWORK_SCALE:-${ROFI_LAUNCH_SCALE:-${ROFI_SCALE:-10}}}
+font_name=${ROFI_NETWORK_FONT:-${ROFI_LAUNCH_FONT:-${ROFI_FONT:-}}}
+font_name=${font_name:-$(get_hyprConf "MENU_FONT")}
+font_name=${font_name:-$(get_hyprConf "FONT")}
+hypr_border=${hypr_border:-$(hyprctl -j getoption decoration:rounding 2>/dev/null | jq '.int' 2>/dev/null || printf 10)}
+hypr_width=${hypr_width:-$(hyprctl -j getoption general:border_size 2>/dev/null | jq '.int' 2>/dev/null || printf 2)}
+wind_border=$((hypr_border * 3 / 2))
+elem_border=$([ "$hypr_border" -eq 0 ] && echo "5" || echo "$hypr_border")
+
+font_override="* {font: \"${font_name:-JetBrainsMono Nerd Font} $font_scale\";}"
+icon_theme=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | sed "s/'//g")
+icon_override="configuration {icon-theme: \"$icon_theme\";}"
+layout_override="window {width: ${ROFI_NETWORK_WIDTH:-34em}; border: ${hypr_width}px; border-radius: ${wind_border}px;} entry {border-radius: ${elem_border}px; placeholder: \"󰤨 Network\";} element {border-radius: ${elem_border}px;} listview {lines: ${ROFI_NETWORK_LINES:-8};}"
+
+rofi_menu() {
+    rofi -dmenu -i -p "Network" \
+        -theme-str "$font_override" \
+        -theme-str "$icon_override" \
+        -theme-str "$layout_override" \
+        -theme "$rofi_theme"
+}
+
+rofi_password() {
+    rofi -dmenu -password -p "$1" \
+        -theme-str "$font_override" \
+        -theme-str "$icon_override" \
+        -theme-str "$layout_override" \
+        -theme "$rofi_theme"
+}
+
+notify() {
+    notify-send -a "Network" "$1" "${2:-}"
+}
+
+active_summary() {
+    nmcli -t -f NAME,TYPE connection show --active \
+        | awk -F: '$2 != "loopback" { print $1 }' \
+        | paste -sd ', ' -
+}
+
+toggle_networking() {
+    if [[ $(nmcli -t -f NETWORKING general) == "enabled" ]]; then
+        nmcli networking off
+        notify "Networking disabled"
+    else
+        nmcli networking on
+        notify "Networking enabled"
+    fi
+}
+
+toggle_wifi() {
+    if [[ $(nmcli -t -f WIFI general) == "enabled" ]]; then
+        nmcli radio wifi off
+        notify "Wi-Fi disabled"
+    else
+        nmcli radio wifi on
+        notify "Wi-Fi enabled"
+    fi
+}
+
+connection_menu() {
+    local selection name
+    selection=$(nmcli -t -f NAME,TYPE connection show \
+        | awk -F: '$2 != "loopback" { print $1 "\t" $2 }' \
+        | sort \
+        | rofi_menu) || return 0
+
+    name=${selection%%$'\t'*}
+    [[ -n $name ]] || return 0
+
+    nmcli connection up "$name" && notify "Connected" "$name"
+}
+
+wifi_menu() {
+    local selection ssid security password
+    nmcli device wifi rescan >/dev/null 2>&1 || true
+
+    selection=$(nmcli -t -f ACTIVE,SSID,SIGNAL,SECURITY device wifi list \
+        | awk -F: '$2 != "" { icon = ($1 == "yes" ? "●" : "○"); print icon "\t" $2 "\t" $3 "%\t" $4 }' \
+        | sort -k3 -nr \
+        | rofi_menu) || return 0
+
+    ssid=$(awk -F'\t' '{ print $2 }' <<< "$selection")
+    security=$(awk -F'\t' '{ print $4 }' <<< "$selection")
+    [[ -n $ssid ]] || return 0
+
+    if grep -Fqx "$ssid" <(nmcli -t -f NAME connection show); then
+        nmcli connection up "$ssid" && notify "Connected" "$ssid"
+        return 0
+    fi
+
+    if [[ -n $security && $security != "--" ]]; then
+        password=$(rofi_password "Password for $ssid") || return 0
+        [[ -n $password ]] || return 0
+        nmcli device wifi connect "$ssid" password "$password" && notify "Connected" "$ssid"
+    else
+        nmcli device wifi connect "$ssid" && notify "Connected" "$ssid"
+    fi
+}
+
+main() {
+    local active wifi_state networking_state selection
+
+    active=$(active_summary)
+    wifi_state=$(nmcli -t -f WIFI general)
+    networking_state=$(nmcli -t -f NETWORKING general)
+
+    selection=$(printf '%s\n' \
+        "󰈀 Active: ${active:-none}" \
+        "󰤨 Wi-Fi: $wifi_state" \
+        "󰤭 Scan Wi-Fi" \
+        "󰛳 Saved connections" \
+        "󰤮 Networking: $networking_state" \
+        "󰏫 Open advanced editor" \
+        | rofi_menu) || return 0
+
+    case $selection in
+        "󰤨 Wi-Fi:"*) toggle_wifi ;;
+        "󰤭 Scan Wi-Fi") wifi_menu ;;
+        "󰛳 Saved connections") connection_menu ;;
+        "󰤮 Networking:"*) toggle_networking ;;
+        "󰏫 Open advanced editor") nm-connection-editor ;;
+    esac
+}
+
+main "$@"

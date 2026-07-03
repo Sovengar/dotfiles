@@ -1,0 +1,18 @@
+{
+    "custom/clipboard": {
+        "format": "\uf07f",
+        "tooltip": false,
+        "on-click": "sleep 0.1 && hyde-shell cliphist -c",
+        "menu": "on-click-right",
+        "menu-file": "$XDG_DATA_HOME/waybar/menus/clipboard.xml",
+        "menu-actions": {
+            "favorites": "hyde-shell cliphist --favorites",
+            "history": "hyde-shell cliphist --copy",
+            "delete": "hyde-shell cliphist --delete",
+            "manage-favorites": "hyde-shell cliphist --manage-fav",
+            "clear-history": "hyde-shell cliphist --wipe"
+        },
+        "signal": 2
+    },
+    "_comments": []
+}

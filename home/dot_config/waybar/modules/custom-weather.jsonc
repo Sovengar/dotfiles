@@ -1,0 +1,9 @@
+{
+  "custom/weather": {
+    "exec": "$XDG_CONFIG_HOME/waybar/scripts/waybar-weather-status",
+    "tooltip": true,
+    "format": "{}",
+    "interval": 600,
+    "return-type": "json"
+  }
+}

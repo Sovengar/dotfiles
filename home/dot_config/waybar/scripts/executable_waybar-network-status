@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+runtime_dir=${XDG_RUNTIME_DIR:-/tmp}
+state_dir="$runtime_dir/waybar-network"
+mode_file="$state_dir/mode"
+bytes_file="$state_dir/bytes"
+mkdir -p "$state_dir"
+
+default_interface() {
+    ip route get 1.1.1.1 2>/dev/null | awk '{ for (i = 1; i <= NF; i++) if ($i == "dev") { print $(i + 1); exit } }'
+}
+
+human_bytes() {
+    local bytes=$1
+    awk -v bytes="$bytes" 'BEGIN {
+        split("B KB MB GB", units, " ");
+        value = bytes;
+        unit = 1;
+        while (value >= 1024 && unit < 4) { value /= 1024; unit++ }
+        if (unit == 1) printf "%d%s/s", value, units[unit];
+        else printf "%.1f%s/s", value, units[unit];
+    }'
+}
+
+json_escape() {
+    printf '%s' "$1" | jq -Rsa .
+}
+
+interface=$(default_interface)
+mode=$(cat "$mode_file" 2>/dev/null || printf icon)
+
+if [[ -z $interface ]]; then
+    jq -cn --arg text "󰖪" --arg tooltip "Disconnected" '{text: $text, tooltip: $tooltip, class: "disconnected"}'
+    exit 0
+fi
+
+rx_file="/sys/class/net/$interface/statistics/rx_bytes"
+tx_file="/sys/class/net/$interface/statistics/tx_bytes"
+rx=$(cat "$rx_file" 2>/dev/null || printf 0)
+tx=$(cat "$tx_file" 2>/dev/null || printf 0)
+now=$(date +%s)
+
+previous_rx=$rx
+previous_tx=$tx
+previous_now=$now
+if [[ -f $bytes_file ]]; then
+    read -r previous_now previous_rx previous_tx < "$bytes_file" || true
+fi
+printf '%s %s %s\n' "$now" "$rx" "$tx" > "$bytes_file"
+
+elapsed=$((now - previous_now))
+((elapsed < 1)) && elapsed=1
+down_rate=$(((rx - previous_rx) / elapsed))
+up_rate=$(((tx - previous_tx) / elapsed))
+((down_rate < 0)) && down_rate=0
+((up_rate < 0)) && up_rate=0
+down=$(human_bytes "$down_rate")
+up=$(human_bytes "$up_rate")
+
+type=$(nmcli -t -f DEVICE,TYPE device status | awk -F: -v iface="$interface" '$1 == iface { print $2; exit }')
+connection=$(nmcli -t -f DEVICE,CONNECTION device status | awk -F: -v iface="$interface" '$1 == iface { print $2; exit }')
+ip_addr=$(ip -o -4 addr show dev "$interface" 2>/dev/null | awk '{ print $4; exit }')
+gateway=$(ip route show default dev "$interface" 2>/dev/null | awk '{ print $3; exit }')
+
+signal=""
+if [[ $type == "wifi" ]]; then
+    signal=$(nmcli -t -f DEVICE,SIGNAL device wifi list | awk -F: -v iface="$interface" '$1 == iface { print $2; exit }')
+fi
+
+case "$type" in
+    wifi) icon="" ;;
+    ethernet) icon="󰈀" ;;
+    *) icon="󰤭" ;;
+esac
+
+if [[ $mode == bandwidth ]]; then
+    text=" $down  $up"
+else
+    text="$icon"
+fi
+
+tooltip="Network: <big><b>${connection:-$interface}</b></big>"
+tooltip+=$'\n'"Interface: <b>$interface</b>"
+tooltip+=$'\n'"Type: <b>${type:-unknown}</b>"
+if [[ -n $signal ]]; then
+    tooltip+=$'\n'"${connection} (<b>${signal}%</b>) "
+fi
+tooltip+=$'\n'"IP: <b>${ip_addr:-unknown}</b>"
+tooltip+=$'\n'"Gateway: <b>${gateway:-unknown}</b>"
+tooltip+=$'\n'"Download: <b>$down</b>"
+tooltip+=$'\n'"Upload: <b>$up</b>"
+
+printf '{"text":%s,"tooltip":%s,"class":%s}\n' \
+    "$(json_escape "$text")" \
+    "$(json_escape "$tooltip")" \
+    "$(json_escape "${type:-unknown}")"

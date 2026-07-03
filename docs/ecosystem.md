@@ -1,12 +1,13 @@
 # Ecosystem & Dependencies
 
-> Complemento a `docs/hyde-workflow.md`. Catálogo de herramientas instaladas.
+> Catálogo de herramientas instaladas.
 
 ### Terminal & Shell
 | Tool | Purpose | Install |
 |------|---------|---------|
 | tealdeer (tldr) | Simplified man pages with examples | cargo/system |
 | ghostty | Terminal emulator | system |
+| konsole | Terminal emulator (KDE) | system |
 | wezterm | Terminal emulator | AUR (nightly bin) |
 | kitty | Terminal emulator | system |
 | zellij | Terminal multiplexer/workspace | system/cargo |
@@ -48,6 +49,7 @@
 | fzf | Fuzzy finder | brew/curl |
 | zoxide | Smarter cd | brew/curl |
 | bat | Cat with syntax | brew/curl |
+| bru (Bruno CLI) | API client CLI | mise/npm |
 | eza | Modern ls | brew/curl |
 | jq | JSON processor | brew/curl |
 | hurl | HTTP CLI | brew/curl |
@@ -60,6 +62,7 @@
 | sd | Find & replace (s/foo/bar) | cargo |
 | dog | DNS client (`dog-dns`) | cargo |
 | xh | HTTPie-style HTTP client | cargo |
+| curl | HTTP client | system |
 | atuin | Shell history with search | cargo |
 | kill-port | Kill process bound to a port | npm |
 | portless | Stable `.localhost` dev domains without ports | npm |
@@ -69,8 +72,13 @@
 | delta | Syntax-highlighted git pager (git-delta) | pacman |
 | hunkdiff (hunk) | TUI diff viewer with AI/agent annotations | npm |
 | git-absorb | Auto fixup commits | pacman |
+| git-flow | Git Flow branching model (AVH) | pacman |
+| git-lfs | Git Large File Storage | system |
 | git-machete | Git branch hierarchy manager | pip |
-
+| gh | GitHub CLI | pacman/brew |
+| jj (jujutsu) | Modern VCS compatible with Git repos | system |
+| lazygit | TUI for Git | pacman |
+| wt (worktrunk) | Git worktree manager | system |
 | easy-conflict (ec) | 3-pane conflict resolver TUI | AUR |
 
 ### Dev Tools
@@ -115,11 +123,18 @@
 | Tool | Purpose | Install |
 |------|---------|---------|
 | onlyoffice-bin | Office suite | CachyOS repo |
+| obsidian | Knowledge base / note-taking (markdown) | system |
+| obsidian-cli-git | Interactive con vaults desde terminal (CLI) | AUR |
 | poppler | PDF utilities (pdftotext, pdfimages) | system |
+| winapps-vm | Windows 11 VM launcher for Microsoft 365 (dockurr/windows + RDP) | chezmoi script |
+| freerdp | RDP client for winapps-vm | system |
+| gum | Interactive prompts for winapps-vm | system |
+| dockurr/windows | Windows 11 Docker image (VM backend) | Docker |
 
 ### Media & Entertainment
 | Tool | Purpose | Install |
 |------|---------|---------|
+| plex-media-server | Media streaming server | system |
 | spotify-adblock | Spotify ad blocker | AUR |
 | imv | Wayland-native lightweight image viewer | system |
 | ffmpeg | Video/audio processing | system |
