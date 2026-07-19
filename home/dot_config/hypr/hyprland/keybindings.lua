@@ -88,6 +88,7 @@ exec(mainMod .. " + E", "sh -lc 'exec hyde-shell open --fall \"${EXPLORER:-dolph
 exec(mainMod .. " + Y", "sh -lc 'exec \"${TERMINAL:-wezterm}\" -e yazi'", "Open yazi file manager")
 exec(mainMod .. " + T", "sh -lc 'exec hyde-shell open --fall \"${EDITOR:-code-oss}\" text-editor'", "Open text editor")
 exec(mainMod .. " + B", "sh -lc 'exec hyde-shell open --fall \"${BROWSER:-zen-browser}\" web-browser'", "Open browser")
+exec(mainMod .. " + M", "sh -lc 'exec spotify'", "Open Spotify")
 exec("CONTROL + SHIFT + Escape", "hyde-shell system.monitor", "Open system monitor")
 
 -- Launcher / Rofi menus
