@@ -5,7 +5,7 @@
     "return-type": "json",
     "interval": 86400,
     "menu": "on-click",
-    "menu-file": "$XDG_DATA_HOME/waybar/menus/hyde-menu.xml",
+    "menu-file": "$XDG_CONFIG_HOME/waybar/menus/hyde-menu.xml",
     "menu-actions": {
       "animations-select": "hyde-shell animations --select",
       "wallpaper-select": "hyde-shell wallpaper --select --global",

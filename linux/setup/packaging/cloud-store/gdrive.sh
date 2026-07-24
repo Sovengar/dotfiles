@@ -42,8 +42,16 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=rclone mount gdrive: $MOUNT_POINT --vfs-cache-mode writes --dir-cache-time 30s
-ExecStop=$FUSERMOUNT_CMD -u $MOUNT_POINT
+ExecStart=rclone mount gdrive: $MOUNT_POINT \
+  --vfs-cache-mode full \
+  --vfs-cache-max-size 10G \
+  --dir-cache-time 30m \
+  --poll-interval 1m \
+  --vfs-read-chunk-size 8M \
+  --vfs-read-chunk-size-limit 256M \
+  --buffer-size 32M \
+  --attr-timeout 5s
+ExecStop=$FUSERMOUNT_CMD -uz $MOUNT_POINT
 Restart=on-failure
 RestartSec=10
 

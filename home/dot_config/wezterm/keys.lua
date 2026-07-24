@@ -16,6 +16,8 @@ M.mouse_bindings = {
 M.bindings = {
 
   -- TERMINAL DEFAULTS
+  -- Ctrl+Backspace → terminal-level: sends Ctrl+W so any shell gets backward-kill-word without per-shell config
+  { mods = "CTRL",          key = "Backspace",      action = act.SendKey({ key = "w", mods = "CTRL" }),             desc = "Delete word backward (Ctrl+W)" },
   { mods = "CTRL",          key = "=",              action = act.IncreaseFontSize,                                  desc = "Increase font size" },
   { mods = "CTRL",          key = "-",              action = act.DecreaseFontSize,                                  desc = "Decrease font size" },
   { mods = "CTRL|SHIFT",    key = "0",              action = act.ResetFontSize,                                     desc = "Reset font size" },

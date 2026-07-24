@@ -11,17 +11,34 @@ function git --wraps git
             case '?'
                 _git_abbrv_list
                 return
-            case sync isync
-                if test (count $argv) -lt 2
-                    echo "Usage: git $argv[1] <branch>" >&2
-                    return 1
-                end
-                if test $argv[1] = sync
-                    command git pull --rebase --autostash origin $argv[2]
-                else
-                    command git pull --rebase=interactive --autostash origin $argv[2]
-                end
-                return
+        case sync isync
+            if test (count $argv) -lt 2
+                echo "Usage: git $argv[1] <branch>" >&2
+                return 1
+            end
+            if test $argv[1] = sync
+                command git pull --rebase --autostash origin $argv[2]
+            else
+                command git pull --rebase=interactive --autostash origin $argv[2]
+            end
+            return
+        case lazy-sync
+            if test (count $argv) -lt 2
+                echo "Usage: git lazy-sync <base-branch>" >&2
+                return 1
+            end
+            set -l target $argv[2]
+            set -l branch (git rev-parse --abbrev-ref HEAD 2>/dev/null)
+            or begin; echo "error: not a git repo" >&2; return 1; end
+            set -l base (git merge-base $target HEAD 2>/dev/null)
+            or begin; echo "error: cannot find merge-base with $target" >&2; return 1; end
+            echo "Lazy sync: Squashing all commits from $target..$branch"
+            command git reset --soft $base
+            and read -l -P "Commit message: " msg
+            or begin; echo "Aborted."; return 1; end
+            command git commit -m $msg
+            and command git pull --rebase --autostash origin $target
+            return
         end
     end
     command git $argv
@@ -47,6 +64,7 @@ abbr g git  # "g" → "git", abrevia todos los comandos
 # Sync working branch fetching foreign branch (main, develop, deploy, ...)
     abbr sync --command git --function __abbr_sync  # pull --rebase --autostash origin <branch>. Uses º for fzf.
     abbr isync --command git --function __abbr_isync  # pull --rebase=interactive --autostash origin <branch>. Uses º.
+    abbr lazy-sync --command git lazy-sync  # Squash all local commits + rebase on main
 
 # Push
     abbr p --command git push  # Push commits to remote branch (default: origin current-branch)

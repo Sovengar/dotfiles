@@ -92,3 +92,4 @@ opacity_rule("opacity-planify", "^(io.github.alainm23.planify)$", 0.97, 0.80)
 opacity_rule("opacity-impression", "^(io.gitlab.adhami3310.Impression)$", 0.97, 0.80)
 opacity_rule("opacity-mission-center", "^(io.missioncenter.MissionCenter)$", 0.97, 0.80)
 opacity_rule("opacity-warehouse", "^(io.github.flattool.Warehouse)$", 0.97, 0.80)
+

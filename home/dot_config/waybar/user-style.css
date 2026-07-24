@@ -55,9 +55,11 @@ window#waybar.bottom #leaf-inverse #workspaces button.active {
 }
 
 window#waybar {
-    background: alpha(@main-bg, 0.72);
-    border-bottom: 1px solid alpha(@main-fg, 0.10);
+    background: alpha(@main-bg, 0.95);
+    border: 1px solid alpha(@main-fg, 0.10);
+    border-radius: 10px;
     box-shadow: 0 10px 34px alpha(@main-bg, 0.24);
+
 }
 
 window#waybar label.module,
@@ -163,6 +165,14 @@ window#waybar.bottom label.module {
     min-width: 2em;
 }
 
+tooltip {
+    background: #ff0000;
+    color: #ffffff;
+    border: 2px solid #00ff00;
+    font-size: 20px;
+    padding: 10px;
+}
+
 #custom-cava {
     color: @main-fg;
     opacity: 1;
@@ -196,20 +206,6 @@ window#waybar.bottom label.module:hover {
 
 #custom-thermals {
     min-width: 1.35em;
-}
-
-#custom-wallbash-mode {
-    min-width: 5.8em;
-}
-
-#custom-wallbash-mode.wallbash-theme {
-    color: alpha(@main-fg, 0.72);
-}
-
-#custom-wallbash-mode.wallbash-auto,
-#custom-wallbash-mode.wallbash-dark,
-#custom-wallbash-mode.wallbash-light {
-    color: @main-fg;
 }
 
 #audio {

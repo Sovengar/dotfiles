@@ -46,13 +46,14 @@ customCommands:
     output: terminal
 
 # HYDE_THEME_START
+
 gui:
   theme:
-    activeBorderColor: [green, bold]
-    inactiveBorderColor: [default]
-    selectedLineBgColor: [blue]
-    searchingActiveBorderColor: [cyan, bold]
-    optionsTextColor: [blue]
-    unstagedChangesColor: [red]
-    defaultFgColor: [default]
+    activeBorderColor: ["#FFFFFF", bold]
+    inactiveBorderColor: ["#CFCCFF"]
+    selectedLineBgColor: ["#BFAAF0"]
+    searchingActiveBorderColor: ["#FFFFFF", bold]
+    optionsTextColor: ["#AEAAF0"]
+    unstagedChangesColor: ["#DBCCFF"]
+    defaultFgColor: ["#FFFFFF"]
 # HYDE_THEME_END
