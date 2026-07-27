@@ -1,236 +1,259 @@
 # Dotfiles
 
-Gestionados con [chezmoi](https://www.chezmoi.io).
+Gestionados con [chezmoi](https://www.chezmoi.io). Hay **3 repositorios separados**, cada uno 100% autocontenido:
 
-Dos flujos independientes por SO:
+| Repo | SO | Distro | Shell | Dotfiles | Setup |
+|------|----|--------|-------|----------|-------|
+| `dotfiles-linux-personal` | Linux | CachyOS (pacman+AUR) | zsh + fish | Desktop completo (44 dirs en `dot_config/`) | `packaging/` 30+ categorías |
+| `dotfiles-linux-server` | Linux | Ubuntu Server (apt) | fish | Headless + dev tools (12 dirs en `dot_config/`) | `packaging/` minimal |
+| `dotfiles-windows-personal` | Windows | winget / PowerShell | PowerShell | AppData, Documents, packages.yaml | `run-all.ps1` |
 
-| Flujo | SO | ¿Cuándo? | ¿Cómo? |
-|-------|----|----------|--------|
-| **Dotfiles** `(1)` | Linux / Windows | Cualquier máquina (diario) | `chezmoi apply` |
-| **Formateo Linux** `(2a)` | Linux | Máquina nueva | `curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/linux/setup/install.sh \| bash` |
-| **Formateo Windows** `(2b)` | Windows | Máquina nueva o actualizar paquetes | `.\windows\setup\run-all.ps1` |
+Cada repo tiene `.chezmoiroot` (→ `home`) para que `chezmoi diff/add/edit/apply` funcionen **sin `--source`**.
 
----
+## Flujos
 
-## (1) Flujo Dotfiles — máquina ya configurada
+### (1) Aplicar dotfiles — máquina ya configurada
 
 ```bash
+# Linux (personal o server) — cd dentro del repo
+cd ~/.local/share/chezmoi
+chezmoi diff    # revisar cambios
+chezmoi apply   # aplicar
+
+# Windows
+chezmoi diff
 chezmoi apply
 ```
 
-Aplica **solo dotfiles** (configs de shell, wezterm, lazygit, opencode, starship, git, etc.) y scripts ligeros.
-Rápido, predecible, sin instalación de apps.
-
-### Para mantener actualizado
+Pull + apply (máquina ya configurada):
 
 ```bash
-chezmoi update
-# = git pull + chezmoi apply
-```
-
----
-
-## (2a) Flujo Formateo — Linux (máquina nueva)
-
-Script bash que instala Git si falta, clona este repo y ejecuta el setup local. No aplica dotfiles automáticamente:
-
-```bash
-curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/linux/setup/install.sh | bash
-```
-
-Si no usas `curl | bash`, inicializa el source state con `chezmoi` y ejecuta el setup local:
-
-```bash
-chezmoi init https://github.com/Sovengar/dotfiles
 cd ~/.local/share/chezmoi
-./linux/setup/install.sh
+git pull --ff-only
+chezmoi apply
 ```
 
-En una máquina nueva, primero ejecuta los scripts Linux y deja `chezmoi apply` para el final, manualmente.
-
-El script `install.sh` orquesta 4 fases:
-
-1. **Preflight** — checks de sistema, XDG dirs, Linuxbrew
-2. **Packaging** — CLI tools, API tools, docker, dropbox, zsh+fish, KeePassXC, Zen Browser
-3. **Config** — shell por defecto, brew en PATH, teclado, autostarts, mounts, audio, pyprland
-4. **Post-install** — resumen + próximos pasos
-
-Los scripts individuales pueden ejecutarse por separado:
+### (2a) Fresh install — Linux Personal (CachyOS)
 
 ```bash
-# Ejemplo: solo instalar shells
-bash ~/.local/share/chezmoi/linux/setup/packaging/30-shells.sh
+curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/launchers/personal.sh | bash
 ```
 
-> **Nota:** Detecta automáticamente apt/pacman/dnf/brew.  
-> Los scripts heredados están en `linux/old/`.
+El script público (launcher) instala git + gh, autentica con GitHub,
+clona el repo privado, y delega al installer privado.
+El installer privado (actualiza SO, instala chezmoi, ejecuta fases,
+aplica dotfiles):
 
----
+### (2b) Fresh install — Linux Server (Ubuntu)
 
-## (2b) Flujo Formateo — Windows (máquina nueva o actualización)
+```bash
+curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/launchers/server.sh | bash
+```
 
-`run-all.ps1` es **idempotente**: puedes ejecutarlo en máquina nueva (instala todo)
-o en máquina ya configurada (actualiza lo que falte). Cada sub-script verifica
-estado antes de actuar.
+El launcher público autentica con GitHub, clona el repo privado, y delega.
+El installer privado ejecuta update, chezmoi, fases y apply. Shell: **fish** (no zsh).
+
+### (2c) Fresh install — Windows
 
 ```powershell
-# 0. Sincronizar OneDrive y crear Secret Vault (ver 🔐 Secret Vault abajo)
-
-# 1. Download dependencies
-winget install --id Git.Git -e --source winget --silent
-winget install --id twpayne.chezmoi -e --source winget --silent
-
-# 2. Clone config
-chezmoi init https://github.com/Sovengar/dotfiles
-
-# 3. Allow script execution 
-Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
-
-# 4. WSL + prerequisitos (virtualización, Ubuntu, crear usuario Linux)
-.\windows\setup\01-wsl-setup.ps1
-# Reiniciar si el script lo indica; crear usuario Ubuntu la primera vez
-
-# 5. (Work PC) Developer Mode para symlinks — CORRER COMO ADMIN
-.\windows\setup\02-enable-symlinks.ps1
-# Abre PowerShell como administrador (usuario admin), corre esto, cierra.
-# Solo toca el registro, no tus dotfiles. Se hace una vez por máquina.
-
-# 6. Setup all (instala o actualiza)
-.\windows\setup\run-all.ps1
+irm https://raw.githubusercontent.com/Sovengar/dotfiles/master/launchers/windows.ps1 | iex
 ```
 
-`run-all.ps1` corre en orden:
-- `00-env-vars.ps1` — variables XDG
-- `10-install-packages.ps1` — ~70+ apps via winget + manual
-- `20-configure-system.ps1` — PATH, symlinks
-- `personal/ssh-client-setup.ps1` — SSH keys (con prompt)
-- `personal/startup-shortcuts.ps1`, `setup-listary.ps1` — personales (con prompt)
-- `30-setup-registry.ps1` — context menus
-- `35-setup-auth.ps1` — gh auth login (con prompt)
-- `40-setup-docker.ps1` — Docker WSL2 integration (último)
+El script:
+1. Verifica winget
+2. Instala Git + chezmoi via winget
+3. Clona repo
+4. `Set-ExecutionPolicy RemoteSigned`
+5. `chezmoi init`
+6. `run-all.ps1` (instala todo: winget + npm + bun + go + manual)
+7. `chezmoi diff` → `chezmoi apply`
 
-Post-run-all: `chezmoi apply` (dotfiles + scripts ligeros + auth.json desde SOPS).
-
----
-
-## Estructura del repositorio
+## Estructura del repositorio público (`Sovengar/dotfiles`)
 
 ```
 dotfiles/
-├── home/                         ← Source state de chezmoi (se sincroniza a ~/)
-│   ├── .chezmoiscripts/          ← Scripts LIGEROS auto-sync (registry, shortcuts)
-│   ├── .chezmoidata/             ← Datos declarativos (packages.yaml)
-│   ├── dot_*                     ← Dotfiles raíz (~/.gitconfig, etc.)
-│   ├── dot_config/               ← Configs en ~/.config (wezterm, lazygit, etc.)
-│   └── Documents/                ← PowerShell profile, PowerToys backup
-│
-├── linux/                        ← Scripts para Linux (bash)
-│   ├── setup/
-│   │   ├── install.sh            ← Bootstrap: orquesta preflight → packaging → config → post-install
-│   │   ├── helpers/              ← logging, errores, guards, display
-│   │   ├── preflight/            ← system checks, XDG dirs, brew
-│   │   ├── packaging/            ← CLI tools, API tools, docker, dropbox, shells, keepassxc, zen
-│   │   ├── config/               ← shell default, PATH, teclado, autostarts, mounts, audio, pyprland
-│   │   └── post-install/         ← resumen final
-│   └── old/                      ← Dotfiles heredados (pre-chezmoi)
-│
-├── windows/                      ← Scripts para Windows (PowerShell)
-│   ├── setup/
-│   │   ├── 00-env-vars.ps1
-│   │   ├── 01-wsl-setup.ps1
-│   │   ├── 02-enable-symlinks.ps1
-│   │   ├── 10-install-packages.ps1
-│   │   ├── 20-configure-system.ps1
-│   │   ├── lib.ps1
-│   │   ├── 40-setup-docker.ps1
-│   │   ├── setup-registry.ps1
-│   │   ├── registry/             ← .reg files
-│   │   │   ├── Wezterm/
-│   │   │   ├── System/
-│   │   │   ├── WindowsTerminal/
-│   │   │   └── Removers/
-│   │   ├── personal/             ← Scripts de máquina personal (con prompt)
-│   │   │   └── ...
-│   │   └── run-all.ps1           ← Orquestador
-│   └── unmanaged/                ← Archivos no gestionados por chezmoi
-│
-├── docs/                         ← Documentación adicional
+├── launchers/                  ← Scripts públicos (curl | bash)
+│   ├── personal.sh             ← Launcher para dotfiles-linux-personal (privado)
+│   ├── server.sh               ← Launcher para dotfiles-linux-server (privado)
+│   └── windows.ps1             ← Launcher para dotfiles-windows-personal (privado)
+├── backup/                     ← Backups del refactor
 ├── README.md
-└── .chezmoiroot                  ← root = home/
+└── AGENTS.md
+```
+
+Cada launcher instala git + gh, autentica con GitHub, clona el repo privado correspondiente,
+y delega a su `setup/install.sh` (que vive en el repo privado).
+
+## Estructura de cada repo privado
+
+Cada repo privado tiene `.chezmoiroot` (→ `home`) para que `chezmoi diff/add/edit/apply` funcionen **sin `--source`**.
+
+### dotfiles-linux-personal
+
+```
+dotfiles-linux-personal/
+├── .chezmoiroot              ← "home" (chezmoi lo lee automáticamente)
+├── .sops.yaml                ← SOPS config (age recipient)
+├── home/                     ← Source state (chezmoi diff/apply sin --source)
+│   ├── .chezmoi.toml.tmpl    ← Config template (email, age, profile prompt)
+│   ├── .chezmoiignore
+│   ├── .chezmoiscripts/      ← Scripts ligeros (themes)
+│   ├── dot_config/           ← 44 dirs (hypr, waybar, git, nvim, zsh, fish, etc.)
+│   ├── dot_zshrc dot_zshenv
+│   ├── dot_local/bin/        ← Scripts desktop
+│   └── dot_agents/
+├── setup/                    ← Scripts CachyOS
+│   ├── install.sh            ← Bootstrap completo
+│   ├── helpers/              ← logging, errors, guards, display
+│   ├── preflight/            ← system checks, XDG, paru, chaotic-aur, brew
+│   ├── packaging/            ← 30+ categorías
+│   ├── config/              ← shell default, brew PATH, mounts, audio
+│   ├── setup/               ← dev dirs, TUI generators, themes
+│   ├── themes/
+│   ├── fixes/
+│   └── post-install/        ← resumen + próximos pasos
+├── secrets/                  ← SOPS-encrypted secrets
+├── docs/                     ← Documentation
+└── README.md
+```
+
+### dotfiles-linux-server
+
+```
+dotfiles-linux-server/
+├── .chezmoiroot
+├── .sops.yaml
+├── home/
+│   ├── .chezmoi.toml.tmpl
+│   ├── .chezmoiignore
+│   └── dot_config/          ← 12 dirs (bat, fish, fzf, git, lazygit, lazydocker,
+│   │                           mise, nvim, opencode, starship, yazi, environment.d)
+├── setup/
+│   ├── install.sh           ← Bootstrap apt-based
+│   ├── helpers/
+│   ├── preflight/
+│   ├── packaging/           ← CLI: core-tools, shells, dev-tools, container-tools, security
+│   ├── config/             ← shell prompt, PATH, mise (fish)
+│   └── post-install/
+├── secrets/
+├── docs/
+└── README.md
+```
+
+### dotfiles-windows-personal
+
+```
+dotfiles-windows-personal/
+├── .chezmoiroot
+├── home/
+│   ├── .chezmoi.toml.tmpl
+│   ├── .chezmoiignore
+│   ├── .chezmoiscripts/    ← Registry context menus, dev shortcuts, startup, age restore
+│   ├── .chezmoidata/       ← packages.yaml (winget + npm + bun + go + manual)
+│   ├── AppData/            ← Windows AppData (Roaming + Local)
+│   ├── Documents/          ← PowerShell profile, PowerToys backup
+│   ├── dot_starship/
+│   └── .local/bin/
+├── setup/
+│   ├── install.ps1         ← Bootstrap completo
+│   ├── run-all.ps1         ← Orquestador idempotente
+│   ├── 00-env-vars.ps1
+│   ├── 01-wsl-setup.ps1
+│   ├── 10-install-packages.ps1
+│   ├── 20-configure-system.ps1
+│   ├── 30-setup-registry.ps1
+│   ├── 35-setup-auth.ps1
+│   ├── 40-setup-docker.ps1
+│   ├── registry/           ← .reg files
+│   ├── personal/            ← SSH, shortcuts (con prompt)
+│   ├── miniwindows/        ← Windows 11 VM para Office 365
+│   └── unmanaged/          ← .gitignore'ed
+└── README.md
 ```
 
 ## Arquitectura: separación de concerns
 
-| Capa | Mecanismo | Frecuencia | Linux | Windows |
-|------|-----------|-----------|-------|---------|
-| **Dotfiles** | `chezmoi apply` | Diario | Shell config, WezTerm, Lazygit, OpenCode, Starship, Git config | PowerShell profile, WezTerm, Lazygit, OpenCode, Starship, Git config |
-| **Scripts ligeros** | `run_onchange_` via chezmoi | Cuando cambian | Hooks post-actualización | Registry context menus, dev shortcuts, startup |
-| **App installation** | Script manual | Solo post-formateo | `linux/setup/install.sh` (fases: helpers→preflight→packaging→config→post-install) | `windows/setup/10-install-packages.ps1` (winget + manual) |
-| **System config** | Script manual | Solo post-formateo | XDG env vars, brew PATH, shells, mounts, autostarts | PATH, symlinks, registry, SSH, Docker |
+| Capa | Mecanismo | Frecuencia | Linux Personal | Linux Server | Windows |
+|------|-----------|-----------|----------------|-------------|---------|
+| **Dotfiles** | `chezmoi apply` | Diario | Shell, Hyprland, WezTerm, Lazygit, OpenCode | Shell, Lazygit, nvim, OpenCode | PowerShell, WezTerm, Lazygit, OpenCode |
+| **Scripts ligeros** | `run_onchange_` chezmoi | Cuando cambian | Themes post-apply | (sin) | Registry, shortcuts, age restore |
+| **App installation** | `setup/install.sh` | Post-formateo | `packaging/` 30+ categorías | `packaging/` minimal apt | `10-install-packages.ps1` |
+| **System config** | Script manual | Post-formateo | XDG, brew PATH, mounts | shell prompt, PATH, mise | PATH, symlinks, registry, Docker |
 
-## Paquetes declarativos
+## Configuración inicial (chezmoi init)
 
-La lista completa de paquetes está en `home/.chezmoidata/packages.yaml`.
-Los scripts standalone la leen via `chezmoi execute-template "{{ toJson .packages }}"`.
-
-Para modificar qué se instala, editar SOLO ese archivo — no los scripts.
-
-## 🔐 Secret Vault
-
-Secretos (API keys, tokens, email, `opencode` auth) via `sops + age` en `secrets/dotfiles.sops.yaml`.
-El archivo cifrado se sube a Git; la clave privada `age` **nunca** se sube.
+Cada repo privado tiene su propio `.chezmoi.toml.tmpl`.
 
 ```bash
-# Linux/macOS
-mkdir -p ~/.config/sops/age
-# Restaurar desde KeePassXC: Database/SO/chezmoi age identity (Notes)
-chmod 600 ~/.config/sops/age/keys.txt
+# Personal (CachyOS)
+chezmoi init https://github.com/Sovengar/dotfiles-linux-personal
+# Responde "personal" al prompt de profile
+
+# Server (Ubuntu)
+chezmoi init https://github.com/Sovengar/dotfiles-linux-server
+# Responde "server" al prompt de profile
 ```
 
 ```powershell
 # Windows
-New-Item -ItemType Directory -Path "$env:USERPROFILE\.config\sops\age" -Force
-# Restaurar desde KeePassXC: Database/SO/chezmoi age identity (Anotaciones)
+chezmoi init https://github.com/Sovengar/dotfiles-windows-personal
 ```
 
-`run_before_00-restore-age-key.*` restaura `~/.config/sops/age/keys.txt` desde KeePassXC si falta.
+> **Nota**: Los repos son privados. Necesitas `gh auth login` antes de
+> `chezmoi init` para que git pueda clonar. El launcher público ya lo hace por ti.
 
-Para que el restore automatico funcione necesitas tener disponible la base KeePassXC:
+## Arquitectura: 2 capas
+
+| Capa | Repo | Responsabilidad |
+|------|------|-----------------|
+| **Launcher** (público) | `Sovengar/dotfiles` | `curl \| bash` → instala git + gh → autentica → clona repo privado → delega |
+| **Installer** (privado) | `dotfiles-*` | `setup/install.sh` → update OS → chezmoi → fases → `chezmoi diff` → `chezmoi apply` |
+
+## 🔐 Secret Vault
+
+Secretos via `sops + age` en `secrets/dotfiles.sops.yaml`. La clave privada `age` nunca se sube a Git.
+
+```bash
+# Restaurar age key
+mkdir -p ~/.config/sops/age
+# Restaurar desde KeePassXC: Database/SO/chezmoi age identity (Notes)
+chmod 600 ~/.config/sops/age/keys.txt
+
+# Editar secrets
+sops secrets/dotfiles.sops.yaml
+```
+
+El script `run_before_00-restore-age-key.*` restaura la key desde KeePassXC si falta.
 
 | OS | Ruta default esperada |
 |----|----------------------|
 | Linux | `~/onedrive/BBDD.kdbx` |
 | Windows | `%USERPROFILE%\OneDrive\BBDD.kdbx` |
 
-La entrada esperada dentro de la base es `SO/chezmoi age identity` y la key debe estar en Notes/Anotaciones.
-Si usas otra ruta o entrada, sobrescribe `KEEPASS_DB` o `KEEPASS_AGE_ENTRY` antes de `chezmoi apply`.
+## Por qué 3 repos separados
 
-Editar secrets:
+Cada repo es un source dir independiente con `.chezmoiroot`. Ventajas:
+- `chezmoi diff/add/edit/apply` funcionan **sin `--source`**
+- Sin templates condicionales por OS que ensucien los `.chezmoiignore`
+- Cada repo puede tener su propio branch, issues, CI
+- Sin `shared/` — duplicación aceptada a cambio de simplicidad
 
-```bash
-sops secrets/dotfiles.sops.yaml
-```
+## Paquetes declarativos
 
-`opencode.config` = contenido completo de `~/.local/share/opencode/auth.json`.
-
-| Quién | Lee | Genera |
-|-------|-----|--------|
-| `dot_gitconfig.tmpl` | `[git].email` | `~/.gitconfig` |
-| `run_once_after_20-firecrawl-key.ps1` | `[api_keys].firecrawl` | `FIRECRAWL_API_KEY` env |
-| `auth.json.tmpl` | `[opencode].config` | `~/.local/share/opencode/auth.json` |
-
-Tras refrescar OAuth (`opencode login`), actualiza `opencode.config` con `sops secrets/dotfiles.sops.yaml`.
+Solo Windows tiene lista declarativa: `home/.chezmoidata/packages.yaml`.
+Linux usa scripts imperativos en `setup/packaging/`.
 
 ## Requisitos
 
-### Linux
-- Gestor de paquetes (apt, pacman, o dnf)
-- Máquina nueva con `curl | bash`: `curl`, `bash`, `sudo`, internet y un gestor soportado
-- Máquina nueva sin `curl | bash`: `chezmoi` para inicializar el source state
-- Máquina ya configurada: `chezmoi` para sincronizar/aplicar dotfiles
+### Linux Personal (CachyOS)
+- pacman + paru (AUR) + chaotic-aur
+- `curl | bash`: curl, bash, sudo, internet
+
+### Linux Server (Ubuntu)
+- Ubuntu/Debian con apt
+- `curl | bash`: curl, bash, sudo, internet
 
 ### Windows
-- KeePassXC database disponible para restaurar `~/.config/sops/age/keys.txt`
-- `sops` y `age` instalados antes de aplicar templates con secrets
 - PowerShell 5.1+
-- winget instalado
+- winget
+- KeePassXC database para restaurar age key
