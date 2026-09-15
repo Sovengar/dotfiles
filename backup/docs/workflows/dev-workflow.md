@@ -58,6 +58,10 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 
 > Para detalle completo de git workflow, abreviaturas y herramientas → `git-workflow.md`
 
+| Acción | Herramienta | Activación | Notas |
+|--------|-------------|------------|-------|
+| Dashboard git TUI | gitdash | `gitdash` / `gitdash -print` | Branches, commits, stashes, stats |
+
 ## AI Help
 
 | Acción | Herramienta | Activación | Notas |
@@ -72,6 +76,15 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 |--------|-------------|------------|-------|
 | Dashboard Docker | LazyDocker | `SUPER+D` / `ldk` | Flotante o terminal |
 | Custom aliases | Docker | `dkbuild`, `dkps`, ... | - |
+| Multi-project orchestrator | vroom | `vroom` (TUI) / `vroom launch/start/stop/logs` | Servicios dev, build, install, dry run |
+
+---
+
+## Databases
+
+| Acción | Herramienta | Activación | Notas |
+|--------|-------------|------------|-------|
+| DB TUI + AI | dbx | `dbx [connection]` | Query, ask (NL), schema, context export |
 
 ---
 
@@ -95,7 +108,7 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 | File picker | fdx | `Ctrl+F` bind, fzf + fd + bat preview → nvim |
 | Content search | rgx | `rgx <pattern>`, fzf + rg + bat preview → nvim |
 | Git picker | fzf-git | `Ctrl+G` + letra: `b`(branches), `f`(files), `h`(hashes), `r`(remotes), `s`(stashes), `t`(tags), `w`(worktrees), etc. |
-| History | atuin | Shell history sync + AI en la terminal (sin TUI) |
+| History | atuin | Shell history sync, fuzzy search y recall + AI en terminal (sin TUI) |
 | | `history` function | `builtin history --show-time='%F %T'` |
 | Plugins | fisher | `fish_plugins`: `franciscolourenco/done` |
 | Notifications | done plugin | Notifica commands >5s si la ventana no está enfocada (vía `notify-send`) |
@@ -129,6 +142,9 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 | Editor | Neovim (LazyVim) | VS Code OSS |
 | AI assistant | OpenCode | — |
 | Container TUI | LazyDocker | — |
+| Multi-project orchestrator | vroom | — |
+| DB TUI + AI | dbx | — |
+| Git dashboard TUI | gitdash | — |
 | File finder | fdx (fd+fzf+bat) | — |
 | Content search | rgx (rg+fzf+bat) | — |
 | File manager TUI | Yazi | Dolphin (GUI) |
@@ -136,7 +152,7 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 
 
 | Completions | carapace | — |
-| Shell history | atuin | AI en la terminal (sin TUI) |
+| Shell history | atuin | History sync, fuzzy search, recall + AI (sin TUI) |
 | Pager | bat | — |
 | Lister | eza | — |
 | Disk usage | dust | — |
