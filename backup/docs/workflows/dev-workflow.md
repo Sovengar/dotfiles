@@ -95,7 +95,7 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 | File picker | fdx | `Ctrl+F` bind, fzf + fd + bat preview → nvim |
 | Content search | rgx | `rgx <pattern>`, fzf + rg + bat preview → nvim |
 | Git picker | fzf-git | `Ctrl+G` + letra: `b`(branches), `f`(files), `h`(hashes), `r`(remotes), `s`(stashes), `t`(tags), `w`(worktrees), etc. |
-| History | atuin | Atuin para shell history |
+| History | atuin | Shell history sync + AI en la terminal (sin TUI) |
 | | `history` function | `builtin history --show-time='%F %T'` |
 | Plugins | fisher | `fish_plugins`: `franciscolourenco/done` |
 | Notifications | done plugin | Notifica commands >5s si la ventana no está enfocada (vía `notify-send`) |
@@ -136,7 +136,7 @@ Neovim (LazyVim) como editor primario, VS Code OSS como secundario, OpenCode com
 
 
 | Completions | carapace | — |
-| Shell history | atuin | — |
+| Shell history | atuin | AI en la terminal (sin TUI) |
 | Pager | bat | — |
 | Lister | eza | — |
 | Disk usage | dust | — |
