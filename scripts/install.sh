@@ -1,27 +1,21 @@
 #!/usr/bin/env bash
 #
-# Public installer for `sftp-gui-client` (yogapc-only script).
-# This file lives in the PUBLIC repo (Sovengar/dotfiles); the real script lives
-# in the PRIVATE repo Sovengar/dotfiles-yogapc-linux, which is chezmoi-ready.
-#
-# What it does: installs git + gh if missing, authenticates with GitHub,
-# clones the private repo and copies the script to ~/.local/scripts/.
+# Public launcher for yogapc (private repo dotfiles-yogapc-linux).
+# This script lives in the PUBLIC repo (Sovengar/dotfiles).
+# It installs git + gh, logs into GitHub, clones the PRIVATE repo,
+# and delegates to its full installer (setup/install.sh), which is
+# what installs chezmoi, runs the phases and applies the profile.
 #
 # Usage:
 #   curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/scripts/install.sh | bash
 #
-# Only this script is installed. The private repo also contains
-# `pantalla-portatil`; copy it by hand if you need it:
-#   install -m755 "$WORK_DIR/home/dot_local/scripts/executable_pantalla-portatil" ~/.local/scripts/
+# Override the clone location with DOTFILES_DIR (default: ~/.local/share/chezmoi,
+# chezmoi's default source dir, so `chezmoi diff/apply` work without --source).
 #
 set -eEuo pipefail
 
-REPO="dotfiles-yogapc-linux"
-REPO_URL="https://github.com/Sovengar/${REPO}.git"
-WORK_DIR="${DOTFILES_YOGAPC_DIR:-$HOME/.local/share/$REPO}"
-DEST_DIR="${SFTP_DEST_DIR:-$HOME/.local/scripts}"
-BIN_NAME="sftp-gui-client"
-SRC_REL="home/dot_local/scripts/executable_${BIN_NAME}"
+REPO_URL="https://github.com/Sovengar/dotfiles-yogapc-linux.git"
+REPO_DIR="${DOTFILES_DIR:-$HOME/.local/share/chezmoi}"
 
 # ── Install git ─────────────────────────────────────────────────
 
@@ -56,6 +50,7 @@ install_gh() {
     sudo pacman -S --noconfirm --needed github-cli
   elif command -v apt &>/dev/null; then
     (sudo apt update && sudo apt install -y gh) || {
+      # Older Ubuntu: use official install script
       curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
       sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
@@ -74,7 +69,7 @@ install_gh() {
   fi
 }
 
-# ── Auth to GitHub (the repo is private) ────────────────────────
+# ── Auth to GitHub ──────────────────────────────────────────────
 
 auth_github() {
   if gh auth status &>/dev/null; then
@@ -87,10 +82,10 @@ auth_github() {
   echo "  GITHUB LOGIN REQUIRED"
   echo "==============================================="
   echo ""
-  echo "${REPO} is private, so you need to authenticate first."
+  echo "To clone private dotfiles, you need to authenticate with GitHub."
   echo ""
   echo "If you're on a desktop with a browser, gh will open the login page."
-  echo "If you're on a headless box, gh will show a device code:"
+  echo "If you're on a headless server, gh will show a device code."
   echo "  → Go to https://github.com/login/device on another device"
   echo "  → Enter the code shown below"
   echo ""
@@ -105,37 +100,22 @@ auth_github() {
   gh auth setup-git
 }
 
-# ── Clone and install ───────────────────────────────────────────
+# ── Clone and delegate ──────────────────────────────────────────
 
 install_git
 install_gh
 auth_github
 
-if [[ -d "$WORK_DIR/.git" ]]; then
+if [[ -d "$REPO_DIR/.git" ]]; then
   echo "Repo exists. Pulling latest..."
-  git -C "$WORK_DIR" pull --ff-only
+  git -C "$REPO_DIR" pull --ff-only
 else
   echo "Cloning $REPO_URL ..."
-  mkdir -p "$(dirname "$WORK_DIR")"
-  git clone "$REPO_URL" "$WORK_DIR"
+  mkdir -p "$(dirname "$REPO_DIR")"
+  git clone "$REPO_URL" "$REPO_DIR"
 fi
 
-if [[ ! -f "$WORK_DIR/$SRC_REL" ]]; then
-  echo "Missing $SRC_REL in $REPO" >&2
-  exit 1
-fi
-
-mkdir -p "$DEST_DIR"
-install -m755 "$WORK_DIR/$SRC_REL" "$DEST_DIR/$BIN_NAME"
-
 echo ""
-echo "Installed: $DEST_DIR/$BIN_NAME"
+echo "Launcher done. Running private installer..."
 echo ""
-echo "Try it:"
-echo "  $BIN_NAME --help"
-echo "  $BIN_NAME --status"
-echo ""
-echo "Defaults are this machine's LAN (edit via env if needed):"
-echo "  SFTP_HOST_ALIAS, SFTP_HOST_IP, SFTP_USER, SFTP_PORT, SFTP_HOME, SFTP_BOOKMARK"
-echo ""
-echo "Repo with all yogapc-only scripts: $REPO_URL"
+exec "$REPO_DIR/setup/install.sh"
