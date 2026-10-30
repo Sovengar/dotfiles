@@ -10,7 +10,7 @@
 #
 set -eEuo pipefail
 
-REPO_URL="https://github.com/Sovengar/dotfiles-linux-personal.git"
+REPO_URL="https://github.com/Sovengar/dotfiles-linux.git"
 REPO_DIR="${DOTFILES_DIR:-$HOME/.local/share/chezmoi}"
 
 # ── Install git ─────────────────────────────────────────────────
