@@ -1,17 +1,35 @@
 #!/usr/bin/env bash
 #
-# Public launcher for linux-personal (CachyOS desktop).
+# Public launcher for the Amur Arch machines (desktop, laptop, WSL).
 # This script lives in the PUBLIC repo (Sovengar/dotfiles).
 # It installs git + gh, logs into GitHub, clones the PRIVATE repo,
 # and delegates to its full installer.
 #
 # Usage:
-#   curl -fsL https://raw.githubusercontent.com/Sovengar/dotfiles/master/launchers/personal.sh | bash
+#   curl -fsL .../launchers/personal.sh | bash                 # desktop
+#   curl -fsL .../launchers/personal.sh | bash -s -- laptop
+#   curl -fsL .../launchers/personal.sh | bash -s -- wsl
+#
+# The machine name becomes the chezmoi `machine` value, so the private repo
+# applies only the bundles that machine owns (see ADR-0010 there).
 #
 set -eEuo pipefail
 
 REPO_URL="https://github.com/Sovengar/dotfiles-linux.git"
 REPO_DIR="${DOTFILES_DIR:-$HOME/.local/share/chezmoi}"
+MACHINE="${1:-desktop}"
+
+case "$MACHINE" in
+  desktop|laptop|wsl) ;;
+  *)
+    echo "Unknown machine: $MACHINE (expected: desktop, laptop, wsl)" >&2
+    exit 2
+    ;;
+esac
+
+# Read by the private repo's chezmoi.toml template: no prompt, no TTY needed.
+export CHEZMOI_MACHINE="$MACHINE"
+export DOTFILES_MACHINE="$MACHINE"
 
 # ── Install git ─────────────────────────────────────────────────
 
@@ -112,6 +130,6 @@ else
 fi
 
 echo ""
-echo "Launcher done. Running private installer..."
+echo "Launcher done (machine: $MACHINE). Running private installer..."
 echo ""
 exec "$REPO_DIR/setup/install.sh"
